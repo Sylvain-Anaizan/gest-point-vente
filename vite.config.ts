@@ -4,25 +4,7 @@ import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
 
-export default defineConfig(({ mode }) => ({
-    base: mode === 'production' ? '/' : '/',
-    build: {
-        manifest: true,
-        outDir: 'public/build',
-        rollupOptions: {
-            input: {
-                app: 'resources/js/app.tsx',
-            },
-        },
-    },
-    // server: {
-    //     host: "0.0.0.0",       // Force IPv4
-    //     port: 5173,
-    //     strictPort: true,
-    //     hmr: {
-    //         host: "192.168.1.10",   // 🔥 ton IP locale
-    //     },
-    // },
+export default defineConfig({
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
@@ -42,4 +24,4 @@ export default defineConfig(({ mode }) => ({
     esbuild: {
         jsx: 'automatic',
     },
-}));
+});
