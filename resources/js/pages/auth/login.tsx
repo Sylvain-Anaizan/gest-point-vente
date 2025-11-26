@@ -45,7 +45,7 @@ export default function Login({
                 {/* Illustration ou Image Centrée */}
                 <div className="max-w-md w-full p-4 bg-white backdrop-blur-sm rounded-lg shadow-2xl">
                     <img
-                        src="/storage/anaizan.png" // Assurez-vous que le chemin est correct (souvent sans '/storage' si c'est dans le dossier public)
+                        src="/anaizan.png"
                         alt="Gest Anaizan Meeting"
                         className="w-full object-contain drop-shadow-lg"
                     />
