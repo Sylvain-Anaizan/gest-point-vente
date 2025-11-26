@@ -4,7 +4,8 @@ import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+    base: mode === 'production' ? process.env.ASSET_URL || '/' : '/',
     // server: {
     //     host: "0.0.0.0",       // Force IPv4
     //     port: 5173,
@@ -32,4 +33,4 @@ export default defineConfig({
     esbuild: {
         jsx: 'automatic',
     },
-});
+}));
