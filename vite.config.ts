@@ -5,7 +5,16 @@ import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
 
 export default defineConfig(({ mode }) => ({
-    base: mode === 'production' ? process.env.ASSET_URL || '/' : '/',
+    base: mode === 'production' ? '/' : '/',
+    build: {
+        manifest: true,
+        outDir: 'public/build',
+        rollupOptions: {
+            input: {
+                app: 'resources/js/app.tsx',
+            },
+        },
+    },
     // server: {
     //     host: "0.0.0.0",       // Force IPv4
     //     port: 5173,
