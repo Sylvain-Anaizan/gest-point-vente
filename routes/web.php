@@ -19,7 +19,9 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-// Public gallery route (no auth required)
+// Public gallery routes (no auth required)
+Route::get('/gallery', [GalleryController::class, 'index'])
+    ->name('gallery.index');
 Route::get('/gallery/category/{categorie}', [GalleryController::class, 'showCategory'])
     ->name('gallery.category');
 
