@@ -39,28 +39,56 @@ interface Category {
     nom: string;
 }
 
-interface Taille {
+interface Unite {
     id: number;
     nom: string;
+}
+
+interface Variante {
+    id: number;
+    taille: string;
+    prix: number;
+    stock: number;
 }
 
 interface Produit {
     id: number;
     nom: string;
-    prix_vente: number;
-    quantite: number;
+    prixMin: number;
+    prixMax: number;
+    totalStock: number;
     description: string | null;
-    imageUrl: string | null; // NOUVEAU: Ajout de l'attribut imageUrl pour l'image
+    imageUrl: string | null;
     category: Category;
-    taille: Taille | null;
+    unite: Unite | null;
+    variantes: Variante[];
 }
+
+// Fonction pour formater les montants : pas de décimales, espaces pour les milliers
+const formatMontant = (montant: string | number | null | undefined): string => {
+    let numericValue: number;
+    if (typeof montant === 'string') {
+        const cleaned = montant.replace(/[^\d.,-]/g, '').replace(',', '.');
+        numericValue = parseFloat(cleaned);
+    } else if (typeof montant === 'number') {
+        numericValue = montant;
+    } else if (montant === null || montant === undefined) {
+        return '0';
+    } else {
+        numericValue = Number(montant);
+    }
+    if (isNaN(numericValue)) {
+        return '0';
+    }
+    return Math.round(numericValue).toLocaleString('fr-FR');
+};
 
 export default function ProduitsShow({ produit }: { produit: Produit }) {
     // Déterminer la classe de couleur pour le stock
     const stockClass =
-        produit.quantite === 0
+        produit.totalStock === 0
             ? 'text-destructive font-bold'
-            : produit.quantite < 10
+            : produit.totalStock < 10
                 ? 'text-orange-500 font-bold'
                 : 'text-green-600 font-bold';
 
@@ -87,12 +115,10 @@ export default function ProduitsShow({ produit }: { produit: Produit }) {
                             </h1>
                             <div className="flex items-center space-x-2 mt-1">
                                 <Badge variant="secondary">{produit.category.nom}</Badge>
-                                {produit.taille && (
-                                    <Badge variant="outline" className="flex items-center gap-1">
-                                        <RulerIcon className="size-3" />
-                                        {produit.taille.nom}
-                                    </Badge>
-                                )}
+                                <Badge variant="outline" className="flex items-center gap-1">
+                                    <RulerIcon className="size-3" />
+                                    {produit.variantes.length} Variantes
+                                </Badge>
                             </div>
                         </div>
                     </div>
@@ -141,14 +167,15 @@ export default function ProduitsShow({ produit }: { produit: Produit }) {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <div className="text-4xl font-extrabold text-primary">
-                                    {produit.prix_vente.toLocaleString('fr-FR', {
-                                        minimumFractionDigits: 0,
-                                        maximumFractionDigits: 2,
-                                    })}
+                                <div className="text-2xl font-extrabold text-primary">
+                                    {produit.prixMin === produit.prixMax ? (
+                                        `${formatMontant(produit.prixMin)} FCFA`
+                                    ) : (
+                                        `${formatMontant(produit.prixMin)} - ${formatMontant(produit.prixMax)} FCFA`
+                                    )}
                                 </div>
                                 <CardDescription className="text-sm mt-1">
-                                    FCFA (prix unitaire)
+                                    {produit.prixMin === produit.prixMax ? 'Prix unique' : 'Gamme de prix'}
                                 </CardDescription>
                             </CardContent>
                         </Card>
@@ -158,16 +185,17 @@ export default function ProduitsShow({ produit }: { produit: Produit }) {
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                                     <Package className="size-4 text-primary" />
-                                    Stock Actuel
+                                    Stock Total
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className={`text-4xl font-extrabold flex items-center gap-2 ${stockClass}`}>
-                                    {produit.quantite === 0 && <AlertTriangle className="size-6" />}
-                                    {produit.quantite}
+                                    {produit.totalStock === 0 && <AlertTriangle className="size-6" />}
+                                    {produit.totalStock}
                                 </div>
                                 <CardDescription className="text-sm mt-1">
-                                    {produit.quantite > 1 ? 'unités disponibles' : 'unité disponible'}
+                                    {produit.totalStock > 1 ? 'unités disponibles' : 'unité disponible'}{' '}
+                                    {produit.unite ? `(${produit.unite.nom})` : '(Pièce)'} au total
                                 </CardDescription>
                             </CardContent>
                         </Card>
@@ -197,51 +225,66 @@ export default function ProduitsShow({ produit }: { produit: Produit }) {
                             </CardContent>
                         </Card>
 
-                        {/* Carte 2: Classification et Métadonnées */}
+                        {/* Carte 2: Variantes */}
+                        <Card>
+                            <CardHeader className="border-b">
+                                <CardTitle className="flex items-center gap-2">
+                                    <RulerIcon className="size-5" />
+                                    Variantes et Stocks par Taille
+                                </CardTitle>
+                                <CardDescription>
+                                    Détails de l'inventaire par déclinaison.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="p-0">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-sm text-left">
+                                        <thead className="text-xs text-muted-foreground uppercase bg-muted/30 border-b">
+                                            <tr>
+                                                <th className="px-6 py-3 font-semibold">Taille</th>
+                                                <th className="px-6 py-3 font-semibold">Prix</th>
+                                                <th className="px-6 py-3 font-semibold text-right">Stock</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {produit.variantes.map((v) => (
+                                                <tr key={v.id} className="border-b hover:bg-muted/10 transition-colors">
+                                                    <td className="px-6 py-4 font-medium">{v.taille}</td>
+                                                    <td className="px-6 py-4">{formatMontant(v.prix)} FCFA</td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <Badge variant={v.stock === 0 ? "destructive" : v.stock < 10 ? "secondary" : "outline"} className="h-6">
+                                                            {v.stock} en stock
+                                                        </Badge>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Carte 3: Classification */}
                         <Card>
                             <CardHeader className="border-b">
                                 <CardTitle className="flex items-center gap-2">
                                     <TagIcon className="size-5" />
-                                    Métadonnées et Classification
+                                    Classification
                                 </CardTitle>
-                                <CardDescription>
-                                    Informations pour la gestion interne.
-                                </CardDescription>
                             </CardHeader>
                             <CardContent className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-                                {/* Ligne 1: Nom */}
                                 <div className="space-y-1 p-2 rounded-md bg-muted/50">
                                     <span className="text-xs font-semibold text-muted-foreground block">Nom interne</span>
                                     <span className="font-medium">{produit.nom}</span>
                                 </div>
-
-                                {/* Ligne 2: Catégorie */}
                                 <div className="space-y-1 p-2 rounded-md bg-muted/50">
                                     <span className="text-xs font-semibold text-muted-foreground block">Catégorie</span>
-                                    <Badge variant="default" className="text-base h-auto">
-                                        {produit.category.nom}
-                                    </Badge>
+                                    <Badge variant="default">{produit.category.nom}</Badge>
                                 </div>
-
-                                {/* Ligne 3: Taille */}
-                                <div className="space-y-1 p-2 rounded-md bg-muted/50">
-                                    <span className="text-xs font-semibold text-muted-foreground block">Taille</span>
-                                    {produit.taille ? (
-                                        <Badge variant="outline" className="text-base h-auto">
-                                            {produit.taille.nom}
-                                        </Badge>
-                                    ) : (
-                                        <span className="text-sm text-muted-foreground italic">Non applicable</span>
-                                    )}
-                                </div>
-
-                                {/* Ligne 4: ID Produit (pour référence) */}
                                 <div className="space-y-1 p-2 rounded-md bg-muted/50">
                                     <span className="text-xs font-semibold text-muted-foreground block">ID Produit</span>
-                                    <span className="font-mono text-sm text-gray-600">{produit.id}</span>
+                                    <span className="font-mono text-sm">{produit.id}</span>
                                 </div>
-
                             </CardContent>
                         </Card>
                     </div>

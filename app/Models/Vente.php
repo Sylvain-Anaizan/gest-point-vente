@@ -17,6 +17,7 @@ class Vente extends Model
         'mode_paiement',
         'type',
         'delivery_address',
+        'boutique_id',
     ];
 
     protected $casts = [
@@ -36,5 +37,10 @@ class Vente extends Model
     public function lignes(): HasMany
     {
         return $this->hasMany(LigneVente::class);
+    }
+
+    public function boutique(): BelongsTo
+    {
+        return $this->belongsTo(Boutique::class);
     }
 }

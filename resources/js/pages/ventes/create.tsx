@@ -1,7 +1,7 @@
 
 import VenteController from '@/actions/App/Http/Controllers/VenteController';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     ArrowLeftIcon,
     PlusIcon,
@@ -14,7 +14,8 @@ import {
     CreditCard,
     Smartphone,
     Banknote,
-    Calculator
+    Calculator,
+    Store,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -37,12 +38,20 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 interface Client { id: number; nom: string; prenom: string; telephone: string; }
-interface Produit { id: number; nom: string; prix_vente: number; quantite: number; }
-interface LigneVente { produit_id: number; produit: Produit; quantite: number; prix_unitaire: number; sous_total: number; }
+interface Variante { id: number; taille: string; prix_vente: number; quantite: number; }
+interface Produit { id: number; nom: string; boutique_id: number | null; variantes: Variante[]; }
+interface LigneVente { produit_id: number; variante_id: number; produit: Produit; variante: Variante; quantite: number; prix_unitaire: number; sous_total: number; }
+interface Boutique { id: number; nom: string; }
 
-export default function VentesCreate({ clients, produits }: { clients: Client[]; produits: Produit[]; }) {
+export default function VentesCreate({ clients, produits, boutiques }: { clients: Client[]; produits: Produit[]; boutiques: Boutique[]; }) {
+    const { auth } = usePage().props as any;
+    const userRole = auth.user?.role;
+
     const [selectedClientId, setSelectedClientId] = useState<string>('');
-    const [selectedProduitId, setSelectedProduitId] = useState<string>('');
+    const [selectedBoutiqueId, setSelectedBoutiqueId] = useState<string>(
+        (userRole !== 'admin' && boutiques.length === 1) ? boutiques[0].id.toString() : ''
+    );
+    const [selectedVarianteId, setSelectedVarianteId] = useState<string>('');
     const [modePaiement, setModePaiement] = useState<string>('espèces');
     const [lignes, setLignes] = useState<LigneVente[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,30 +59,45 @@ export default function VentesCreate({ clients, produits }: { clients: Client[];
     const total = useMemo(() => lignes.reduce((acc, ligne) => acc + ligne.sous_total, 0), [lignes]);
 
     const addProduit = () => {
-        if (!selectedProduitId) return;
-        const produit = produits.find(p => p.id === parseInt(selectedProduitId));
-        if (!produit) return;
+        if (!selectedVarianteId) return;
 
-        const existingIndex = lignes.findIndex(l => l.produit_id === produit.id);
+        // Trouver la variante et son produit parent
+        let foundProduit: Produit | undefined;
+        let foundVariante: Variante | undefined;
+
+        for (const p of produits) {
+            const v = p.variantes.find(v => v.id === parseInt(selectedVarianteId));
+            if (v) {
+                foundProduit = p;
+                foundVariante = v;
+                break;
+            }
+        }
+
+        if (!foundProduit || !foundVariante) return;
+
+        const existingIndex = lignes.findIndex(l => l.variante_id === foundVariante?.id);
         if (existingIndex >= 0) {
             updateQuantite(existingIndex, lignes[existingIndex].quantite + 1);
         } else {
             const nouvelleLigne: LigneVente = {
-                produit_id: produit.id,
-                produit: produit,
+                produit_id: foundProduit.id,
+                variante_id: foundVariante.id,
+                produit: foundProduit,
+                variante: foundVariante,
                 quantite: 1,
-                prix_unitaire: produit.prix_vente,
-                sous_total: produit.prix_vente,
+                prix_unitaire: foundVariante.prix_vente,
+                sous_total: foundVariante.prix_vente,
             };
             setLignes([...lignes, nouvelleLigne]);
         }
-        setSelectedProduitId('');
+        setSelectedVarianteId('');
     };
 
     const updateQuantite = (index: number, nouvelleQuantite: number) => {
         if (nouvelleQuantite <= 0) { removeLigne(index); return; }
         const ligne = lignes[index];
-        if (nouvelleQuantite > ligne.produit.quantite) { alert(`Stock insuffisant. Disponible: ${ligne.produit.quantite}`); return; }
+        if (nouvelleQuantite > ligne.variante.quantite) { alert(`Stock insuffisant. Disponible: ${ligne.variante.quantite}`); return; }
 
         const updatedLignes = [...lignes];
         updatedLignes[index] = { ...ligne, quantite: nouvelleQuantite, sous_total: nouvelleQuantite * ligne.prix_unitaire };
@@ -96,14 +120,20 @@ export default function VentesCreate({ clients, produits }: { clients: Client[];
         try {
             await router.post(VenteController.store.url(), {
                 client_id: selectedClientId || null,
-                lignes: lignes.map(l => ({ produit_id: l.produit_id, quantite: l.quantite, prix_unitaire: l.prix_unitaire })),
+                boutique_id: selectedBoutiqueId || null,
+                lignes: lignes.map(l => ({
+                    produit_id: l.produit_id,
+                    variante_id: l.variante_id,
+                    quantite: l.quantite,
+                    prix_unitaire: l.prix_unitaire
+                })),
                 mode_paiement: modePaiement,
             });
         } catch (error) { console.log(error); setIsSubmitting(false); }
     };
 
     // Fonction pour formater les montants : pas de décimales, espaces pour les milliers
-    const formatMontant = (montant: any): string => {
+    const formatMontant = (montant: string | number | null | undefined): string => {
         // Vérifier et convertir en nombre si nécessaire
         let numericValue: number;
 
@@ -129,10 +159,27 @@ export default function VentesCreate({ clients, produits }: { clients: Client[];
         return Math.round(numericValue).toLocaleString('fr-FR');
     };
 
-    const produitsDisponibles = useMemo(() => {
-        const idsDejaSelectionnes = lignes.map(l => l.produit_id);
-        return produits.filter(p => !idsDejaSelectionnes.includes(p.id) && p.quantite > 0);
-    }, [produits, lignes]);
+    const variantesFiltrees = useMemo(() => {
+        const idsVariantesDejaSelectionnees = lignes.map(l => l.variante_id);
+
+        // On récupère toutes les variantes avec leurs infos de produit parent
+        const allVariantes = produits.flatMap(p =>
+            p.variantes.map(v => ({
+                ...v,
+                produit_nom: p.nom,
+                boutique_id: p.boutique_id
+            }))
+        );
+
+        return allVariantes.filter(v => {
+            // Filtrage par boutique
+            const matchBoutique = selectedBoutiqueId === 'none'
+                ? v.boutique_id === null
+                : v.boutique_id?.toString() === selectedBoutiqueId;
+
+            return matchBoutique && !idsVariantesDejaSelectionnees.includes(v.id) && v.quantite > 0;
+        });
+    }, [produits, lignes, selectedBoutiqueId]);
 
     // Icon helper for Payment
     const getPaymentIcon = (mode: string) => {
@@ -184,18 +231,18 @@ export default function VentesCreate({ clients, produits }: { clients: Client[];
                                 <CardContent>
                                     <div className="flex flex-col sm:flex-row gap-3">
                                         <div className="flex-1">
-                                            <Select value={selectedProduitId} onValueChange={setSelectedProduitId}>
+                                            <Select value={selectedVarianteId} onValueChange={setSelectedVarianteId} disabled={!selectedBoutiqueId && userRole === 'admin'}>
                                                 <SelectTrigger className="h-11 sm:h-10">
-                                                    <SelectValue placeholder="Rechercher un produit..." />
+                                                    <SelectValue placeholder={!selectedBoutiqueId && userRole === 'admin' ? "Sélectionnez d'abord une boutique..." : "Rechercher un produit..."} />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {produitsDisponibles.map((produit) => (
-                                                        <SelectItem key={produit.id} value={produit.id?.toString() || `produit-${Math.random()}`}>
+                                                    {variantesFiltrees.map((v) => (
+                                                        <SelectItem key={v.id} value={v.id.toString()}>
                                                             <div className="flex flex-col sm:flex-row sm:items-center gap-1">
-                                                                <span className="font-medium">{produit.nom}</span>
+                                                                <span className="font-medium">{v.produit_nom} {v.taille !== 'N/A' ? `(${v.taille})` : ''}</span>
                                                                 <span className="hidden sm:inline text-muted-foreground">-</span>
                                                                 <span className="text-xs sm:text-sm text-muted-foreground">
-                                                                    {formatMontant(produit.prix_vente)} FCFA (Stock: {produit.quantite})
+                                                                    {formatMontant(v.prix_vente)} FCFA (Stock: {v.quantite})
                                                                 </span>
                                                             </div>
                                                         </SelectItem>
@@ -206,11 +253,43 @@ export default function VentesCreate({ clients, produits }: { clients: Client[];
                                         <Button
                                             type="button"
                                             onClick={addProduit}
-                                            disabled={!selectedProduitId}
+                                            disabled={!selectedVarianteId}
                                             className="h-11 sm:h-10 w-full sm:w-auto"
                                         >
                                             <PlusIcon className="mr-2 h-4 w-4" /> Ajouter
                                         </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            {/* BOUTIQUE CARD */}
+                            <Card>
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="flex items-center text-base">
+                                        <Store className="h-5 w-5 mr-2 text-muted-foreground" />
+                                        Point de Vente
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="boutique" className="text-xs uppercase text-muted-foreground font-semibold">Sélectionner la boutique</Label>
+                                        <Select
+                                            value={selectedBoutiqueId || 'none'}
+                                            onValueChange={setSelectedBoutiqueId}
+                                            disabled={userRole !== 'admin' && boutiques.length === 1}
+                                        >
+                                            <SelectTrigger className="h-11">
+                                                <SelectValue placeholder="Stock Général / Non spécifié" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {userRole === 'admin' && <SelectItem value="none">Stock Général</SelectItem>}
+                                                {boutiques.map((boutique) => (
+                                                    <SelectItem key={boutique.id} value={boutique.id?.toString()}>
+                                                        {boutique.nom}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -241,7 +320,7 @@ export default function VentesCreate({ clients, produits }: { clients: Client[];
                                 ) : (
                                     <div className="space-y-3">
                                         {lignes.map((ligne, index) => (
-                                            <Card key={ligne.produit_id} className="overflow-hidden transition-all hover:border-primary/50">
+                                            <Card key={`${ligne.produit_id}-${ligne.variante_id}`} className="overflow-hidden transition-all hover:border-primary/50">
                                                 <CardContent className="p-3 sm:p-4">
                                                     {/* Layout Mobile : Stacked / Desktop : Row */}
                                                     <div className="flex flex-col sm:flex-row gap-4">
@@ -250,9 +329,11 @@ export default function VentesCreate({ clients, produits }: { clients: Client[];
                                                         <div className="flex-1 min-w-0">
                                                             <div className="flex justify-between items-start">
                                                                 <div>
-                                                                    <h4 className="font-semibold text-base truncate pr-2">{ligne.produit.nom}</h4>
+                                                                    <h4 className="font-semibold text-base truncate pr-2">
+                                                                        {ligne.produit.nom} {ligne.variante.taille !== 'N/A' ? `(${ligne.variante.taille})` : ''}
+                                                                    </h4>
                                                                     <p className="text-xs text-muted-foreground mt-0.5">
-                                                                        Dispo: {ligne.produit.quantite}
+                                                                        Dispo: {ligne.variante.quantite}
                                                                     </p>
                                                                 </div>
                                                                 {/* Bouton supprimer visible uniquement sur mobile ici pour gagner de la place */}
@@ -351,7 +432,7 @@ export default function VentesCreate({ clients, produits }: { clients: Client[];
                                             <SelectContent>
                                                 <SelectItem value="none">Client de passage</SelectItem>
                                                 {clients.map((client) => (
-                                                    <SelectItem key={client.id} value={client.id?.toString() || `client-${Math.random()}`}>
+                                                    <SelectItem key={client.id} value={client.id.toString()}>
                                                         {client.nom} {client.prenom}
                                                     </SelectItem>
                                                 ))}

@@ -10,6 +10,7 @@ class LigneVente extends Model
     protected $fillable = [
         'vente_id',
         'produit_id',
+        'variante_id',
         'quantite',
         'prix_unitaire',
         'sous_total',
@@ -28,5 +29,10 @@ class LigneVente extends Model
     public function produit(): BelongsTo
     {
         return $this->belongsTo(Produit::class);
+    }
+
+    public function variante(): BelongsTo
+    {
+        return $this->belongsTo(Variante::class);
     }
 }

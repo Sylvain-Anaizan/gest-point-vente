@@ -6,6 +6,7 @@ use App\Http\Requests\TailleStoreRequest;
 use App\Http\Requests\TailleUpdateRequest;
 use App\Models\Taille;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -16,11 +17,13 @@ class TailleController extends Controller
      */
     public function index(): Response
     {
+        Gate::authorize('admin');
+
         return Inertia::render('tailles/index', [
             'tailles' => Taille::query()
                 ->latest()
                 ->get()
-                ->map(fn($taille) => [
+                ->map(fn ($taille) => [
                     'id' => $taille->id,
                     'nom' => $taille->nom,
                     'description' => $taille->description,
@@ -57,14 +60,14 @@ class TailleController extends Controller
                 'id' => $taille->id,
                 'nom' => $taille->nom,
                 'description' => $taille->description,
-                'produits' => $taille->produits()->with('category')->get()->map(fn($produit) => [
-                    'id' => $produit->id,
-                    'nom' => $produit->nom,
-                    'prix_vente' => $produit->prix_vente,
-                    'quantite' => $produit->quantite,
-                    'imageUrl' => $produit->imageUrl,
-                    'category' => $produit->category->nom,
-                ]),
+                    'produits' => $taille->produits()->with('category')->get()->map(fn ($produit) => [
+                        'id' => $produit->id,
+                        'nom' => $produit->nom,
+                        'prix_vente' => $produit->prixMin,
+                        'quantite' => $produit->totalStock,
+                        'imageUrl' => $produit->imageUrl,
+                        'category' => $produit->category->nom ?? 'N/A',
+                    ]),
             ],
         ]);
     }

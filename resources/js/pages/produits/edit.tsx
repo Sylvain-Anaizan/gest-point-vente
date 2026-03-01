@@ -2,13 +2,14 @@ import ProduitController from '@/actions/App/Http/Controllers/ProduitController'
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import {
+    PlusIcon,
     ArrowLeftIcon,
     TagIcon,
-    DollarSign,
     Package,
     CloudUpload,
     Image as ImageIcon,
-    SaveIcon // Icône pour Sauvegarder
+    SaveIcon,
+    TrashIcon,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -45,41 +46,88 @@ interface Taille {
     nom: string;
 }
 
+interface Boutique {
+    id: number;
+    nom: string;
+}
+
+interface Unite {
+    id: number;
+    nom: string;
+}
+
+interface Variante {
+    id?: number;
+    taille_id: number | null;
+    prix_vente: number;
+    quantite: number;
+}
+
 interface Produit {
     id: number;
     nom: string;
-    prix_vente: number;
-    quantite: number;
     description: string | null;
-    imageUrl: string | null; // URL de l'image existante
+    imageUrl: string | null;
     categorie_id: number;
-    taille_id: number | null;
+    boutique_id: number | null;
+    unite_id: number | null;
+    variantes: Variante[];
 }
 
 export default function ProduitsEdit({
     produit,
     categories,
     tailles,
+    boutiques,
+    unites,
 }: {
     produit: Produit;
     categories: Category[];
     tailles: Taille[];
+    boutiques: Boutique[];
+    unites: Unite[];
 }) {
     // Initialisation du formulaire avec les données du produit existant
     const { data, setData, post, processing, errors, recentlySuccessful } = useForm({
-        _method: 'put', // Méthode pour simuler la requête PUT/PATCH via POST
+        _method: 'put',
         nom: produit.nom,
-        prix_vente: produit.prix_vente,
-        quantite: produit.quantite,
         categorie_id: produit.categorie_id,
-        taille_id: produit.taille_id,
+        boutique_id: produit.boutique_id,
+        unite_id: produit.unite_id,
         description: produit.description ?? '',
-        // L'image est null initialement, elle sera envoyée seulement si l'utilisateur la modifie
         image: null as File | null,
+        variantes: produit.variantes.map(v => ({
+            id: v.id,
+            taille_id: v.taille_id,
+            prix_vente: v.prix_vente,
+            quantite: v.quantite,
+        })) as Variante[],
     });
 
     // Aperçu de l'image : initialisé avec l'image existante ou null
     const [imagePreview, setImagePreview] = useState<string | null>(produit.imageUrl);
+
+    // --- Gestion des Variantes ---
+    const addVariante = () => {
+        setData('variantes', [
+            ...data.variantes,
+            { taille_id: null, prix_vente: 0, quantite: 0 } as Variante
+        ]);
+    };
+
+    const removeVariante = (index: number) => {
+        if (data.variantes.length > 1) {
+            const newVariantes = [...data.variantes];
+            newVariantes.splice(index, 1);
+            setData('variantes', newVariantes);
+        }
+    };
+
+    const updateVariante = (index: number, field: string, value: any) => {
+        const newVariantes = [...data.variantes];
+        (newVariantes[index] as any)[field] = value;
+        setData('variantes', newVariantes);
+    };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files ? e.target.files[0] : null;
@@ -92,7 +140,6 @@ export default function ProduitsEdit({
             };
             reader.readAsDataURL(file);
         } else {
-            // Si l'utilisateur annule la sélection, revenir à l'image existante
             setImagePreview(produit.imageUrl);
         }
     };
@@ -211,78 +258,6 @@ export default function ProduitsEdit({
                                 </CardContent>
                             </Card>
 
-                            {/* Carte Prix et Inventaire (Condensed) */}
-                            <Card>
-                                <CardHeader className="border-b">
-                                    <CardTitle className="flex items-center gap-3">
-                                        <DollarSign className="h-5 w-5 text-primary" />
-                                        Prix & Stock
-                                    </CardTitle>
-                                    <CardDescription>
-                                        Informations financières et d'inventaire.
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="p-6 space-y-4">
-                                    {/* Prix de vente */}
-                                    <div className="space-y-2">
-                                        <Label htmlFor="prix_vente">
-                                            Prix de vente (FCFA){' '}
-                                            <span className="text-destructive">*</span>
-                                        </Label>
-                                        <div className="relative">
-                                            <Input
-                                                id="prix_vente"
-                                                name="prix_vente"
-                                                type="number"
-                                                step="0.01"
-                                                min="0"
-                                                required
-                                                value={data.prix_vente || ''}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        'prix_vente',
-                                                        parseFloat(e.target.value) || 0,
-                                                    )
-                                                }
-                                                placeholder="0.00"
-                                                className="pr-16"
-                                            />
-                                            <Badge variant="secondary" className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                                                FCFA
-                                            </Badge>
-                                        </div>
-                                        <InputError message={errors.prix_vente} />
-                                    </div>
-
-                                    {/* Quantité en stock */}
-                                    <div className="space-y-2">
-                                        <Label htmlFor="quantite">
-                                            Quantité actuelle en stock{' '}
-                                            <span className="text-destructive">*</span>
-                                        </Label>
-                                        <div className="relative">
-                                            <Input
-                                                id="quantite"
-                                                name="quantite"
-                                                type="number"
-                                                min="0"
-                                                required
-                                                value={data.quantite || ''}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        'quantite',
-                                                        parseInt(e.target.value) || 0,
-                                                    )
-                                                }
-                                                placeholder="0"
-                                                className="pl-8"
-                                            />
-                                            <Package className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                        </div>
-                                        <InputError message={errors.quantite} />
-                                    </div>
-                                </CardContent>
-                            </Card>
                         </div>
 
                         {/* COLONNE 2 & 3: Informations de base et Description */}
@@ -327,7 +302,6 @@ export default function ProduitsEdit({
                                             </Label>
                                             <Select
                                                 name="categorie_id"
-                                                // Assurez-vous que l'initialisation est correcte
                                                 value={data.categorie_id ? data.categorie_id.toString() : undefined}
                                                 onValueChange={(value) =>
                                                     setData(
@@ -354,41 +328,76 @@ export default function ProduitsEdit({
                                         </div>
 
                                         <div className="space-y-2">
-                                            <Label htmlFor="taille_id">
-                                                Taille (optionnel)
+                                            <Label htmlFor="unite_id">
+                                                Unité de mesure
                                             </Label>
                                             <Select
-                                                name="taille_id"
-                                                // Utilise 'none' comme valeur si taille_id est null
-                                                value={data.taille_id?.toString() ?? "none"}
+                                                name="unite_id"
+                                                value={data.unite_id?.toString() ?? "none"}
                                                 onValueChange={(value) => {
                                                     if (value === "none") {
-                                                        setData('taille_id', null);
+                                                        setData('unite_id', null);
                                                     } else {
-                                                        setData('taille_id', parseInt(value));
+                                                        setData('unite_id', parseInt(value));
                                                     }
                                                 }}
                                             >
                                                 <SelectTrigger>
-                                                    <SelectValue placeholder="Sélectionner une taille" />
+                                                    <SelectValue placeholder="Sélectionner une unité" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="none">
-                                                        Aucune taille (N/A)
-                                                    </SelectItem>
-                                                    {tailles.map((taille) => (
+                                                    <SelectItem value="none">Par défaut (Pièce)</SelectItem>
+                                                    {unites.map((unite) => (
                                                         <SelectItem
-                                                            key={taille.id}
-                                                            value={taille.id.toString()}
+                                                            key={unite.id}
+                                                            value={unite.id.toString()}
                                                         >
-                                                            {taille.nom}
+                                                            {unite.nom}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
-                                            <InputError message={errors.taille_id} />
+                                            <InputError message={errors.unite_id} />
                                         </div>
                                     </div>
+
+                                    <div className="grid gap-4 md:grid-cols-2">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="boutique_id">
+                                                Boutique (optionnel)
+                                            </Label>
+                                            <Select
+                                                name="boutique_id"
+                                                value={data.boutique_id?.toString() ?? "none"}
+                                                onValueChange={(value) => {
+                                                    if (value === "none") {
+                                                        setData('boutique_id', null);
+                                                    } else {
+                                                        setData('boutique_id', parseInt(value));
+                                                    }
+                                                }}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Sélectionner une boutique" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="none">
+                                                        Stock général
+                                                    </SelectItem>
+                                                    {boutiques.map((boutique) => (
+                                                        <SelectItem
+                                                            key={boutique.id}
+                                                            value={boutique.id.toString()}
+                                                        >
+                                                            {boutique.nom}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <InputError message={errors.boutique_id} />
+                                        </div>
+                                    </div>
+
 
                                     {/* Description */}
                                     <div className="space-y-2">
@@ -411,6 +420,88 @@ export default function ProduitsEdit({
                             </Card>
                         </div>
                     </div>
+
+                    {/* Carte Variantes (Tailles, Prix, Stock) - En pleine largeur pour un meilleur confort de saisie */}
+                    <Card>
+                        <CardHeader className="border-b flex flex-row items-center justify-between">
+                            <div>
+                                <CardTitle className="flex items-center gap-3">
+                                    <Package className="h-5 w-5 text-primary" />
+                                    Variantes (Tailles, Prix & Stock)
+                                </CardTitle>
+                                <CardDescription>
+                                    Modifiez les tailles existantes ou ajoutez-en de nouvelles.
+                                </CardDescription>
+                            </div>
+                            <Button type="button" variant="outline" size="sm" onClick={addVariante}>
+                                <PlusIcon className="mr-2 h-4 w-4" />
+                                Ajouter une taille
+                            </Button>
+                        </CardHeader>
+                        <CardContent className="p-6">
+                            <div className="space-y-4">
+                                {data.variantes.map((variante, index) => (
+                                    <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg bg-muted/30 relative group">
+                                        <div className="space-y-2">
+                                            <Label>Taille</Label>
+                                            <Select
+                                                value={variante.taille_id?.toString() ?? "none"}
+                                                onValueChange={(val) => updateVariante(index, 'taille_id', val === "none" ? null : parseInt(val))}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Taille" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="none">N/A</SelectItem>
+                                                    {tailles.map(t => (
+                                                        <SelectItem key={t.id} value={t.id.toString()}>{t.nom}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <InputError message={(errors as any)[`variantes.${index}.taille_id`]} />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label>Prix de vente (FCFA)</Label>
+                                            <Input
+                                                type="number"
+                                                value={variante.prix_vente || ''}
+                                                onChange={(e) => updateVariante(index, 'prix_vente', parseFloat(e.target.value) || 0)}
+                                                placeholder="0"
+                                            />
+                                            <InputError message={(errors as any)[`variantes.${index}.prix_vente`]} />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label>Stock actuel</Label>
+                                            <Input
+                                                type="number"
+                                                value={variante.quantite || ''}
+                                                onChange={(e) => updateVariante(index, 'quantite', parseInt(e.target.value) || 0)}
+                                                placeholder="0"
+                                            />
+                                            <InputError message={(errors as any)[`variantes.${index}.quantite`]} />
+                                        </div>
+
+                                        <div className="flex items-end justify-end">
+                                            {data.variantes.length > 1 && (
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="text-destructive hover:bg-destructive/10"
+                                                    onClick={() => removeVariante(index)}
+                                                >
+                                                    <TrashIcon className="h-5 w-5" />
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <InputError message={errors.variantes} className="mt-4" />
+                        </CardContent>
+                    </Card>
 
                     {/* Footer d'actions */}
                     <div className="flex gap-4 p-0 items-center">
@@ -436,7 +527,7 @@ export default function ProduitsEdit({
                         )}
                     </div>
                 </form>
-            </div>
-        </AppLayout>
+            </div >
+        </AppLayout >
     );
 }

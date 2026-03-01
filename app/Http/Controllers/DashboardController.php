@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Client;
 use App\Models\Produit;
 use App\Models\Vente;
-use App\Models\Client;
-use App\Models\Categorie;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -43,6 +41,7 @@ class DashboardController extends Controller
             'topProducts' => $topProducts,
             'topCategories' => $topCategories,
             'clients' => $clients,
+            'boutiques' => $this->getBoutiqueStats(),
         ]);
     }
 
@@ -52,13 +51,19 @@ class DashboardController extends Controller
         $totalProduits = Produit::count();
 
         // Valeur totale du stock
-        $totalStockValue = Produit::sum(DB::raw('prix_vente * quantite'));
+        $totalStockValue = \App\Models\Variante::sum(DB::raw('prix_vente * quantite'));
 
-        // Nombre de produits en rupture de stock
-        $outOfStockProducts = Produit::where('quantite', 0)->count();
+        // Nombre de produits en rupture de stock (produits dont toutes les variantes sont à 0)
+        $outOfStockProducts = Produit::whereDoesntHave('variantes', function ($query) {
+            $query->where('quantite', '>', 0);
+        })->count();
 
-        // Nombre de produits avec stock faible (< 10)
-        $lowStockProducts = Produit::where('quantite', '<', 10)->where('quantite', '>', 0)->count();
+        // Nombre de produits avec stock faible (< 10 au total)
+        $lowStockProducts = Produit::whereHas('variantes', function ($query) {
+            $query->where('quantite', '>', 0);
+        })->get()->filter(function ($p) {
+            return $p->totalStock < 10;
+        })->count();
 
         // Ventes du jour
         $todaySales = Vente::whereDate('created_at', today())
@@ -89,7 +94,6 @@ class DashboardController extends Controller
             $query->whereYear('created_at', now()->year)
                 ->where('statut', 'complétée');
         })->count();
-
 
         return [
             'total_produits' => $totalProduits,
@@ -135,18 +139,20 @@ class DashboardController extends Controller
 
     private function getLowStockProducts()
     {
-        return Produit::with('category')
-            ->where('quantite', '<', 10)
-            ->where('quantite', '>', 0)
-            ->orderBy('quantite')
-            ->limit(5)
+        return Produit::with(['category', 'variantes'])
             ->get()
+            ->filter(function ($p) {
+                $total = $p->totalStock;
+
+                return $total > 0 && $total < 10;
+            })
+            ->take(5)
             ->map(function ($produit) {
                 return [
                     'id' => $produit->id,
                     'nom' => $produit->nom,
-                    'quantite' => $produit->quantite,
-                    'prix_vente' => $produit->prix_vente,
+                    'quantite' => $produit->totalStock,
+                    'prix_vente' => $produit->prixMin, // Utiliser le prix minimum pour l'affichage
                     'category' => $produit->category,
                 ];
             });
@@ -213,5 +219,16 @@ class DashboardController extends Controller
             ->orderBy('total_revenus', 'desc')
             ->limit(5)
             ->get();
+    }
+
+    private function getBoutiqueStats()
+    {
+        return \App\Models\Boutique::withCount('produits')
+            ->get()
+            ->map(fn ($boutique) => [
+                'id' => $boutique->id,
+                'nom' => $boutique->nom,
+                'produits_count' => $boutique->produits_count,
+            ]);
     }
 }

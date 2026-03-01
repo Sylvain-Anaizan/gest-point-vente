@@ -34,7 +34,7 @@ class WhatsAppController extends Controller
         $message = $this->generateCatalogMessage($categorie);
 
         // Generate WhatsApp link
-        $whatsappLink = "https://wa.me/{$telephone}?text=" . urlencode($message);
+        $whatsappLink = "https://wa.me/{$telephone}?text=".urlencode($message);
 
         return response()->json([
             'success' => true,
@@ -67,12 +67,12 @@ class WhatsAppController extends Controller
 
         // If number starts with 0, it's a local number - replace with Morocco code (212)
         if (str_starts_with($telephone, '0')) {
-            return '212' . substr($telephone, 1);
+            return '212'.substr($telephone, 1);
         }
 
         // If it's a short number without country code, assume Morocco
         if (strlen($telephone) < 10) {
-            return '212' . $telephone;
+            return '212'.$telephone;
         }
 
         return $telephone;
@@ -84,7 +84,7 @@ class WhatsAppController extends Controller
     private function generateCatalogMessage(Categorie $categorie): string
     {
         $galleryUrl = url("/gallery/category/{$categorie->id}");
-        
+
         $message = "🛍️ *Catalogue {$categorie->nom}*\n\n";
 
         if ($categorie->description) {
@@ -96,7 +96,7 @@ class WhatsAppController extends Controller
         $message .= "{$galleryUrl}\n\n";
         $message .= "---\n";
         $message .= "📞 Pour plus d'infos ou commander, répondez à ce message!\n";
-        $message .= "🏪 *Anaizan*";
+        $message .= '🏪 *Anaizan*';
 
         return $message;
     }
@@ -137,8 +137,8 @@ class WhatsAppController extends Controller
                 return [
                     'id' => $produit->id,
                     'nom' => $produit->nom,
-                    'prix_vente' => $produit->prix_vente,
-                    'quantite' => $produit->quantite,
+                    'prix_vente' => $produit->prixMin,
+                    'quantite' => $produit->totalStock,
                     'description' => $produit->description,
                     'imageUrl' => $produit->imageUrl,
                 ];

@@ -6,6 +6,7 @@ use App\Http\Requests\CategoryStoreRequest;
 use App\Http\Requests\CategoryUpdateRequest;
 use App\Models\Categorie;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -16,6 +17,8 @@ class CategoryController extends Controller
      */
     public function index(): Response
     {
+        Gate::authorize('admin');
+
         return Inertia::render('categories/index', [
             'categories' => Categorie::query()
                 ->latest()
@@ -60,8 +63,8 @@ class CategoryController extends Controller
                 'produits' => $category->produits()->with('category')->get()->map(fn ($produit) => [
                     'id' => $produit->id,
                     'nom' => $produit->nom,
-                    'prix_vente' => $produit->prix_vente,
-                    'quantite' => $produit->quantite,
+                    'prix_vente' => $produit->prixMin,
+                    'quantite' => $produit->totalStock,
                     'category' => $produit->category->nom,
                     'imageUrl' => $produit->imageUrl,
                 ]),

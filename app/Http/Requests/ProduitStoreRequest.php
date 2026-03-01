@@ -23,12 +23,16 @@ class ProduitStoreRequest extends FormRequest
     {
         return [
             'nom' => ['required', 'string', 'max:255'],
-            'prix_vente' => ['required', 'numeric', 'min:0'],
-            'quantite' => ['required', 'integer', 'min:0'],
             'categorie_id' => ['required', 'exists:categories,id'],
-            'taille_id' => ['nullable', 'exists:tailles,id'],
+            'boutique_id' => ['nullable', 'exists:boutiques,id'],
+            'unite_id' => ['nullable', 'exists:unites,id'],
             'description' => ['nullable', 'string', 'max:1000'],
-            // "image" => ['nullable']
+            'image' => ['nullable', 'image', 'max:2048'],
+
+            'variantes' => ['required', 'array', 'min:1'],
+            'variantes.*.taille_id' => ['nullable', 'exists:tailles,id'],
+            'variantes.*.prix_vente' => ['required', 'numeric', 'min:0'],
+            'variantes.*.quantite' => ['required', 'integer', 'min:0'],
         ];
     }
 }

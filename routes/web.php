@@ -1,14 +1,18 @@
 <?php
 
+use App\Http\Controllers\BoutiqueController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EmployeController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\POSController;
 use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\TailleController;
 use App\Http\Controllers\VenteController;
 use App\Http\Controllers\WhatsAppController;
+use App\Http\Controllers\MouvementStockController;
+use App\Http\Controllers\RapportController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -30,10 +34,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('categories', CategoryController::class);
     Route::resource('tailles', TailleController::class);
+    Route::resource('unites', \App\Http\Controllers\UniteController::class);
+    Route::resource('boutiques', BoutiqueController::class);
     Route::resource('produits', ProduitController::class);
     Route::resource('clients', ClientController::class);
     Route::resource('ventes', VenteController::class);
+    Route::resource('employes', EmployeController::class);
     Route::get('ventes/{vente}/receipt', [VenteController::class, 'receipt'])->name('ventes.receipt');
+
+    Route::resource('mouvements-stock', MouvementStockController::class)->only(['index', 'create', 'store']);
+    Route::get('/rapports', [RapportController::class, 'index'])->name('rapports.index');
 
     // Route supplémentaire pour activer/désactiver un client
     Route::patch('clients/{client}/toggle-status', [ClientController::class, 'toggleStatus'])
@@ -52,4 +62,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('whatsapp.category-products');
 });
 
-require __DIR__ . '/settings.php';
+require __DIR__.'/settings.php';

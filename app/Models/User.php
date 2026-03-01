@@ -24,6 +24,7 @@ class User extends Authenticatable
         'numero',
         'password',
         'role',
+        'boutique_id',
     ];
 
     /**
@@ -60,5 +61,15 @@ class User extends Authenticatable
     public function isCustomer(): bool
     {
         return $this->role === 'customer';
+    }
+
+    public function isEmploye(): bool
+    {
+        return $this->role === 'employé';
+    }
+
+    public function boutique()
+    {
+        return $this->belongsTo(Boutique::class);
     }
 }

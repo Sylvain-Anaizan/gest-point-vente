@@ -19,15 +19,17 @@ class Produit extends Model
      */
     protected $fillable = [
         'nom',
-        'prix_vente',
-        'quantite',
+        // 'prix_vente', // Migré vers Variante
+        // 'quantite',   // Migré vers Variante
         'categorie_id',
-        'taille_id',
+        // 'taille_id',  // Migré vers Variante
         'description',
         'image',
+        'boutique_id',
+        'unite_id',
     ];
 
-    protected $appends = ['imageUrl'];
+    protected $appends = ['imageUrl', 'totalStock', 'prixMin', 'prixMax'];
 
     /**
      * Get the attributes that should be cast.
@@ -37,9 +39,25 @@ class Produit extends Model
     protected function casts(): array
     {
         return [
-            'prix_vente' => 'float',
-            'quantite' => 'integer',
+            // 'prix_vente' => 'float',
+            // 'quantite' => 'integer',
         ];
+    }
+
+    // Accessors for master product summary
+    public function getTotalStockAttribute(): int
+    {
+        return $this->variantes->sum('quantite');
+    }
+
+    public function getPrixMinAttribute(): float
+    {
+        return $this->variantes->min('prix_vente') ?? 0;
+    }
+
+    public function getPrixMaxAttribute(): float
+    {
+        return $this->variantes->max('prix_vente') ?? 0;
     }
 
     public function getImageUrlAttribute()
@@ -58,26 +76,26 @@ class Produit extends Model
     }
 
     /**
-     * Get the taille that owns the produit.
+     * Les variantes du produit.
      */
-    public function taille(): BelongsTo
+    public function variantes(): HasMany
     {
-        return $this->belongsTo(Taille::class);
+        return $this->hasMany(Variante::class);
     }
 
     /**
-     * Les mouvements de stock associés au produit.
+     * Get the boutique that owns the produit.
      */
-    public function mouvements(): HasMany
+    public function boutique(): BelongsTo
     {
-        return $this->hasMany(MouvementStock::class);
+        return $this->belongsTo(Boutique::class);
     }
 
     /**
-     * Les ventes (lignes de vente) associées au produit.
+     * Get the unit that belongs to the product.
      */
-    public function ventes(): HasMany
+    public function unite(): BelongsTo
     {
-        return $this->hasMany(LigneVente::class);
+        return $this->belongsTo(Unite::class);
     }
 }

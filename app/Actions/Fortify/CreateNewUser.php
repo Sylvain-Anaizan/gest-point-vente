@@ -29,6 +29,7 @@ class CreateNewUser implements CreatesNewUsers
             ],
             'password' => $this->passwordRules(),
             'numero' => ['required', 'string', 'max:255'],
+            'role' => ['nullable', 'string', 'in:admin,employé,customer'],
         ])->validate();
 
         return User::create([
@@ -36,6 +37,7 @@ class CreateNewUser implements CreatesNewUsers
             'email' => $input['email'],
             'password' => $input['password'],
             'numero' => $input['numero'],
+            'role' => $input['role'] ?? 'customer',
         ]);
     }
 }

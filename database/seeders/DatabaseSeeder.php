@@ -16,6 +16,15 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
+        \App\Models\Boutique::firstOrCreate(
+            ['nom' => 'Boutique Principale'],
+            ['adresse' => 'Bamako, Mali', 'telephone' => '00000000']
+        );
+
+        $this->call([
+            AdminSeeder::class,
+        ]);
+
         User::firstOrCreate(
             ['email' => 'test@example.com'],
             [

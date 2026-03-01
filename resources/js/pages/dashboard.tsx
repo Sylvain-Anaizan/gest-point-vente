@@ -20,13 +20,13 @@ import {
     Calendar,
     Tag,
     MessageCircle,
+    Store,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
-    CardDescription,
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
@@ -57,6 +57,7 @@ interface LowStockProduct { id: number; nom: string; quantite: number; prix_vent
 interface RecentSale { id: number; numero: string; montant_total: number | string; mode_paiement: string; created_at: string; client: { nom: string } | null; vendeur: string; produits_count: number; }
 interface TopProduct { id: number; nom: string; total_vendu: number; total_revenus: number; }
 interface TopCategory { id: number; nom: string; total_vendu: number; total_revenus: number; }
+interface BoutiqueStat { id: number; nom: string; produits_count: number; }
 interface Client { id: number; nom: string; telephone: string; email: string; }
 
 
@@ -67,6 +68,7 @@ export default function Dashboard({
     recentSales,
     topProducts,
     topCategories,
+    boutiques,
     clients,
 }: {
     stats: Stats;
@@ -75,6 +77,7 @@ export default function Dashboard({
     recentSales: RecentSale[];
     topProducts: TopProduct[];
     topCategories: TopCategory[];
+    boutiques: BoutiqueStat[];
     clients: Client[];
 }) {
     const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
@@ -83,7 +86,7 @@ export default function Dashboard({
     const maxSalesValue = Math.max(...salesChart.map(d => d.total), 1);
 
     // Fonction pour formater les montants : pas de décimales, espaces pour les milliers
-    const formatMontant = (montant: any): string => {
+    const formatMontant = (montant: string | number | null | undefined): string => {
         // Vérifier et convertir en nombre si nécessaire
         let numericValue: number;
 
@@ -127,16 +130,16 @@ export default function Dashboard({
             <div className="space-y-6 p-4 md:p-8 max-w-[100vw] overflow-x-hidden pb-24">
 
                 {/* HEADER */}
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center justify-between">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center justify-between bg-gradient-to-r from-background to-muted/30 p-6 rounded-2xl border shadow-sm">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-foreground">Tableau de bord</h1>
-                        <p className="text-sm text-muted-foreground">
-                            Aperçu de l'activité.
+                        <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">Tableau de bord</h1>
+                        <p className="text-sm text-muted-foreground mt-1">
+                            Aperçu détaillé de l'activité commerciale.
                         </p>
                     </div>
-                    <div className="flex items-center gap-2 self-start sm:self-auto bg-muted/50 p-1 rounded-md border">
-                        <Calendar className="h-4 w-4 text-muted-foreground ml-2" />
-                        <span className="text-sm font-medium px-2 py-1">
+                    <div className="flex items-center gap-2 self-start sm:self-auto bg-background/80 backdrop-blur-md p-1.5 rounded-xl border shadow-sm">
+                        <Calendar className="h-4 w-4 text-primary ml-2" />
+                        <span className="text-sm font-semibold px-2 py-1 text-foreground">
                             {new Date().toLocaleDateString('fr-FR', {
                                 weekday: 'short', day: 'numeric', month: 'short'
                             })}
@@ -147,54 +150,89 @@ export default function Dashboard({
                 {/* KPI CARDS (Grid 1 colonne mobile -> 2 tablette -> 4 desktop) */}
                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                     {/* Ventes Jour */}
-                    <Card className="border-l-4 border-l-primary shadow-sm relative overflow-hidden">
+                    <Card className="relative overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 to-transparent hover:border-primary/50 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Ventes du jour</CardTitle>
+                            <CardTitle className="text-sm font-semibold text-primary">Ventes du jour</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{formatMontant(stats.today_sales)} <span className="text-sm font-normal text-muted-foreground">F</span></div>
-                            <p className="text-xs text-muted-foreground mt-1">
+                            <div className="text-3xl font-black text-foreground">{formatMontant(stats.today_sales)} <span className="text-sm font-normal text-muted-foreground">F</span></div>
+                            <p className="text-xs font-medium text-muted-foreground mt-1">
                                 {stats.today_sales_count} transactions
                             </p>
-                            <ShoppingCart className="absolute right-4 top-4 h-8 w-8 text-primary/10" />
+                            <div className="absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-primary/10 to-transparent pointer-events-none" />
+                            <ShoppingCart className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 text-primary/20 transition-transform group-hover:scale-110" />
                         </CardContent>
                     </Card>
 
                     {/* Revenus Mois */}
-                    <Card className="border-l-4 border-l-blue-500 shadow-sm relative overflow-hidden">
+                    <Card className="relative overflow-hidden border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent hover:border-blue-500/50 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Ce mois-ci</CardTitle>
+                            <CardTitle className="text-sm font-semibold text-blue-600 dark:text-blue-400">Ce mois-ci</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{formatMontant(stats.month_sales)} <span className="text-sm font-normal text-muted-foreground">F</span></div>
-                            <p className="text-xs text-muted-foreground mt-1">Revenus cumulés</p>
-                            <TrendingUp className="absolute right-4 top-4 h-8 w-8 text-blue-500/10" />
+                            <div className="text-3xl font-black text-foreground">{formatMontant(stats.month_sales)} <span className="text-sm font-normal text-muted-foreground">F</span></div>
+                            <p className="text-xs font-medium text-muted-foreground mt-1">Revenus cumulés</p>
+                            <div className="absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-blue-500/10 to-transparent pointer-events-none" />
+                            <TrendingUp className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 text-blue-500/20 transition-transform group-hover:scale-110" />
                         </CardContent>
                     </Card>
 
                     {/* Valeur Stock */}
-                    <Card className="border-l-4 border-l-emerald-500 shadow-sm relative overflow-hidden">
+                    <Card className="relative overflow-hidden border-emerald-500/20 bg-gradient-to-br from-emerald-500/5 to-transparent hover:border-emerald-500/50 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Valeur Stock</CardTitle>
+                            <CardTitle className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Valeur Stock</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{formatMontant(stats.total_stock_value)} <span className="text-sm font-normal text-muted-foreground">F</span></div>
-                            <p className="text-xs text-muted-foreground mt-1">{stats.total_produits} produits</p>
-                            <Package className="absolute right-4 top-4 h-8 w-8 text-emerald-500/10" />
+                            <div className="text-3xl font-black text-foreground">{formatMontant(stats.total_stock_value)} <span className="text-sm font-normal text-muted-foreground">F</span></div>
+                            <p className="text-xs font-medium text-muted-foreground mt-1">{stats.total_produits} produits</p>
+                            <div className="absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none" />
+                            <Package className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 text-emerald-500/20 transition-transform group-hover:scale-110" />
                         </CardContent>
                     </Card>
 
                     {/* Clients */}
-                    <Card className="border-l-4 border-l-orange-500 shadow-sm relative overflow-hidden">
+                    <Card className="relative overflow-hidden border-orange-500/20 bg-gradient-to-br from-orange-500/5 to-transparent hover:border-orange-500/50 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Clients Actifs</CardTitle>
+                            <CardTitle className="text-sm font-semibold text-orange-600 dark:text-orange-400">Clients Actifs</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{stats.active_clients}</div>
-                            <p className="text-xs text-muted-foreground mt-1">Sur {stats.total_clients} total</p>
-                            <Users className="absolute right-4 top-4 h-8 w-8 text-orange-500/10" />
+                            <div className="text-3xl font-black text-foreground">{stats.active_clients}</div>
+                            <p className="text-xs font-medium text-muted-foreground mt-1">Sur {stats.total_clients} total</p>
+                            <div className="absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-orange-500/10 to-transparent pointer-events-none" />
+                            <Users className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 text-orange-500/20 transition-transform group-hover:scale-110" />
                         </CardContent>
                     </Card>
+                </div>
+
+                {/* ACTIONS RAPIDES (Grid 2 cols Mobile / 4 cols Desktop) */}
+                <div className="pt-2">
+                    <h2 className="text-sm font-semibold mb-3 px-1 text-muted-foreground uppercase tracking-wider">Raccourcis</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <Link href="/ventes/create" className="group">
+                            <Button variant="outline" className="w-full h-20 flex flex-col gap-2 items-center justify-center border-dashed border-primary/30 hover:border-primary hover:bg-primary/5 bg-background shadow-sm hover:shadow-md transition-all duration-300">
+                                <Plus className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
+                                <span className="text-xs font-semibold">Vente</span>
+                            </Button>
+                        </Link>
+                        <Link href="/produits/create" className="group">
+                            <Button variant="outline" className="w-full h-20 flex flex-col gap-2 items-center justify-center border-dashed border-blue-500/30 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-500/10 bg-background shadow-sm hover:shadow-md transition-all duration-300">
+                                <Package className="h-6 w-6 text-blue-500 group-hover:scale-110 transition-transform" />
+                                <span className="text-xs font-semibold">Produit</span>
+                            </Button>
+                        </Link>
+                        <Link href="/clients/create" className="group">
+                            <Button variant="outline" className="w-full h-20 flex flex-col gap-2 items-center justify-center border-dashed border-orange-500/30 hover:border-orange-500 hover:bg-orange-50/50 dark:hover:bg-orange-500/10 bg-background shadow-sm hover:shadow-md transition-all duration-300">
+                                <Users className="h-6 w-6 text-orange-500 group-hover:scale-110 transition-transform" />
+                                <span className="text-xs font-semibold">Client</span>
+                            </Button>
+                        </Link>
+                        <Link href="/ventes" className="group">
+                            <Button variant="outline" className="w-full h-20 flex flex-col gap-2 items-center justify-center border-dashed border-emerald-500/30 hover:border-emerald-500 hover:bg-emerald-50/50 dark:hover:bg-emerald-500/10 bg-background shadow-sm hover:shadow-md transition-all duration-300">
+                                <Search className="h-6 w-6 text-emerald-500 group-hover:scale-110 transition-transform" />
+                                <span className="text-xs font-semibold">Recherche</span>
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
 
                 {/* ALERTES STOCK (Si nécessaire) */}
@@ -222,7 +260,7 @@ export default function Dashboard({
                 <div className="grid gap-6 grid-cols-1 xl:grid-cols-7">
 
                     {/* GRAPHIQUE DES VENTES (Colspan 4) */}
-                    <Card className="xl:col-span-4 shadow-sm overflow-hidden">
+                    <Card className="xl:col-span-4 shadow-sm overflow-hidden border-border/50 hover:shadow-md transition-shadow duration-300">
                         <CardHeader className="pb-2">
                             <CardTitle className="text-base flex items-center gap-2">
                                 <BarChart3 className="h-4 w-4 text-primary" />
@@ -263,7 +301,7 @@ export default function Dashboard({
                     </Card>
 
                     {/* TOP PRODUITS (Colspan 3) */}
-                    <Card className="xl:col-span-3 shadow-sm flex flex-col">
+                    <Card className="xl:col-span-3 shadow-sm flex flex-col border-border/50 hover:shadow-md transition-shadow duration-300">
                         <CardHeader className="pb-2">
                             <CardTitle className="text-base flex items-center gap-2">
                                 <TrendingUp className="h-4 w-4 text-blue-500" />
@@ -280,7 +318,7 @@ export default function Dashboard({
                                 ) : (
                                     <div className="divide-y">
                                         {topProducts.map((product, index) => (
-                                            <div key={product.id} className="flex items-center justify-between p-3 hover:bg-muted/30 transition-colors">
+                                            <div key={product.id} className="flex items-center justify-between p-3 hover:bg-primary/5 transition-colors group">
                                                 <div className="flex items-center gap-3 min-w-0">
                                                     <span className={cn(
                                                         "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
@@ -308,12 +346,65 @@ export default function Dashboard({
                             </ScrollArea>
                         </CardContent>
                     </Card>
+
+                    {/* STATS BOUTIQUES */}
+                    <Card className="shadow-sm flex flex-col xl:col-span-7 border-border/50 hover:shadow-md transition-shadow duration-300">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-base flex items-center gap-2">
+                                <Store className="h-4 w-4 text-emerald-500" />
+                                Boutiques & Inventaire
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex-1 p-0">
+                            <ScrollArea className="h-[280px]">
+                                {boutiques.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-6">
+                                        <Store className="h-8 w-8 opacity-20 mb-2" />
+                                        <p className="text-sm">Aucune boutique</p>
+                                    </div>
+                                ) : (
+                                    <div className="divide-y">
+                                        {boutiques.map((boutique) => (
+                                            <div key={boutique.id} className="flex items-center justify-between p-3 hover:bg-emerald-50/50 dark:hover:bg-emerald-500/10 transition-colors group">
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    <div className="h-8 w-8 shrink-0 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                                        <Store className="h-4 w-4" />
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="text-sm font-medium truncate pr-2">{boutique.nom}</p>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            {boutique.produits_count} produits référencés
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="shrink-0">
+                                                    <Link href={`/boutiques/${boutique.id}`}>
+                                                        <Button variant="ghost" size="sm" className="text-xs h-7">
+                                                            Voir
+                                                        </Button>
+                                                    </Link>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </ScrollArea>
+                        </CardContent>
+                        <Separator />
+                        <div className="p-3 text-center">
+                            <Link href="/boutiques">
+                                <Button variant="link" size="sm" className="text-xs">
+                                    Gérer les boutiques
+                                </Button>
+                            </Link>
+                        </div>
+                    </Card>
                 </div>
 
                 {/* NOUVELLE SECTION: TOP CATÉGORIES ET GRAPHIQUE */}
                 <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
                     {/* TOP CATÉGORIES */}
-                    <Card className="shadow-sm flex flex-col">
+                    <Card className="shadow-sm flex flex-col border-border/50 hover:shadow-md transition-shadow duration-300">
                         <CardHeader className="pb-2">
                             <CardTitle className="text-base flex items-center gap-2">
                                 <Tag className="h-4 w-4 text-purple-500" />
@@ -330,7 +421,7 @@ export default function Dashboard({
                                 ) : (
                                     <div className="divide-y">
                                         {topCategories.map((category, index) => (
-                                            <div key={category.id} className="flex items-center justify-between p-3 hover:bg-muted/30 transition-colors">
+                                            <div key={category.id} className="flex items-center justify-between p-3 hover:bg-purple-50/50 dark:hover:bg-purple-500/10 transition-colors group">
                                                 <div className="flex items-center gap-3 min-w-0">
                                                     <span className={cn(
                                                         "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
@@ -360,7 +451,7 @@ export default function Dashboard({
                     </Card>
 
                     {/* DERNIÈRES VENTES */}
-                    <Card className="shadow-sm">
+                    <Card className="shadow-sm border-border/50 hover:shadow-md transition-shadow duration-300">
                         <CardHeader className="pb-2 flex flex-row items-center justify-between">
                             <CardTitle className="text-base flex items-center gap-2">
                                 <Receipt className="h-4 w-4 text-emerald-600" />
@@ -375,7 +466,7 @@ export default function Dashboard({
                                 ) : (
                                     <div className="divide-y">
                                         {recentSales.map((sale) => (
-                                            <div key={sale.id} className="p-3 flex items-center justify-between hover:bg-muted/30">
+                                            <div key={sale.id} className="p-3 flex items-center justify-between hover:bg-muted/50 transition-colors group">
                                                 <div className="flex items-center gap-3 min-w-0">
                                                     <div className="h-8 w-8 shrink-0 rounded-full bg-muted flex items-center justify-center">
                                                         {getPaymentIcon(sale.mode_paiement)}
@@ -408,7 +499,7 @@ export default function Dashboard({
                     </Card>
 
                     {/* STOCK CRITIQUE */}
-                    <Card className="shadow-sm border-orange-100 dark:border-orange-900/30">
+                    <Card className="shadow-sm border-orange-200 dark:border-orange-900/50 hover:shadow-orange-500/10 transition-shadow duration-300 bg-gradient-to-br from-orange-50/30 to-transparent dark:from-orange-950/20">
                         <CardHeader className="pb-2 flex flex-row items-center justify-between">
                             <CardTitle className="text-base flex items-center gap-2 text-orange-700 dark:text-orange-400">
                                 <AlertTriangle className="h-4 w-4" />
@@ -443,46 +534,18 @@ export default function Dashboard({
                     </Card>
                 </div>
 
-                {/* ACTIONS RAPIDES (Grid 2 cols Mobile / 4 cols Desktop) */}
-                <div className="pt-2">
-                    <h2 className="text-sm font-semibold mb-3 px-1 text-muted-foreground uppercase tracking-wider">Raccourcis</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <Link href="/ventes/create">
-                            <Button variant="outline" className="w-full h-16 flex flex-col gap-1 items-center justify-center hover:border-primary hover:bg-primary/5 border-dashed">
-                                <Plus className="h-5 w-5 text-primary" />
-                                <span className="text-xs font-semibold">Vente</span>
-                            </Button>
-                        </Link>
-                        <Link href="/produits/create">
-                            <Button variant="outline" className="w-full h-16 flex flex-col gap-1 items-center justify-center hover:border-blue-500 hover:bg-blue-50 border-dashed">
-                                <Package className="h-5 w-5 text-blue-500" />
-                                <span className="text-xs font-semibold">Produit</span>
-                            </Button>
-                        </Link>
-                        <Link href="/clients/create">
-                            <Button variant="outline" className="w-full h-16 flex flex-col gap-1 items-center justify-center hover:border-orange-500 hover:bg-orange-50 border-dashed">
-                                <Users className="h-5 w-5 text-orange-500" />
-                                <span className="text-xs font-semibold">Client</span>
-                            </Button>
-                        </Link>
-                        <Link href="/ventes">
-                            <Button variant="outline" className="w-full h-16 flex flex-col gap-1 items-center justify-center hover:border-emerald-500 hover:bg-emerald-50 border-dashed">
-                                <Search className="h-5 w-5 text-emerald-500" />
-                                <span className="text-xs font-semibold">Recherche</span>
-                            </Button>
-                        </Link>
-                    </div>
-                </div>
+
 
                 {/* WhatsApp Catalog Section */}
                 <div className="pt-4">
                     <h2 className="text-sm font-semibold mb-3 px-1 text-muted-foreground uppercase tracking-wider">Communication</h2>
                     <Button
                         onClick={() => setWhatsappModalOpen(true)}
-                        className="w-full h-16 bg-green-600 hover:bg-green-700 text-white flex items-center justify-center gap-2"
+                        className="w-full h-16 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-3 overflow-hidden group relative"
                     >
-                        <MessageCircle className="h-5 w-5" />
-                        <span className="font-semibold">Envoyer Catalogue WhatsApp</span>
+                        <div className="absolute inset-0 bg-white/20 w-1/2 -skew-x-12 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+                        <MessageCircle className="h-6 w-6 group-hover:scale-110 transition-transform" />
+                        <span className="font-bold text-base tracking-wide">Envoyer Catalogue WhatsApp</span>
                     </Button>
                 </div>
 

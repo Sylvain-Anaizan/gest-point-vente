@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Client;
 use App\Models\MouvementStock;
 use App\Models\Produit;
+use App\Models\Variante;
 use App\Models\Vente;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,119 +20,129 @@ class POSController extends Controller
      */
     public function index()
     {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        $queryProduits = Produit::with(['category', 'variantes.taille'])
+            ->whereHas('variantes', function ($q) {
+                $q->where('quantite', '>', 0);
+            });
+
+        if ($user->role === 'employé') {
+            $queryProduits->where('boutique_id', $user->boutique_id);
+        }
+
         return Inertia::render('pos/index', [
-            'produits' => Produit::with(['category', 'taille'])
-                ->where('quantite', '>', 0) // On affiche que les produits en stock par défaut
-                ->get(),
+            'produits' => $queryProduits->get()->map(fn ($p) => [
+                'id' => $p->id,
+                'nom' => $p->nom,
+                'imageUrl' => $p->imageUrl,
+                'category' => $p->category->nom,
+                'variantes' => $p->variantes->map(fn ($v) => [
+                    'id' => $v->id,
+                    'taille' => $v->taille ? $v->taille->nom : 'N/A',
+                    'prix_vente' => $v->prix_vente,
+                    'quantite' => $v->quantite,
+                ]),
+            ]),
             'clients' => Client::actifs()->get(),
+            'tailles' => \App\Models\Taille::all(['id', 'nom']),
+            'boutiques' => $user->role === 'admin'
+                ? \App\Models\Boutique::all(['id', 'nom'])
+                : \App\Models\Boutique::where('id', $user->boutique_id)->get(['id', 'nom']),
         ]);
     }
 
     /**
      * Enregistre une nouvelle vente.
      */
-
     public function store(Request $request)
     {
-        //dd($request->all());
-        // 1. Validation renforcée
         $validated = $request->validate([
             'client_id' => 'nullable|integer|exists:clients,id',
             'panier' => 'required|array|min:1',
-            'panier.*.id' => 'required|integer|exists:produits,id',
+            'panier.*.id' => 'required|integer|exists:produits,id', // ID du produit maître (pour UI)
+            'panier.*.variante_id' => 'required|integer|exists:variantes,id', // ID réel vendu
             'panier.*.quantite' => 'required|integer|min:1',
-            // Valider le prix unitaire doit être basé sur le prix réel du produit, non pas celui envoyé par le client
             'panier.*.prix_vente' => 'required|numeric|min:0',
             'mode_paiement' => 'required|string|in:espèces,carte,virement,mobile_money',
-            // Assurez-vous que le montant reçu est requis si c'est 'espèces'
             'montant_recu' => 'nullable|numeric|min:0|required_if:mode_paiement,espèces',
+            'boutique_id' => 'nullable|exists:boutiques,id',
         ]);
 
         try {
             $vente = DB::transaction(function () use ($validated) {
                 $montantTotal = 0;
-                $produitIds = collect($validated['panier'])->pluck('id');
+                $varianteIds = collect($validated['panier'])->pluck('variante_id');
 
-                // Verrouiller TOUS les produits en une seule fois
-                $produits = Produit::lockForUpdate()->whereIn('id', $produitIds)->get()->keyBy('id');
+                $variantes = Variante::with('produit')
+                    ->lockForUpdate()
+                    ->whereIn('id', $varianteIds)
+                    ->get()
+                    ->keyBy('id');
 
-                // 1. Calculer le total et vérifier les stocks
                 foreach ($validated['panier'] as $item) {
-                    $produit = $produits->get($item['id']);
+                    $variante = $variantes->get($item['variante_id']);
 
-                    if (!$produit) {
-                        throw ValidationException::withMessages(['error' => "Produit ID {$item['id']} non trouvé ou verrouillé."]);
+                    if (! $variante) {
+                        throw ValidationException::withMessages(['error' => 'Variante non trouvée ou verrouillée.']);
                     }
-
-                    // *** VÉRIFICATION CRITIQUE: Le prix de vente correspond-il au prix actuel ? ***
-                    // Si vous n'avez pas de gestion des remises complexes, assurez-vous que le prix est celui en base.
-                    // Ici, on utilise le prix envoyé par le frontend (utile pour remises/promos ponctuelles)
 
                     $montantTotal += $item['quantite'] * $item['prix_vente'];
 
-                    // Vérification stock
-                    if ($produit->quantite < $item['quantite']) {
-                        // Lancer une exception de validation pour un meilleur message d'erreur
+                    if ($variante->quantite < $item['quantite']) {
                         throw ValidationException::withMessages([
-                            'panier' => ["Stock insuffisant pour le produit : {$produit->nom}. Stock actuel : {$produit->quantite}"]
+                            'panier' => ["Stock insuffisant pour {$variante->produit->nom} (Taille: ".($variante->taille->nom ?? 'N/A')."). Stock actuel : {$variante->quantite}"],
                         ]);
                     }
                 }
 
-                // 2. Création de la Vente
+                /** @var \App\Models\User $user */
+                $user = auth()->user();
                 $vente = Vente::create([
-                    'numero' => 'FAC-' . strtoupper(uniqid()),
+                    'numero' => 'FAC-'.strtoupper(uniqid()),
                     'client_id' => $validated['client_id'],
                     'user_id' => Auth::id(),
+                    'boutique_id' => $user->role === 'employé'
+                        ? $user->boutique_id
+                        : ($validated['boutique_id'] ?? null),
                     'montant_total' => $montantTotal,
                     'statut' => 'complétée',
                     'mode_paiement' => $validated['mode_paiement'],
-                    // Ajoutez ici les autres champs pertinents comme 'montant_recu' si vous l'ajoutez au modèle Vente
                 ]);
 
-                // 3. Traitement des lignes et du stock
                 foreach ($validated['panier'] as $item) {
-                    $produit = $produits->get($item['id']);
+                    $variante = $variantes->get($item['variante_id']);
 
-                    // Création ligne de vente
                     $vente->lignes()->create([
-                        'produit_id' => $produit->id,
+                        'produit_id' => $variante->produit_id,
+                        'variante_id' => $variante->id,
                         'quantite' => $item['quantite'],
                         'prix_unitaire' => $item['prix_vente'],
                         'sous_total' => $item['quantite'] * $item['prix_vente'],
                     ]);
 
-                    // Décrémentation du stock
-                    $produit->decrement('quantite', $item['quantite']);
+                    $variante->decrement('quantite', $item['quantite']);
 
-                    // Historisation du mouvement
                     MouvementStock::create([
-                        'produit_id' => $produit->id,
+                        'produit_id' => $variante->produit_id,
+                        'variante_id' => $variante->id,
                         'user_id' => Auth::id(),
-                        'quantite' => -$item['quantite'], // Négatif car sortie
+                        'quantite' => -$item['quantite'],
                         'type' => 'vente',
                         'commentaire' => "Vente #{$vente->numero}",
                     ]);
                 }
 
-                // 4. Paiement (Si nécessaire, enregistrez le montant reçu et la monnaie rendue)
-                if ($validated['mode_paiement'] === 'espèces' && $validated['montant_recu']) {
-                    $montantRendu = $validated['montant_recu'] - $montantTotal;
-
-                    // Idéalement, créer ici un enregistrement de Paiement ou mettre à jour la vente
-                    // $vente->paiements()->create([...]);
-                }
-
                 return $vente;
             });
 
-            return redirect()->route('ventes.show', $vente)->with('success', 'Vente enregistrée avec succès. Numéro: ' . $vente->numero);
+            return redirect()->route('ventes.show', $vente)->with('success', 'Vente enregistrée avec succès. Numéro: '.$vente->numero);
         } catch (ValidationException $e) {
             // Gère les erreurs de ValidationException (stock insuffisant)
             return back()->withErrors($e->errors());
         } catch (\Throwable $e) {
             // Gère les autres erreurs (connexion DB, etc.)
-            return back()->withErrors(['error' => "Une erreur inattendue est survenue : " . $e->getMessage()]);
+            return back()->withErrors(['error' => 'Une erreur inattendue est survenue : '.$e->getMessage()]);
         }
     }
 }

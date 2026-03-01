@@ -57,7 +57,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface Client { id: number; nom: string; prenom: string; telephone: string; }
 interface User { id: number; name: string; email: string; }
 interface LigneVente { id: number; produit_id: number; quantite: number; prix_unitaire: number; sous_total: number; produit: { id: number; nom: string; }; }
-interface Vente { id: number; numero: string; client_id: number | null; user_id: number; montant_total: number | string; statut: 'complétée' | 'annulée'; mode_paiement: 'espèces' | 'carte' | 'virement' | 'mobile_money'; created_at: string; updated_at: string; client?: Client; user: User; lignes: LigneVente[]; }
+interface Vente { id: number; numero: string; client_id: number | null; user_id: number; montant_total: number | string; statut: 'complétée' | 'annulée'; mode_paiement: 'espèces' | 'carte' | 'virement' | 'mobile_money'; created_at: string; updated_at: string; client?: Client; user: User; lignes: LigneVente[]; boutique?: { id: number; nom: string; }; }
 
 export default function VentesIndex({ ventes, filters }: { ventes: { data: Vente[]; current_page: number; last_page: number; per_page: number; total: number; }; filters: { search?: string; statut?: string; date_debut?: string; date_fin?: string; }; }) {
 
@@ -69,7 +69,7 @@ export default function VentesIndex({ ventes, filters }: { ventes: { data: Vente
     const [venteToDelete, setVenteToDelete] = useState<Vente | null>(null);
 
     // Fonction pour formater les montants : pas de décimales, espaces pour les milliers
-    const formatMontant = (montant: any): string => {
+    const formatMontant = (montant: string | number | null | undefined): string => {
         // Vérifier et convertir en nombre si nécessaire
         let numericValue: number;
 
@@ -128,19 +128,19 @@ export default function VentesIndex({ ventes, filters }: { ventes: { data: Vente
 
     const getStatutBadge = (statut: string) => {
         switch (statut) {
-            case 'complétée': return <Badge variant="outline" className="border-green-500 text-green-600 bg-green-50 w-fit">Complétée</Badge>;
-            case 'annulée': return <Badge variant="destructive" className="w-fit">Annulée</Badge>;
-            default: return <Badge variant="secondary" className="w-fit">{statut}</Badge>;
+            case 'complétée': return <Badge variant="outline" className="border-emerald-200 dark:border-emerald-900 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 w-fit">Complétée</Badge>;
+            case 'annulée': return <Badge variant="outline" className="border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 w-fit">Annulée</Badge>;
+            default: return <Badge variant="secondary" className="w-fit border-transparent">{statut}</Badge>;
         }
     };
 
     const getModePaiementDetails = (mode: string) => {
         switch (mode) {
-            case 'espèces': return { icon: <Banknote className="h-3 w-3" />, label: 'Espèces', color: 'text-emerald-600' };
-            case 'carte': return { icon: <CreditCard className="h-3 w-3" />, label: 'Carte', color: 'text-blue-600' };
-            case 'virement': return { icon: <Receipt className="h-3 w-3" />, label: 'Virement', color: 'text-purple-600' };
-            case 'mobile_money': return { icon: <User className="h-3 w-3" />, label: 'Mobile', color: 'text-orange-600' };
-            default: return { icon: <Banknote className="h-3 w-3" />, label: mode, color: 'text-gray-600' };
+            case 'espèces': return { icon: <Banknote className="h-3 w-3" />, label: 'Espèces', color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded-full' };
+            case 'carte': return { icon: <CreditCard className="h-3 w-3" />, label: 'Carte', color: 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-950/50 px-1.5 py-0.5 rounded-full' };
+            case 'virement': return { icon: <Receipt className="h-3 w-3" />, label: 'Virement', color: 'text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-950/50 px-1.5 py-0.5 rounded-full' };
+            case 'mobile_money': return { icon: <span className="font-bold text-[10px]">M</span>, label: 'Mobile', color: 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-950/50 px-1.5 py-0.5 rounded-full' };
+            default: return { icon: <Banknote className="h-3 w-3" />, label: mode, color: 'text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full' };
         }
     };
 
@@ -148,15 +148,15 @@ export default function VentesIndex({ ventes, filters }: { ventes: { data: Vente
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Gestion des Ventes" />
 
-            <div className="space-y-6 p-4 md:p-6 max-w-[1600px] mx-auto pb-24">
+            <div className="space-y-6 p-4 md:p-6 max-w-[1600px] pb-24">
                 {/* SECTION 1: HEADER (Responsive Flex) */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Ventes</h1>
-                        <p className="text-sm text-muted-foreground">Suivi des encaissements.</p>
+                        <h1 className="text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">Ventes</h1>
+                        <p className="text-sm text-muted-foreground mt-1">Suivi des encaissements et des transactions.</p>
                     </div>
                     <Link href={VenteController.create.url()} className="w-full sm:w-auto">
-                        <Button className="w-full sm:w-auto shadow-sm">
+                        <Button className="w-full sm:w-auto shadow-md hover:shadow-lg transition-all border border-primary/20 bg-gradient-to-b from-primary to-primary/90">
                             <Plus className="mr-2 size-4" /> Nouvelle vente
                         </Button>
                     </Link>
@@ -165,66 +165,78 @@ export default function VentesIndex({ ventes, filters }: { ventes: { data: Vente
                 {/* SECTION 2: STATS (Grid 2 cols on mobile, 4 on desktop) */}
                 <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
                     {/* CARTE REVENUS (Celle qui déborde souvent) */}
-                    <Card className="bg-primary/5 border-primary/20 shadow-sm overflow-hidden">
+                    <Card className="bg-gradient-to-br from-primary/10 to-transparent border-primary/20 shadow-sm overflow-hidden relative group">
+                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all duration-500"></div>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4">
-                            <CardTitle className="text-[10px] sm:text-xs font-medium uppercase text-muted-foreground truncate">
+                            <CardTitle className="text-[10px] sm:text-xs font-medium uppercase text-primary/80 truncate">
                                 Revenus
                             </CardTitle>
-                            <Banknote className="h-4 w-4 text-primary shrink-0" />
+                            <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
+                                <Banknote className="h-4 w-4 text-primary shrink-0" />
+                            </div>
                         </CardHeader>
-                        <CardContent className="p-3 sm:p-4 pt-0">
+                        <CardContent className="p-3 sm:p-4 pt-0 relative z-10">
                             {/* Ajout de min-w-0 pour forcer le truncate si besoin */}
                             <div className="flex items-baseline gap-1 min-w-0">
                                 <div
-                                    className="text-lg sm:text-2xl font-bold truncate"
+                                    className="text-lg sm:text-2xl font-bold text-primary truncate"
                                     title={formatMontant(stats.totalRevenus) + " FCFA"}
                                 >
                                     {stats.totalRevenus}
                                 </div>
-                                <span className="text-[10px] sm:text-xs font-normal text-muted-foreground shrink-0">
-                                    F
+                                <span className="text-[10px] sm:text-xs font-medium text-primary/70 shrink-0">
+                                    FCFA
                                 </span>
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card className="shadow-sm overflow-hidden">
+                    <Card className="bg-gradient-to-br from-blue-500/5 to-transparent border-blue-500/10 shadow-sm overflow-hidden relative group">
+                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all duration-500"></div>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4">
-                            <CardTitle className="text-[10px] sm:text-xs font-medium uppercase text-muted-foreground truncate">
+                            <CardTitle className="text-[10px] sm:text-xs font-medium uppercase text-blue-600/80 dark:text-blue-400 truncate">
                                 Total Ventes
                             </CardTitle>
-                            <ShoppingCart className="h-4 w-4 text-muted-foreground shrink-0" />
+                            <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center">
+                                <ShoppingCart className="h-4 w-4 text-blue-500 shrink-0" />
+                            </div>
                         </CardHeader>
-                        <CardContent className="p-3 sm:p-4 pt-0">
-                            <div className="text-lg sm:text-2xl font-bold truncate">
+                        <CardContent className="p-3 sm:p-4 pt-0 relative z-10">
+                            <div className="text-lg sm:text-2xl font-bold text-blue-600 dark:text-blue-400 truncate">
                                 {stats.totalVentes}
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card className="shadow-sm overflow-hidden">
+                    <Card className="bg-gradient-to-br from-green-500/5 to-transparent border-green-500/10 shadow-sm overflow-hidden relative group">
+                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-500"></div>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4">
-                            <CardTitle className="text-[10px] sm:text-xs font-medium uppercase text-muted-foreground truncate">
+                            <CardTitle className="text-[10px] sm:text-xs font-medium uppercase text-green-600/80 dark:text-green-400 truncate">
                                 Validées
                             </CardTitle>
-                            <Receipt className="h-4 w-4 text-green-600 shrink-0" />
+                            <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center">
+                                <Receipt className="h-4 w-4 text-green-600 shrink-0" />
+                            </div>
                         </CardHeader>
-                        <CardContent className="p-3 sm:p-4 pt-0">
-                            <div className="text-lg sm:text-2xl font-bold text-green-600 truncate">
+                        <CardContent className="p-3 sm:p-4 pt-0 relative z-10">
+                            <div className="text-lg sm:text-2xl font-bold text-green-600 dark:text-green-400 truncate">
                                 {stats.ventesCompletees}
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card className="shadow-sm overflow-hidden">
+                    <Card className="bg-gradient-to-br from-red-500/5 to-transparent border-red-500/10 shadow-sm overflow-hidden relative group">
+                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl group-hover:bg-rose-500/20 transition-all duration-500"></div>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-4">
-                            <CardTitle className="text-[10px] sm:text-xs font-medium uppercase text-muted-foreground truncate">
+                            <CardTitle className="text-[10px] sm:text-xs font-medium uppercase text-red-600/80 dark:text-red-400 truncate">
                                 Annulées
                             </CardTitle>
-                            <AlertTriangle className="h-4 w-4 text-red-600 shrink-0" />
+                            <div className="h-8 w-8 rounded-full bg-red-500/10 flex items-center justify-center">
+                                <AlertTriangle className="h-4 w-4 text-red-600 shrink-0" />
+                            </div>
                         </CardHeader>
-                        <CardContent className="p-3 sm:p-4 pt-0">
-                            <div className="text-lg sm:text-2xl font-bold text-red-600 truncate">
+                        <CardContent className="p-3 sm:p-4 pt-0 relative z-10">
+                            <div className="text-lg sm:text-2xl font-bold text-red-600 dark:text-red-400 truncate">
                                 {stats.ventesAnnulees}
                             </div>
                         </CardContent>
@@ -273,57 +285,85 @@ export default function VentesIndex({ ventes, filters }: { ventes: { data: Vente
 
                 {/* SECTION 4: LISTE DES VENTES */}
                 {ventes.data.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed rounded-xl bg-muted/10">
-                        <div className="rounded-full bg-muted p-3"><ShoppingCart className="h-6 w-6 text-muted-foreground" /></div>
-                        <h3 className="mt-4 text-lg font-semibold">Aucune vente trouvée</h3>
-                        <Link href={VenteController.create.url()} className="mt-4"><Button variant="outline">Créer une vente</Button></Link>
+                    <div className="flex flex-col items-center justify-center py-16 px-4 text-center border-2 border-dashed rounded-xl bg-muted/30 dark:bg-muted/10">
+                        <div className="h-16 w-16 mb-4 rounded-full bg-primary/10 flex items-center justify-center ring-8 ring-primary/5">
+                            <ShoppingCart className="h-8 w-8 text-primary" />
+                        </div>
+                        <h3 className="mt-2 text-xl font-bold tracking-tight">Aucune vente trouvée</h3>
+                        <p className="text-sm text-muted-foreground mt-2 max-w-sm mb-6">
+                            Il semble que vous n'ayez pas encore enregistré de ventes avec ces critères de recherche.
+                        </p>
+                        <Link href={VenteController.create.url()}>
+                            <Button className="hover:shadow-md transition-shadow">
+                                <Plus className="mr-2 h-4 w-4" /> Créer une vente
+                            </Button>
+                        </Link>
                     </div>
                 ) : (
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {ventes.data.map((vente) => {
                             const paiement = getModePaiementDetails(vente.mode_paiement);
+                            const isCompleted = vente.statut === 'complétée';
+                            const isCancelled = vente.statut === 'annulée';
+
+                            // Détermination de la couleur de bordure basée sur le statut
+                            const borderColor = isCompleted ? 'border-l-emerald-500'
+                                : isCancelled ? 'border-l-rose-500'
+                                    : 'border-l-primary/50';
+
                             return (
-                                <Card key={vente.id} className="group hover:shadow-lg transition-all duration-300 flex flex-col border-l-4 border-l-primary/50 relative overflow-hidden">
+                                <Card key={vente.id} className={`group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col border-l-4 ${borderColor} relative overflow-hidden bg-gradient-to-br from-white to-white/50`}>
+                                    <div className="absolute top-0 right-0 p-8 w-32 h-32 bg-primary/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform duration-500"></div>
+
                                     <CardHeader className="pb-2 p-4">
                                         <div className="flex justify-between items-start mb-1">
                                             <div className="flex flex-col">
-                                                <span className="font-mono text-xs text-muted-foreground font-bold">{vente.numero}</span>
-                                                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                                <span className="font-mono text-xs text-muted-foreground font-semibold px-2 py-0.5 bg-muted/50 rounded-md w-fit">{vente.numero}</span>
+                                                <span className="text-[10px] text-muted-foreground flex items-center gap-1 mt-1.5 ml-0.5">
                                                     <Calendar className="h-3 w-3" />
-                                                    {new Date(vente.created_at).toLocaleDateString('fr-FR')}
+                                                    {new Date(vente.created_at).toLocaleDateString('fr-FR', {
+                                                        day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                                                    })}
                                                 </span>
                                             </div>
                                             {getStatutBadge(vente.statut)}
                                         </div>
-                                        <div className="pt-2">
-                                            <div className="text-xl font-bold tracking-tight text-primary">
-                                                {formatMontant(vente.montant_total)} <span className="text-xs font-normal text-muted-foreground">FCFA</span>
+                                        <div className="pt-3">
+                                            <div className={`text-2xl font-black tracking-tight ${isCompleted ? 'text-emerald-600 dark:text-emerald-400' : isCancelled ? 'text-rose-600 dark:text-rose-400' : 'text-primary'}`}>
+                                                {formatMontant(vente.montant_total)} <span className="text-xs font-medium text-muted-foreground">FCFA</span>
                                             </div>
                                         </div>
                                     </CardHeader>
 
-                                    <CardContent className="p-4 pt-0 pb-3 flex-1">
-                                        <Separator className="my-2" />
-                                        <div className="flex items-center gap-3 mb-3">
-                                            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                                    <CardContent className="p-4 pt-1 pb-4 flex-1">
+                                        <Separator className="mb-3 opacity-50" />
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="h-9 w-9 rounded-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center shrink-0 border border-muted-foreground/10 shadow-sm">
                                                 <User className="h-4 w-4 text-muted-foreground" />
                                             </div>
                                             <div className="min-w-0">
-                                                <p className="text-sm font-medium leading-none truncate">
+                                                <p className="text-sm font-semibold leading-tight truncate">
                                                     {vente.client ? `${vente.client.nom} ${vente.client.prenom}` : 'Client Anonyme'}
                                                 </p>
                                                 {vente.client && <p className="text-xs text-muted-foreground mt-0.5 truncate">{vente.client.telephone}</p>}
                                             </div>
                                         </div>
-                                        <div className="flex justify-between items-center text-xs text-muted-foreground bg-muted/30 p-2 rounded">
+                                        <div className="flex justify-between items-center text-xs text-muted-foreground bg-background rounded-lg border border-muted/40 p-2 shadow-sm">
                                             <div className={`flex items-center gap-1.5 ${paiement.color} font-medium`}>
                                                 {paiement.icon} {paiement.label}
                                             </div>
-                                            <span>{vente.lignes.length} art.</span>
+                                            <div className="flex flex-col items-end gap-1">
+                                                <span className="font-medium bg-muted px-1.5 py-0.5 rounded-full text-foreground/80">{vente.lignes.length} article(s)</span>
+                                                {vente.boutique && (
+                                                    <Badge variant="secondary" className="px-1.5 py-0 h-4 text-[9px] font-bold bg-primary/10 text-primary border-primary/20">
+                                                        {vente.boutique.nom}
+                                                    </Badge>
+                                                )}
+                                            </div>
                                         </div>
                                     </CardContent>
 
-                                    <CardFooter className="p-3 pt-0 flex gap-2 border-t bg-muted/10 mt-auto">
+                                    <CardFooter className="p-3 flex gap-2 border-t bg-muted/20 mt-auto backdrop-blur-sm">
                                         <Link href={VenteController.show.url(vente.id)} className="flex-1">
                                             <Button variant="outline" size="sm" className="w-full h-8 text-xs">
                                                 <Eye className="mr-2 h-3 w-3" /> Détails
@@ -360,7 +400,7 @@ export default function VentesIndex({ ventes, filters }: { ventes: { data: Vente
                     <div className="flex justify-center pt-4">
                         <div className="flex flex-nowrap overflow-x-auto pb-2 gap-2 w-full justify-start md:justify-center px-2 scrollbar-hide">
                             {Array.from({ length: ventes.last_page }, (_, i) => i + 1).map((page) => (
-                                <Link key={page} href={VenteController.index.url({ page })} preserveScroll preserveState className="shrink-0">
+                                <Link key={page} href={VenteController.index.url({ mergeQuery: { page: page } })} preserveScroll preserveState className="shrink-0">
                                     <Button variant={page === ventes.current_page ? "default" : "outline"} size="sm" className="w-9 h-9 p-0">
                                         {page}
                                     </Button>

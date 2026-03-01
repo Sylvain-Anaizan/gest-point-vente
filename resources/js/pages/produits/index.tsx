@@ -10,7 +10,8 @@ import {
     Package,
     AlertTriangle,
     TrendingUp,
-    Warehouse, // Ajout pour l'icône de stock dans la carte
+    Warehouse,
+    Store,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,13 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
 import { useState, useMemo } from 'react';
@@ -49,7 +57,8 @@ interface Category {
     nom: string;
 }
 
-interface Taille {
+
+interface Boutique {
     id: number;
     nom: string;
 }
@@ -57,40 +66,54 @@ interface Taille {
 interface Produit {
     id: number;
     nom: string;
-    prix_vente: number;
-    quantite: number;
+    totalStock: number;
+    prixMin: number;
+    prixMax: number;
     description: string | null;
-    imageUrl: string | null; // NOUVEAU: URL de l'image du produit
+    imageUrl: string | null;
     category: Category;
-    taille: Taille | null;
+    boutique: Boutique | null;
 }
 
 export default function ProduitsIndex({
-    produits,
+    produits = [],
+    boutiques = [],
 }: {
     produits: Produit[];
+    boutiques: Boutique[];
 }) {
     const [searchQuery, setSearchQuery] = useState('');
+    const [selectedBoutique, setSelectedBoutique] = useState<string>('all');
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [produitToDelete, setProduitToDelete] = useState<Produit | null>(null);
 
     // --- LOGIQUE DE FILTRAGE ET STATISTIQUES ---
 
-    // Filtrer les produits selon la recherche
+    // Filtrer les produits selon la recherche et la boutique
     const filteredProduits = useMemo(() => {
-        if (!searchQuery) return produits;
-        const lowerQuery = searchQuery.toLowerCase();
-        return produits.filter(p =>
-            p.nom.toLowerCase().includes(lowerQuery) ||
-            p.category.nom.toLowerCase().includes(lowerQuery)
-        );
-    }, [produits, searchQuery]);
+        let result = produits;
+
+        if (selectedBoutique !== 'all') {
+            result = result.filter(p => p.boutique?.id.toString() === selectedBoutique);
+        }
+
+        if (searchQuery) {
+            const lowerQuery = searchQuery.toLowerCase();
+            result = result.filter(p =>
+                p.nom.toLowerCase().includes(lowerQuery) ||
+                p.category.nom.toLowerCase().includes(lowerQuery) ||
+                p.boutique?.nom.toLowerCase().includes(lowerQuery)
+            );
+        }
+
+        return result;
+    }, [produits, searchQuery, selectedBoutique]);
 
     // Calcul des KPIs (Statistiques)
     const stats = useMemo(() => {
         const totalProduits = produits.length;
-        const lowStock = produits.filter(p => p.quantite < 10).length;
-        const totalValue = produits.reduce((acc, p) => acc + (p.prix_vente * p.quantite), 0);
+        const lowStock = produits.filter(p => p.totalStock < 10).length;
+        const totalValue = produits.reduce((acc, p) => acc + (p.prixMin * p.totalStock), 0);
         return { totalProduits, lowStock, totalValue };
     }, [produits]);
 
@@ -203,6 +226,21 @@ export default function ProduitsIndex({
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
+
+                            <Select value={selectedBoutique} onValueChange={setSelectedBoutique}>
+                                <SelectTrigger className="w-full sm:w-[200px]">
+                                    <SelectValue placeholder="Toutes les boutiques" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Toutes les boutiques</SelectItem>
+                                    {boutiques?.map((b) => (
+                                        <SelectItem key={b.id} value={b.id.toString()}>
+                                            {b.nom}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
                             <span className="text-sm text-muted-foreground hidden sm:block">
                                 {filteredProduits.length} produit{filteredProduits.length > 1 ? 's' : ''} affiché{filteredProduits.length > 1 ? 's' : ''}
                             </span>
@@ -266,30 +304,36 @@ export default function ProduitsIndex({
                                             <div className="flex items-center justify-between border-t pt-3">
                                                 <div className="flex flex-col">
                                                     <span className="text-sm text-muted-foreground">Prix :</span>
-                                                    <span className="text-xl font-bold text-primary">
-                                                        {produit.prix_vente.toLocaleString('fr-FR')} FCFA
+                                                    <span className="text-lg font-bold text-primary">
+                                                        {produit.prixMin === produit.prixMax
+                                                            ? `${produit.prixMin.toLocaleString('fr-FR')} FCFA`
+                                                            : `${produit.prixMin.toLocaleString('fr-FR')} - ${produit.prixMax.toLocaleString('fr-FR')} FCFA`
+                                                        }
                                                     </span>
                                                 </div>
-                                                <div className="flex flex-col items-end">
-                                                    <span className="text-sm text-muted-foreground">Taille :</span>
-                                                    <Badge variant="outline" className="font-semibold text-base">
-                                                        {produit.taille ? produit.taille.nom : 'N/A'}
-                                                    </Badge>
-                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-col gap-1">
+                                                <span className="text-sm text-muted-foreground flex items-center gap-1">
+                                                    <Store className="h-3 w-3" /> Boutique :
+                                                </span>
+                                                <span className="text-sm font-medium">
+                                                    {produit.boutique ? produit.boutique.nom : 'Stock Général'}
+                                                </span>
                                             </div>
 
                                             <div className="flex items-center justify-between p-3 rounded-md border bg-muted/50">
                                                 <div className="flex items-center space-x-2">
                                                     <Warehouse className="h-4 w-4 text-muted-foreground" />
-                                                    <span className="text-sm font-medium">Stock :</span>
+                                                    <span className="text-sm font-medium">Stock Total :</span>
                                                 </div>
                                                 <span
-                                                    className={`text-lg font-bold flex items-center gap-1 ${produit.quantite === 0 ? 'text-destructive' :
-                                                        produit.quantite < 10 ? 'text-orange-500' : 'text-green-600'
+                                                    className={`text-lg font-bold flex items-center gap-1 ${produit.totalStock === 0 ? 'text-destructive' :
+                                                        produit.totalStock < 10 ? 'text-orange-500' : 'text-green-600'
                                                         }`}
                                                 >
-                                                    {produit.quantite === 0 && <AlertTriangle className="h-4 w-4" />}
-                                                    {produit.quantite}
+                                                    {produit.totalStock === 0 && <AlertTriangle className="h-4 w-4" />}
+                                                    {produit.totalStock}
                                                 </span>
                                             </div>
                                         </CardContent>

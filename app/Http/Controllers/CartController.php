@@ -32,10 +32,10 @@ class CartController extends Controller
             $cart[$product->id] = [
                 'id' => $product->id,
                 'name' => $product->nom,
-                'price' => $product->prix_vente,
+                'price' => $product->prixMin,
                 'image' => $product->imageUrl,
                 'quantity' => $quantity,
-                'max_quantity' => $product->quantite,
+                'max_quantity' => $product->totalStock,
             ];
         }
 
@@ -71,6 +71,7 @@ class CartController extends Controller
     public function clear()
     {
         session()->forget('cart');
+
         return back()->with('success', 'Panier vidé.');
     }
 }

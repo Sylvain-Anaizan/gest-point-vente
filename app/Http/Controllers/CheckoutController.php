@@ -56,7 +56,7 @@ class CheckoutController extends Controller
             // Create Order
             $vente = Vente::create([
                 'numero' => 'CMD-' . strtoupper(uniqid()),
-                'user_id' => auth()->id(), // Assumes user is logged in
+                'user_id' => \Illuminate\Support\Facades\Auth::id(), // Assumes user is logged in
                 'client_id' => null, // Optional: link to a client record if needed
                 'montant_total' => $total,
                 'statut' => 'en_attente', // New status for online orders
@@ -67,20 +67,24 @@ class CheckoutController extends Controller
 
             // Create Order Items
             foreach ($cart as $item) {
-                LigneVente::create([
-                    'vente_id' => $vente->id,
-                    'produit_id' => $item['id'],
+                $produit = Produit::with('variantes')->find($item['id']);
+                if (!$produit || $produit->variantes->isEmpty()) {
+                    continue;
+                }
+
+                // Pour les commandes en ligne simplifiées, on prend la première variante disponible
+                $variante = $produit->variantes->where('quantite', '>', 0)->first() ?? $produit->variantes->first();
+
+                $vente->lignes()->create([
+                    'produit_id' => $produit->id,
+                    'variante_id' => $variante->id,
                     'quantite' => $item['quantity'],
                     'prix_unitaire' => $item['price'],
                     'sous_total' => $item['price'] * $item['quantity'],
                 ]);
 
-                // Optional: Decrement stock immediately or wait for confirmation?
-                // Let's decrement for now to reserve items
-                $produit = Produit::find($item['id']);
-                if ($produit) {
-                    $produit->decrement('quantite', $item['quantity']);
-                }
+                // Décrémenter le stock de la variante
+                $variante->decrement('quantite', $item['quantity']);
             }
 
             DB::commit();

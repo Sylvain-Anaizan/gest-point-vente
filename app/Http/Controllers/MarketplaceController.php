@@ -12,7 +12,15 @@ class MarketplaceController extends Controller
 {
     public function index()
     {
-        $featuredProducts = Produit::with('category')->latest()->take(8)->get();
+        $featuredProducts = Produit::with('category')->latest()->take(8)->get()->map(fn ($p) => [
+            'id' => $p->id,
+            'nom' => $p->nom,
+            'description' => $p->description,
+            'imageUrl' => $p->imageUrl,
+            'prix_vente' => $p->prixMin,
+            'quantite' => $p->totalStock,
+            'category' => $p->category->nom ?? null,
+        ]);
         $categories = Categorie::has('produits')->take(6)->get();
 
         return Inertia::render('marketplace/home', [
@@ -35,7 +43,15 @@ class MarketplaceController extends Controller
             $query->where('nom', 'like', '%' . $request->search . '%');
         }
 
-        $products = $query->paginate(12);
+        $products = $query->paginate(12)->through(fn ($p) => [
+            'id' => $p->id,
+            'nom' => $p->nom,
+            'description' => $p->description,
+            'imageUrl' => $p->imageUrl,
+            'prix_vente' => $p->prixMin,
+            'quantite' => $p->totalStock,
+            'category' => $p->category->nom ?? null,
+        ]);
         $categories = Categorie::has('produits')->get();
 
         return Inertia::render('marketplace/catalog', [

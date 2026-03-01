@@ -32,8 +32,7 @@ interface Produit {
     nom: string;
     prix_vente: number;
     quantite: number;
-    taille: string | null;
-    imageUrl: string; // Ajouté et rendu obligatoire pour l'affichage
+    imageUrl: string;
 }
 
 interface Category {
@@ -125,7 +124,7 @@ export default function CategoriesShow({
                                                         Prix de vente:
                                                     </span>
                                                     <span className="font-semibold text-primary">
-                                                        {produit.prix_vente.toFixed(2)} FCFA
+                                                        {new Intl.NumberFormat('fr-FR').format(produit.prix_vente)} FCFA
                                                     </span>
                                                 </div>
                                                 <div className="flex justify-between items-center text-sm">
@@ -136,16 +135,7 @@ export default function CategoriesShow({
                                                         {produit.quantite} unités
                                                     </span>
                                                 </div>
-                                                {produit.taille && (
-                                                    <div className="flex justify-between items-center text-sm">
-                                                        <span className="text-muted-foreground">
-                                                            Taille/Format:
-                                                        </span>
-                                                        <span className="font-medium text-gray-700">
-                                                            {produit.taille}
-                                                        </span>
-                                                    </div>
-                                                )}
+
                                             </div>
                                         </CardContent>
                                     </Card>
