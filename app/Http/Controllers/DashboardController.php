@@ -152,10 +152,11 @@ class DashboardController extends Controller
                     'id' => $produit->id,
                     'nom' => $produit->nom,
                     'quantite' => $produit->totalStock,
-                    'prix_vente' => $produit->prixMin, // Utiliser le prix minimum pour l'affichage
+                    'prix_vente' => $produit->prixMin,
                     'category' => $produit->category,
                 ];
-            });
+            })
+            ->values();
     }
 
     private function getRecentSales()
@@ -166,7 +167,6 @@ class DashboardController extends Controller
             ->limit(5)
             ->get()
             ->map(function ($vente) {
-                // S'assurer que montant_total est un nombre valide
                 $montantTotal = is_numeric($vente->montant_total) ? (float) $vente->montant_total : 0;
 
                 return [
@@ -179,7 +179,8 @@ class DashboardController extends Controller
                     'vendeur' => $vente->user->name,
                     'produits_count' => $vente->lignes->count(),
                 ];
-            });
+            })
+            ->values();
     }
 
     private function getTopProducts()
@@ -229,6 +230,7 @@ class DashboardController extends Controller
                 'id' => $boutique->id,
                 'nom' => $boutique->nom,
                 'produits_count' => $boutique->produits_count,
-            ]);
+            ])
+            ->values();
     }
 }

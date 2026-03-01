@@ -27,3 +27,7 @@ yarn-error.log
 /.vscode
 /.zed
 start.sh
+.vscode
+.gemini
+.cursor
+.agent
