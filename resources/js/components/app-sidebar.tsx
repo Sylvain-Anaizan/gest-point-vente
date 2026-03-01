@@ -81,21 +81,21 @@ export function AppSidebar() {
     const adminOnly = ['Boutiques', 'Catégories', 'Tailles', 'Unités de mesure', 'Équipe & Staff'];
 
     return (
-        <Sidebar collapsible="icon" variant="floating" className="border-r-0 bg-background/50 backdrop-blur-xl">
+        <Sidebar collapsible="icon" variant="floating" className="border-r border-white/5 bg-background/50 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] transition-all duration-500">
             <SidebarHeader className="p-4">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild className="hover:bg-transparent px-2">
-                            <Link href={dashboard()} prefetch className="flex items-center gap-3">
-                                <div className="flex aspect-square size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+                        <SidebarMenuButton size="lg" asChild className="hover:bg-primary/5 px-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center transition-all duration-300 group/logo">
+                            <Link href={dashboard()} prefetch className="flex items-center gap-3 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:justify-center">
+                                <div className="flex aspect-square size-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-xl shadow-primary/30 group-hover/logo:scale-105 group-data-[collapsible=icon]:scale-90 transition-transform duration-500 shrink-0">
                                     <AppLogo />
                                 </div>
                                 <div className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
-                                    <span className="truncate font-black tracking-tighter text-lg">
+                                    <span className="truncate font-black tracking-tighter text-lg bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
                                         ANAIZAN <span className="text-primary italic">GEST</span>
                                     </span>
-                                    <span className="truncate text-[10px] uppercase tracking-widest text-muted-foreground font-bold font-mono">
-                                        Version 1.0
+                                    <span className="truncate text-[9px] uppercase tracking-[0.3em] text-muted-foreground/60 font-bold font-mono">
+                                        Premium Edition
                                     </span>
                                 </div>
                             </Link>

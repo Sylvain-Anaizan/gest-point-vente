@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { ArrowDownLeft, ArrowUpRight, History, Plus, Search, Scale } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, History, Plus, Search, Scale, Users } from 'lucide-react';
 import MouvementStockController from '@/actions/App/Http/Controllers/MouvementStockController';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -161,7 +161,8 @@ export default function MouvementsIndex({
                     </div>
                 ) : (
                     <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
-                        <div className="overflow-x-auto">
+                        {/* Desktop Table View */}
+                        <div className="hidden md:block overflow-x-auto">
                             <table className="w-full text-sm text-left">
                                 <thead className="text-xs uppercase bg-muted/50 text-muted-foreground border-b border-border/50">
                                     <tr>
@@ -213,11 +214,11 @@ export default function MouvementsIndex({
                                                     )}
                                                 </td>
                                                 <td className="px-5 py-4 text-center whitespace-nowrap">
-                                                    <span className={`font-black text-base px-3 py-1 bg-background border rounded-lg shadow-sm ${details.color}`}>
+                                                    <span className={`font-black text-sm md:text-base px-3 py-1 bg-background border rounded-lg shadow-sm ${details.color}`}>
                                                         {isPositive ? '+' : '-'} {Math.abs(mvt.quantite)}
                                                     </span>
                                                 </td>
-                                                <td className="px-5 py-4 font-medium text-muted-foreground whitespace-nowrap">
+                                                <td className="px-5 py-4 font-medium text-muted-foreground whitespace-nowrap text-xs md:text-sm">
                                                     {mvt.user.name}
                                                 </td>
                                             </tr>
@@ -225,6 +226,54 @@ export default function MouvementsIndex({
                                     })}
                                 </tbody>
                             </table>
+                        </div>
+
+                        {/* Mobile Card View */}
+                        <div className="md:hidden divide-y">
+                            {mouvements.data.map((mvt) => {
+                                const details = getTypeDetails(mvt.type);
+                                const isPositive = mvt.type === 'entrée' || (mvt.type === 'ajustement' && mvt.quantite > 0);
+
+                                return (
+                                    <div key={mvt.id} className="p-4 space-y-3 hover:bg-muted/10 transition-colors">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <div className="h-8 w-8 rounded-full bg-background border flex items-center justify-center shadow-sm">
+                                                    {details.icon}
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{mvt.type}</span>
+                                                    <span className="text-[10px] text-muted-foreground/60">
+                                                        {new Date(mvt.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })} à {new Date(mvt.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <span className={`font-black text-base px-3 py-1 bg-background border rounded-lg shadow-sm ${details.color}`}>
+                                                {isPositive ? '+' : '-'} {Math.abs(mvt.quantite)}
+                                            </span>
+                                        </div>
+
+                                        <div className="pl-10">
+                                            <div className="font-bold text-foreground">{mvt.produit.nom}</div>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                {mvt.variante.taille && (
+                                                    <Badge variant="secondary" className="text-[9px] py-0 h-4">
+                                                        Taille: {mvt.variante.taille.nom}
+                                                    </Badge>
+                                                )}
+                                                <span className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
+                                                    <Users className="size-2.5" /> {mvt.user.name}
+                                                </span>
+                                            </div>
+                                            {mvt.commentaire && (
+                                                <p className="text-[11px] text-muted-foreground mt-2 italic border-l-2 border-muted pl-2 py-0.5">
+                                                    {mvt.commentaire}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 )}

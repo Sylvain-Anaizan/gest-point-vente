@@ -8,7 +8,6 @@ import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
@@ -190,44 +189,39 @@ export default function CategoriesIndex({
                 ) : (
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {filteredCategories.map((category) => (
-                            <Card
-                                key={category.id}
-                                className="transition-all duration-200 hover:shadow-lg hover:border-primary/50"
-                            >
-                                <CardHeader>
-                                    <div className="flex justify-between items-start">
-                                        <CardTitle className="text-xl">
-                                            {category.nom}
-                                        </CardTitle>
-                                        <Badge variant={category.produits_count > 0 ? "default" : "secondary"} className="ml-4">
-                                            {category.produits_count} {category.produits_count <= 1 ? 'produit' : 'produits'}
-                                        </Badge>
-                                    </div>
-                                    {category.description && (
-                                        <CardDescription className="line-clamp-2 mt-1">
-                                            {category.description}
-                                        </CardDescription>
-                                    )}
-                                </CardHeader>
-                                <CardFooter className="flex gap-2 pt-4 border-t">
-                                    <Link
-                                        href={CategoryController.show.url(
-                                            category.id,
+                            <div key={category.id} className="group flex flex-col transition-all duration-200 hover:shadow-lg hover:[&>div:first-child]:border-primary/50 hover:[&>div:last-child]:border-primary/50">
+                                <Card className="rounded-b-none border-b-0 transition-colors duration-200">
+                                    <CardHeader>
+                                        <div className="flex justify-between items-start">
+                                            <CardTitle className="text-xl">
+                                                {category.nom}
+                                            </CardTitle>
+                                            <Badge variant={category.produits_count > 0 ? "default" : "secondary"} className="ml-4">
+                                                {category.produits_count} {category.produits_count <= 1 ? 'produit' : 'produits'}
+                                            </Badge>
+                                        </div>
+                                        {category.description && (
+                                            <CardDescription className="line-clamp-2 mt-1">
+                                                {category.description}
+                                            </CardDescription>
                                         )}
+                                    </CardHeader>
+                                </Card>
+                                <div className="flex gap-2 p-2 border border-t-0 rounded-b-lg bg-white transition-colors duration-200">
+                                    <Link
+                                        href={CategoryController.show.url(category.id)}
                                         className="flex-1"
                                     >
-                                        <Button variant="outline" size="sm" className="w-full">
+                                        <Button variant="outline" size="sm" className="w-full bg-background">
                                             <EyeIcon className="size-4 mr-2" />
                                             Voir
                                         </Button>
                                     </Link>
                                     <Link
-                                        href={CategoryController.edit.url(
-                                            category.id,
-                                        )}
+                                        href={CategoryController.edit.url(category.id)}
                                         className="flex-1"
                                     >
-                                        <Button variant="outline" size="sm" className="w-full">
+                                        <Button variant="outline" size="sm" className="w-full bg-background">
                                             <PencilIcon className="size-4 mr-2" />
                                             Modifier
                                         </Button>
@@ -235,15 +229,13 @@ export default function CategoriesIndex({
                                     <Button
                                         variant="destructive"
                                         size="sm"
-                                        onClick={() =>
-                                            handleDeleteClick(category)
-                                        }
+                                        onClick={() => handleDeleteClick(category)}
                                         className="flex-shrink-0"
                                     >
                                         <TrashIcon className="size-4" />
                                     </Button>
-                                </CardFooter>
-                            </Card>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 )}
