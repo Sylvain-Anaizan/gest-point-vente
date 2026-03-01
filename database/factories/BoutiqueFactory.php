@@ -17,9 +17,9 @@ class BoutiqueFactory extends Factory
     public function definition(): array
     {
         return [
-            'nom' => $this->faker->company(),
-            'adresse' => $this->faker->address(),
-            'telephone' => $this->faker->phoneNumber(),
+            'nom' => fake()->company(),
+            'adresse' => fake()->address(),
+            'telephone' => fake()->phoneNumber(),
         ];
     }
 }
