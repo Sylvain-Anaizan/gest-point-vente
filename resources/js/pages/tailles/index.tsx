@@ -1,6 +1,6 @@
 import TailleController from '@/actions/App/Http/Controllers/TailleController';
 import { type BreadcrumbItem } from '@/types';
-import { Form, Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -72,7 +72,7 @@ export default function TaillesIndex({ tailles }: { tailles: Taille[] }) {
                             Tailles
                         </h1>
                         <p className="text-muted-foreground mt-2">
-                            G?rez les tailles de vos produits
+                            Gérez les tailles de vos produits
                         </p>
                     </div>
                     <Link href={TailleController.create.url()}>
@@ -95,7 +95,7 @@ export default function TaillesIndex({ tailles }: { tailles: Taille[] }) {
                             >
                                 <Button variant="outline">
                                     <PlusIcon className="size-4" />
-                                    Cr?er votre premi?re taille
+                                    Créer votre première taille
                                 </Button>
                             </Link>
                         </CardContent>
