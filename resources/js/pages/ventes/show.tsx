@@ -17,7 +17,8 @@ import {
     XCircle,
     Smartphone,
     Banknote,
-    Printer
+    Printer,
+    StoreIcon,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -55,9 +56,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 // ... (Interfaces restent identiques)
 interface Client { id: number; nom: string; prenom: string; telephone: string; }
 interface User { id: number; name: string; email: string; }
+interface Boutique { id: number; nom: string; }
 interface Produit { id: number; nom: string; }
 interface LigneVente { id: number; produit_id: number; quantite: number; prix_unitaire: number; sous_total: number; produit: Produit; }
-interface Vente { id: number; numero: string; client_id: number | null; user_id: number; montant_total: number | string; statut: 'complétée' | 'annulée'; mode_paiement: 'espèces' | 'carte' | 'virement' | 'mobile_money'; created_at: string; updated_at: string; client?: Client; user: User; lignes: LigneVente[]; }
+interface Vente { id: number; numero: string; client_id: number | null; user_id: number; boutique_id: number | null; montant_total: number | string; statut: 'complétée' | 'annulée'; mode_paiement: 'espèces' | 'carte' | 'virement' | 'mobile_money'; created_at: string; updated_at: string; client?: Client; user: User; boutique?: Boutique; lignes: LigneVente[]; }
 
 export default function VentesShow({ vente }: { vente: Vente }) {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -223,6 +225,13 @@ export default function VentesShow({ vente }: { vente: Vente }) {
                                     <div className="flex items-center gap-2 font-medium">
                                         <User className="h-4 w-4 text-muted-foreground" />
                                         {vente.user.name}
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">Boutique</span>
+                                    <div className="flex items-center gap-2 font-medium">
+                                        <StoreIcon className="h-4 w-4 text-muted-foreground" />
+                                        {vente.boutique ? vente.boutique.nom : <span className="text-muted-foreground italic text-sm">Stock général</span>}
                                     </div>
                                 </div>
                             </CardContent>

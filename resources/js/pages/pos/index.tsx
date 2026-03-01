@@ -10,7 +10,7 @@ import {
     BanknoteIcon,
     SmartphoneIcon,
     CalculatorIcon,
-
+    StoreIcon,
 } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
@@ -71,6 +71,7 @@ interface Produit {
     nom: string;
     imageUrl: string;
     category?: string;
+    boutique_id: number | null;
     variantes: Variante[];
 }
 
@@ -93,8 +94,14 @@ interface PanierItem {
 interface Boutique { id: number; nom: string; }
 
 export default function POSIndex({ produits, clients, boutiques }: { produits: Produit[]; clients: Client[]; boutiques: Boutique[] }) {
+    const { auth } = usePage().props as unknown as { auth: { user?: { role?: string } } };
+    const userRole = auth.user?.role;
+
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [selectedBoutiqueId, setSelectedBoutiqueId] = useState<string>(
+        userRole !== 'admin' && boutiques.length === 1 ? boutiques[0].id.toString() : 'all'
+    );
     const [panier, setPanier] = useState<PanierItem[]>([]);
     const [selectedClient, setSelectedClient] = useState<string>('anonymous');
     const [paymentModalOpen, setPaymentModalOpen] = useState(false);
@@ -103,9 +110,6 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [openCombobox, setOpenCombobox] = useState(false);
 
-    const { auth } = usePage().props as unknown as { auth: { user?: { role?: string } } };
-    const userRole = auth.user?.role;
-
     const { data, setData, post, processing, reset, errors } = useForm({
         client_id: null as number | null,
         panier: [] as { id: number; variante_id: number; quantite: number; prix_vente: number }[],
@@ -113,6 +117,13 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
         montant_recu: null as number | null,
         boutique_id: (userRole !== 'admin' && boutiques.length === 1) ? boutiques[0].id : null as number | null,
     });
+
+    const handleBoutiqueChange = (value: string) => {
+        setSelectedBoutiqueId(value);
+        setPanier([]);
+        const boutiqueId = value === 'all' ? null : parseInt(value);
+        setData('boutique_id', boutiqueId);
+    };
 
     // --- Calculs ---
     const categories = useMemo(() => {
@@ -124,9 +135,12 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
         return produits.filter(p => {
             const matchesSearch = p.nom.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesCategory = selectedCategory === 'all' || (p.category || 'Autre') === selectedCategory;
-            return matchesSearch && matchesCategory;
+            const matchesBoutique = selectedBoutiqueId === 'all'
+                ? p.boutique_id === null
+                : p.boutique_id?.toString() === selectedBoutiqueId;
+            return matchesSearch && matchesCategory && matchesBoutique;
         });
-    }, [produits, searchTerm, selectedCategory]);
+    }, [produits, searchTerm, selectedCategory, selectedBoutiqueId]);
 
     const panierTotal = useMemo(() => {
         return panier.reduce((total, item) => total + (item.prix_vente * item.panierQuantite), 0);
@@ -258,6 +272,20 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                                     ))}
                                 </SelectContent>
                             </Select>
+                            {userRole === 'admin' && (
+                                <Select value={selectedBoutiqueId} onValueChange={handleBoutiqueChange}>
+                                    <SelectTrigger className="w-full sm:w-[200px] h-11 lg:h-10 bg-background shadow-sm lg:shadow-none">
+                                        <StoreIcon className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
+                                        <SelectValue placeholder="Boutique" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Stock Général</SelectItem>
+                                        {boutiques.map(b => (
+                                            <SelectItem key={b.id} value={b.id.toString()}>{b.nom}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            )}
                         </CardContent>
                     </Card>
 
@@ -665,23 +693,15 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                     <div className="grid gap-4 py-2">
                         <div className="space-y-1.5">
                             <label className="text-sm font-medium">Boutique / Point de Vente</label>
-                            <Select
-                                value={data.boutique_id?.toString() || 'none'}
-                                onValueChange={(v) => setData('boutique_id', v === 'none' ? null : parseInt(v))}
-                                disabled={userRole !== 'admin' && boutiques.length === 1}
-                            >
-                                <SelectTrigger className="h-11">
-                                    <SelectValue placeholder="Stock Général" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {userRole === 'admin' && <SelectItem value="none">Stock Général</SelectItem>}
-                                    {boutiques.map((boutique) => (
-                                        <SelectItem key={boutique.id} value={boutique.id.toString()}>
-                                            {boutique.nom}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <div className="flex items-center gap-2 h-11 px-3 rounded-md border bg-muted/40 text-sm">
+                                <StoreIcon className="h-4 w-4 text-muted-foreground" />
+                                <span>
+                                    {data.boutique_id
+                                        ? boutiques.find(b => b.id === data.boutique_id)?.nom ?? 'Inconnue'
+                                        : 'Stock Général'}
+                                </span>
+                            </div>
+                            <p className="text-xs text-muted-foreground">Sélectionnez la boutique dans les filtres du catalogue</p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">

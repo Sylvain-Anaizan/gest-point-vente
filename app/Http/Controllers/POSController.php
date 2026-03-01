@@ -37,6 +37,7 @@ class POSController extends Controller
                 'nom' => $p->nom,
                 'imageUrl' => $p->imageUrl,
                 'category' => $p->category->nom,
+                'boutique_id' => $p->boutique_id,
                 'variantes' => $p->variantes->map(fn ($v) => [
                     'id' => $v->id,
                     'taille' => $v->taille ? $v->taille->nom : 'N/A',

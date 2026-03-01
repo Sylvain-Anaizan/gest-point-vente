@@ -225,6 +225,7 @@ class VenteController extends Controller
         ]);
 
         return Inertia::render('ventes/edit', [
+            'vente' => $vente,
             'clients' => $clients,
             'produits' => $produits,
             'boutiques' => $user->role === 'admin'
