@@ -29,6 +29,7 @@ import {
     PackageSearch,
     UserCheck,
     Settings2,
+    Truck,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 import POSController from '@/actions/App/Http/Controllers/POSController';
@@ -54,6 +55,7 @@ const navigationGroups = [
             { title: 'Produits & Stocks', href: ProduitController.index.url(), icon: PackageSearch },
             { title: 'Mouvements stock', href: MouvementStockController.index.url(), icon: ArrowLeftRight },
             { title: 'Clients', href: ClientController.index.url(), icon: Users },
+            { title: 'Suivi Commandes', href: '/commandes', icon: Truck },
         ]
     },
     {
@@ -92,10 +94,10 @@ export function AppSidebar() {
                                 </div>
                                 <div className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
                                     <span className="truncate font-black tracking-tighter text-lg bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
-                                        ANAIZAN <span className="text-primary italic">GEST</span>
+                                        Gest <span className="text-primary italic ">Anaizan</span>
                                     </span>
                                     <span className="truncate text-[9px] uppercase tracking-[0.3em] text-muted-foreground/60 font-bold font-mono">
-                                        Premium Edition
+                                        Version 1.0
                                     </span>
                                 </div>
                             </Link>

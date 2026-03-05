@@ -27,8 +27,8 @@ class RapportController extends Controller
         $endDate = $dates['end'];
 
         // 2. Chiffres clés (KPIs) des Ventes
-        $ventesQuery = Vente::whereBetween('created_at', [$startDate, $endDate])
-                            ->where('statut', '!=', 'annulée');
+        $ventesQuery = Vente::whereBetween('ventes.created_at', [$startDate, $endDate])
+                            ->where('ventes.statut', '!=', 'annulée');
 
         $kpiVentes = [
             'total_ca' => (clone $ventesQuery)->sum('montant_total'),
@@ -86,6 +86,32 @@ class RapportController extends Controller
             ->take(10)
             ->get();
 
+        // 7. Ventes par Mode de Paiement
+        $ventesParMode = (clone $ventesQuery)
+            ->select('ventes.mode_paiement', DB::raw('SUM(ventes.montant_total) as total'), DB::raw('COUNT(*) as count'))
+            ->groupBy('ventes.mode_paiement')
+            ->get();
+
+        // 8. Performance par Boutique
+        $perfBoutiques = (clone $ventesQuery)
+            ->join('boutiques', 'ventes.boutique_id', '=', 'boutiques.id')
+            ->select('boutiques.nom', DB::raw('SUM(ventes.montant_total) as total'), DB::raw('COUNT(*) as count'))
+            ->groupBy('boutiques.id', 'boutiques.nom')
+            ->get();
+
+        // 9. Ventes par Catégorie
+        $ventesParCategorie = LigneVente::join('variantes', 'ligne_ventes.variante_id', '=', 'variantes.id')
+            ->join('produits', 'variantes.produit_id', '=', 'produits.id')
+            ->join('categories', 'produits.categorie_id', '=', 'categories.id')
+            ->whereHas('vente', function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('created_at', [$startDate, $endDate])
+                  ->where('statut', '!=', 'annulée');
+            })
+            ->select('categories.nom', DB::raw('SUM(ligne_ventes.sous_total) as total'), DB::raw('SUM(ligne_ventes.quantite) as qte'))
+            ->groupBy('categories.id', 'categories.nom')
+            ->orderByDesc('total')
+            ->get();
+
         return Inertia::render('rapports/index', [
             'filters' => [
                 'period' => $period,
@@ -95,9 +121,13 @@ class RapportController extends Controller
             'kpis' => [
                 'ventes' => $kpiVentes,
                 'stock_valeur' => $valeurGlobaleStock,
+                'panier_moyen' => $kpiVentes['nombre_ventes'] > 0 ? $kpiVentes['total_ca'] / $kpiVentes['nombre_ventes'] : 0,
             ],
             'charts' => [
                 'tendance_ventes' => $tendanceVentes,
+                'par_mode' => $ventesParMode,
+                'par_boutique' => $perfBoutiques,
+                'par_categorie' => $ventesParCategorie,
             ],
             'top_produits' => $topProduits,
             'alertes_stock' => $alertesStock,

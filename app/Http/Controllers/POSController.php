@@ -21,7 +21,7 @@ class POSController extends Controller
     public function index()
     {
         /** @var \App\Models\User $user */
-        $user = auth()->user();
+        $user = Auth::user();
         $queryProduits = Produit::with(['category', 'variantes.taille'])
             ->whereHas('variantes', function ($q) {
                 $q->where('quantite', '>', 0);
@@ -98,7 +98,7 @@ class POSController extends Controller
                 }
 
                 /** @var \App\Models\User $user */
-                $user = auth()->user();
+                $user = Auth::user();
                 $vente = Vente::create([
                     'numero' => 'FAC-'.strtoupper(uniqid()),
                     'client_id' => $validated['client_id'],

@@ -250,7 +250,7 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                 {/* 1. Zone Gauche : Catalogue (Prend toute la largeur sur mobile) */}
                 <div className="flex-1 flex flex-col gap-4 min-w-0 h-full pb-20 lg:pb-0">
                     {/* Filtres */}
-                    <Card className="shrink-0 border-0 shadow-none lg:border-border/50 lg:shadow-md bg-transparent lg:bg-card/80 lg:backdrop-blur-md lg:rounded-2xl transition-all">
+                    <Card className="shrink-0 border-0 shadow-none lg:border-border/50 lg:shadow-md bg-transparent lg:bg-card/80 lg:backdrop-blur-md lg:rounded-md transition-all">
                         <CardContent className="p-0 lg:p-4 flex flex-col sm:flex-row gap-3">
                             <div className="relative flex-1">
                                 <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -304,7 +304,7 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                                         onClick={() => handleAddClick(produit)}
                                         disabled={isOutOfStock}
                                         className={cn(
-                                            "group relative flex flex-col items-start text-left rounded-2xl border border-border/50 bg-card shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden",
+                                            "group relative flex flex-col items-start text-left rounded-lg border border-border/50 bg-card shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden",
                                             isOutOfStock ? "opacity-60 grayscale cursor-not-allowed" : "hover:border-primary/50 hover:ring-1 hover:ring-primary/20"
                                         )}
                                     >
@@ -363,7 +363,7 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                 </div>
 
                 {/* 2. Zone Droite : Panier (DESKTOP SEULEMENT) */}
-                <Card className="hidden lg:flex w-[380px] xl:w-[420px] flex-col h-full shrink-0 shadow-lg bg-gradient-to-b from-card to-muted/10 rounded-none lg:rounded-3xl z-10">
+                <Card className="hidden lg:flex w-[380px] xl:w-[420px] flex-col h-full shrink-0 shadow-md bg-gradient-to-b from-card to-muted/10 rounded-none lg:rounded-md z-10">
                     <CardHeader className="pb-3 border-b backdrop-blur-md">
                         <CardTitle className="flex items-center justify-between text-base">
                             <span className="flex items-center gap-2">
@@ -675,10 +675,10 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                         </SheetContent>
                     </Sheet>
                 </div>
-            </div>
+            </div >
 
             {/* Modal de Paiement (Responsive) */}
-            <Dialog open={paymentModalOpen} onOpenChange={setPaymentModalOpen}>
+            < Dialog open={paymentModalOpen} onOpenChange={setPaymentModalOpen} >
                 <DialogContent className="w-[95vw] max-w-md rounded-lg sm:rounded-lg">
                     <DialogHeader>
                         <DialogTitle>Paiement</DialogTitle>
@@ -771,9 +771,9 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                         </Button>
                     </DialogFooter>
                 </DialogContent>
-            </Dialog>
+            </Dialog >
             {/* Modal de Sélection de Variante (Taille) */}
-            <Dialog open={variantModalOpen} onOpenChange={setVariantModalOpen}>
+            < Dialog open={variantModalOpen} onOpenChange={setVariantModalOpen} >
                 <DialogContent className="w-[95vw] max-w-sm rounded-xl">
                     <DialogHeader>
                         <DialogTitle>Choisir une taille</DialogTitle>
@@ -799,7 +799,7 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                         ))}
                     </div>
                 </DialogContent>
-            </Dialog>
+            </Dialog >
         </AppLayout>
     );
 }

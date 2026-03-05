@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { ShoppingCart, Search, Menu, X, User } from 'lucide-react';
+import { ShoppingCart, Search, Menu, User } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { SharedData } from '@/types';
 
 export default function MarketplaceLayout({ children }: { children: React.ReactNode }) {
-    const { auth } = usePage<SharedData>().props;
+    const { auth, cartCount } = usePage<SharedData & { cartCount: number }>().props;
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     return (
@@ -47,9 +47,9 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                         <Button variant="ghost" size="icon" className="relative" asChild>
                             <Link href="/cart">
                                 <ShoppingCart className="h-5 w-5" />
-                                {(usePage<SharedData>().props as any).cartCount > 0 && (
+                                {cartCount > 0 && (
                                     <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px]">
-                                        {(usePage<SharedData>().props as any).cartCount}
+                                        {cartCount}
                                     </Badge>
                                 )}
                             </Link>
@@ -77,9 +77,6 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                                 <Button variant="ghost" asChild>
                                     <Link href="/login">Connexion</Link>
                                 </Button>
-                                <Button asChild>
-                                    <Link href="/register">S'inscrire</Link>
-                                </Button>
                             </div>
                         )}
 
@@ -97,7 +94,6 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                                     {!auth.user && (
                                         <>
                                             <Link href="/login" className="text-lg font-medium" onClick={() => setIsMobileMenuOpen(false)}>Connexion</Link>
-                                            <Link href="/register" className="text-lg font-medium" onClick={() => setIsMobileMenuOpen(false)}>S'inscrire</Link>
                                         </>
                                     )}
                                 </div>

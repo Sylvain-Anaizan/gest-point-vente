@@ -6,7 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { ArrowDownLeft, ArrowUpRight, History, Plus, Search, Scale, Users } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, History, Plus, Search, Scale, Users, Calendar } from 'lucide-react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 import MouvementStockController from '@/actions/App/Http/Controllers/MouvementStockController';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -63,33 +65,33 @@ export default function MouvementsIndex({
         switch (type) {
             case 'entrée':
                 return {
-                    icon: <ArrowDownLeft className="h-4 w-4 text-emerald-600" />,
-                    badge: <Badge variant="outline" className="border-emerald-200 text-emerald-700 bg-emerald-50">Entrée</Badge>,
-                    color: 'text-emerald-600'
+                    icon: <ArrowDownLeft className="h-3 w-3" />,
+                    label: 'Entrée',
+                    color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20'
                 };
             case 'sortie':
                 return {
-                    icon: <ArrowUpRight className="h-4 w-4 text-blue-600" />,
-                    badge: <Badge variant="outline" className="border-blue-200 text-blue-700 bg-blue-50">Sortie</Badge>,
-                    color: 'text-blue-600'
+                    icon: <ArrowUpRight className="h-3 w-3" />,
+                    label: 'Sortie',
+                    color: 'text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-lg border border-blue-500/20'
                 };
             case 'perte':
                 return {
-                    icon: <ArrowUpRight className="h-4 w-4 text-rose-600" />,
-                    badge: <Badge variant="outline" className="border-rose-200 text-rose-700 bg-rose-50">Perte</Badge>,
-                    color: 'text-rose-600'
+                    icon: <ArrowUpRight className="h-3 w-3" />,
+                    label: 'Perte',
+                    color: 'text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-lg border border-rose-500/20'
                 };
             case 'ajustement':
                 return {
-                    icon: <Scale className="h-4 w-4 text-orange-600" />,
-                    badge: <Badge variant="outline" className="border-orange-200 text-orange-700 bg-orange-50">Ajustement</Badge>,
-                    color: 'text-orange-600'
+                    icon: <Scale className="h-3 w-3" />,
+                    label: 'Ajustement',
+                    color: 'text-orange-600 dark:text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-lg border border-orange-500/20'
                 };
             default:
                 return {
-                    icon: <History className="h-4 w-4 text-muted-foreground" />,
-                    badge: <Badge variant="secondary">{type}</Badge>,
-                    color: 'text-muted-foreground'
+                    icon: <History className="h-3 w-3" />,
+                    label: type,
+                    color: 'text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-lg border border-zinc-200 dark:border-zinc-800'
                 };
         }
     };
@@ -98,193 +100,203 @@ export default function MouvementsIndex({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Mouvements de stock" />
 
-            <div className="space-y-6 p-4 md:p-6 max-w-[1200px] pb-24">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">Mouvements de stock</h1>
-                        <p className="text-sm text-muted-foreground mt-1">Historique des entrées et sorties de produits.</p>
+            <div className="space-y-8 p-4 md:p-8 max-w-[1600px] pb-32 animate-in fade-in duration-700">
+                {/* SECTION 1: HEADER */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div className="space-y-1">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mb-2">
+                            <History className="size-3" />
+                            Journal de flux
+                        </div>
+                        <h1 className="text-3xl md:text-4xl font-black tracking-tight text-zinc-900 dark:text-zinc-50 uppercase">Mouvements</h1>
+                        <p className="text-sm text-muted-foreground font-medium flex items-center gap-2">
+                            <div className="size-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                            Historique précis des entrées et sorties de stock.
+                        </p>
                     </div>
-                    <Link href={MouvementStockController.create.url()} className="w-full sm:w-auto">
-                        <Button className="w-full sm:w-auto shadow-md hover:shadow-lg transition-all border border-primary/20 bg-gradient-to-b from-primary to-primary/90">
-                            <Plus className="mr-2 size-4" /> Nouvelle entrée/sortie
+                    <Link href={MouvementStockController.create.url()} className="group">
+                        <Button className="h-14 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-600/20 border-0 font-black uppercase tracking-widest text-xs transition-all hover:scale-[1.02] active:scale-95 group overflow-hidden relative w-full sm:w-auto">
+                            <span className="relative z-10 flex items-center gap-2">
+                                <Plus className="size-5 stroke-[3px]" /> Nouveau mouvement
+                            </span>
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
                         </Button>
                     </Link>
                 </div>
 
-                <div className="bg-card p-4 rounded-xl border shadow-sm space-y-3">
-                    <div className="flex flex-col lg:flex-row gap-3">
-                        <div className="relative flex-1 w-full">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Rechercher (Produit)..."
-                                className="pl-9 w-full bg-muted/50"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
+                {/* SECTION 2: FILTRES */}
+                <Card className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 rounded-lg shadow-sm">
+                    <CardContent >
+                        <div className="flex flex-col lg:flex-row items-center gap-4">
+                            <div className="relative flex-1 w-full group">
+                                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-indigo-500 transition-colors" />
+                                <Input
+                                    placeholder="Rechercher un produit..."
+                                    className="pl-11 h-12 bg-white dark:bg-zinc-800/50 border-white/20 dark:border-zinc-700/50 rounded-2xl focus-visible:ring-indigo-500/30 transition-all font-medium"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 md:flex items-center gap-3 w-full lg:w-auto">
+                                <Select value={typeFilter || 'none'} onValueChange={setTypeFilter}>
+                                    <SelectTrigger className="w-full md:w-[150px] h-12 bg-white dark:bg-zinc-800/50 border-white/20 dark:border-zinc-700/50 rounded-2xl">
+                                        <SelectValue placeholder="Type" />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-lg border-zinc-200 dark:border-zinc-800">
+                                        <SelectItem value="none">Tous les types</SelectItem>
+                                        <SelectItem value="entrée">Entrée</SelectItem>
+                                        <SelectItem value="sortie">Sortie</SelectItem>
+                                        <SelectItem value="perte">Perte</SelectItem>
+                                        <SelectItem value="ajustement">Ajustement</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <div className="flex items-center gap-2 h-12 px-3 bg-white dark:bg-zinc-800/50 border border-white/20 dark:border-zinc-700/50 rounded-2xl min-w-0">
+                                    <Calendar className="size-4 text-muted-foreground shrink-0" />
+                                    <input
+                                        type="date"
+                                        className="bg-transparent border-0 text-xs focus:ring-0 p-0 w-full"
+                                        value={dateDebut}
+                                        onChange={(e) => setDateDebut(e.target.value)}
+                                    />
+                                </div>
+                                <div className="flex items-center gap-2 h-12 px-3 bg-white dark:bg-zinc-800/50 border border-white/20 dark:border-zinc-700/50 rounded-2xl min-w-0">
+                                    <Calendar className="size-4 text-muted-foreground shrink-0" />
+                                    <input
+                                        type="date"
+                                        className="bg-transparent border-0 text-xs focus:ring-0 p-0 w-full"
+                                        value={dateFin}
+                                        onChange={(e) => setDateFin(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2 w-full lg:w-auto mt-2 lg:mt-0">
+                                <Button
+                                    variant="outline"
+                                    className="flex-1 lg:flex-none h-12 rounded-lg border-white/20 dark:border-zinc-700/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-bold uppercase tracking-widest text-[10px]"
+                                    onClick={clearFilters}
+                                >
+                                    Effacer
+                                </Button>
+                                <Button
+                                    className="flex-1 lg:flex-none h-12 px-6 rounded-lg bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-900 font-black uppercase tracking-widest text-[10px] shadow-sm shadow-zinc-500/20"
+                                    onClick={applyFilters}
+                                >
+                                    Appliquer
+                                </Button>
+                            </div>
                         </div>
-                        <div className="grid grid-cols-2 sm:flex gap-3 w-full lg:w-auto">
-                            <Select value={typeFilter} onValueChange={setTypeFilter}>
-                                <SelectTrigger className="w-full sm:w-[140px] bg-muted/50 col-span-2 sm:col-span-1">
-                                    <SelectValue placeholder="Type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="none">Tous</SelectItem>
-                                    <SelectItem value="entrée">Entrée</SelectItem>
-                                    <SelectItem value="sortie">Sortie</SelectItem>
-                                    <SelectItem value="perte">Perte</SelectItem>
-                                    <SelectItem value="ajustement">Ajustement</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <Input type="date" className="w-full sm:w-auto bg-muted/50 text-xs" value={dateDebut} onChange={(e) => setDateDebut(e.target.value)} />
-                            <Input type="date" className="w-full sm:w-auto bg-muted/50 text-xs" value={dateFin} onChange={(e) => setDateFin(e.target.value)} />
-                        </div>
-                    </div>
-                    <div className="flex justify-end gap-2 pt-2 border-t mt-2">
-                        <Button variant="ghost" size="sm" onClick={clearFilters} disabled={!searchQuery && typeFilter === 'none' && !dateDebut}>
-                            Effacer
-                        </Button>
-                        <Button onClick={applyFilters} size="sm">
-                            Appliquer
-                        </Button>
-                    </div>
-                </div>
+                    </CardContent>
+                </Card>
 
+                {/* SECTION 3: LISTE DES MOUVEMENTS */}
                 {mouvements.data.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-16 px-4 text-center border-2 border-dashed rounded-xl bg-muted/30">
-                        <div className="h-16 w-16 mb-4 rounded-full bg-primary/10 flex items-center justify-center ring-8 ring-primary/5">
-                            <History className="h-8 w-8 text-primary" />
+                    <div className="flex flex-col items-center justify-center py-24 px-4 text-center bg-white/20 dark:bg-zinc-900/10 backdrop-blur-sm rounded-[3rem] border border-dashed border-zinc-300 dark:border-zinc-800">
+                        <div className="size-20 mb-6 rounded-[2rem] bg-indigo-500/10 flex items-center justify-center ring-8 ring-indigo-500/5 animate-pulse">
+                            <History className="size-10 text-indigo-500 opacity-40" />
                         </div>
-                        <h3 className="mt-2 text-xl font-bold tracking-tight">Aucun mouvement trouvé</h3>
-                        <p className="text-sm text-muted-foreground mt-2 max-w-sm mb-6">
-                            Commencez par ajouter ou retirer du stock aux produits.
+                        <h3 className="text-2xl font-black uppercase tracking-[0.2em] text-zinc-400">Aucun mouvement</h3>
+                        <p className="text-sm text-muted-foreground mt-2 max-w-xs font-medium opacity-60">
+                            Aucune opération de stock enregistrée pour cette période.
                         </p>
                     </div>
                 ) : (
-                    <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
-                        {/* Desktop Table View */}
-                        <div className="hidden md:block overflow-x-auto">
-                            <table className="w-full text-sm text-left">
-                                <thead className="text-xs uppercase bg-muted/50 text-muted-foreground border-b border-border/50">
-                                    <tr>
-                                        <th className="px-5 py-4 font-semibold">Date</th>
-                                        <th className="px-5 py-4 font-semibold">Type</th>
-                                        <th className="px-5 py-4 font-semibold">Produit & Taille</th>
-                                        <th className="px-5 py-4 text-center font-semibold text-primary">Quantité</th>
-                                        <th className="px-5 py-4 font-semibold">Auteur</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {mouvements.data.map((mvt) => {
-                                        const details = getTypeDetails(mvt.type);
-                                        const isPositive = mvt.type === 'entrée' || (mvt.type === 'ajustement' && mvt.quantite > 0);
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {mouvements.data.map((mvt) => {
+                            const details = getTypeDetails(mvt.type);
+                            const isPositive = mvt.type === 'entrée' || (mvt.type === 'ajustement' && mvt.quantite > 0);
 
-                                        return (
-                                            <tr key={mvt.id} className="border-b last:border-0 hover:bg-muted/20 transition-colors">
-                                                <td className="px-5 py-4 whitespace-nowrap">
-                                                    <div className="font-medium">
-                                                        {new Date(mvt.created_at).toLocaleDateString('fr-FR', {
-                                                            day: '2-digit', month: 'short', year: 'numeric'
-                                                        })}
-                                                    </div>
-                                                    <div className="text-[10px] text-muted-foreground mt-0.5 font-mono">
-                                                        {new Date(mvt.created_at).toLocaleTimeString('fr-FR', {
-                                                            hour: '2-digit', minute: '2-digit'
-                                                        })}
-                                                    </div>
-                                                </td>
-                                                <td className="px-5 py-4 whitespace-nowrap">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="h-7 w-7 rounded-full bg-background border flex items-center justify-center shadow-sm">
-                                                            {details.icon}
-                                                        </div>
-                                                        {details.badge}
-                                                    </div>
-                                                </td>
-                                                <td className="px-5 py-4">
-                                                    <div className="font-semibold">{mvt.produit.nom}</div>
-                                                    {mvt.variante.taille && (
-                                                        <Badge variant="secondary" className="mt-1 text-[10px] py-0 px-1.5 h-4">
-                                                            Taille: {mvt.variante.taille.nom}
-                                                        </Badge>
-                                                    )}
-                                                    {mvt.commentaire && (
-                                                        <div className="text-[10px] text-muted-foreground mt-1.5 line-clamp-1 italic">
-                                                            "{mvt.commentaire}"
-                                                        </div>
-                                                    )}
-                                                </td>
-                                                <td className="px-5 py-4 text-center whitespace-nowrap">
-                                                    <span className={`font-black text-sm md:text-base px-3 py-1 bg-background border rounded-lg shadow-sm ${details.color}`}>
-                                                        {isPositive ? '+' : '-'} {Math.abs(mvt.quantite)}
-                                                    </span>
-                                                </td>
-                                                <td className="px-5 py-4 font-medium text-muted-foreground whitespace-nowrap text-xs md:text-sm">
-                                                    {mvt.user.name}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
+                            return (
+                                <Card key={mvt.id} className="group relative flex flex-col rounded-xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/40 dark:border-zinc-800/40 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-2 overflow-hidden">
+                                    <div className={cn(
+                                        "absolute top-0 left-0 w-full h-1.5 opacity-50",
+                                        mvt.type === 'entrée' ? "bg-emerald-500" :
+                                            mvt.type === 'sortie' ? "bg-blue-500" :
+                                                mvt.type === 'perte' ? "bg-rose-500" : "bg-orange-500"
+                                    )} />
 
-                        {/* Mobile Card View */}
-                        <div className="md:hidden divide-y">
-                            {mouvements.data.map((mvt) => {
-                                const details = getTypeDetails(mvt.type);
-                                const isPositive = mvt.type === 'entrée' || (mvt.type === 'ajustement' && mvt.quantite > 0);
-
-                                return (
-                                    <div key={mvt.id} className="p-4 space-y-3 hover:bg-muted/10 transition-colors">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <div className="h-8 w-8 rounded-full bg-background border flex items-center justify-center shadow-sm">
-                                                    {details.icon}
+                                    <CardHeader className="pb-2 space-y-4">
+                                        <div className="flex justify-between items-start">
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-black uppercase tracking-tighter opacity-60">
+                                                    <Calendar className="size-3" />
+                                                    {new Date(mvt.created_at).toLocaleDateString('fr-FR', {
+                                                        day: '2-digit', month: 'short', year: 'numeric'
+                                                    })}
                                                 </div>
-                                                <div className="flex flex-col">
-                                                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{mvt.type}</span>
-                                                    <span className="text-[10px] text-muted-foreground/60">
-                                                        {new Date(mvt.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })} à {new Date(mvt.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                                                    </span>
+                                                <div className="text-[9px] font-mono text-muted-foreground/40">
+                                                    {new Date(mvt.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                                                 </div>
                                             </div>
-                                            <span className={`font-black text-base px-3 py-1 bg-background border rounded-lg shadow-sm ${details.color}`}>
-                                                {isPositive ? '+' : '-'} {Math.abs(mvt.quantite)}
-                                            </span>
+                                            <div className={cn("text-[10px] font-black uppercase tracking-widest", details.color)}>
+                                                {details.icon} {details.label}
+                                            </div>
                                         </div>
 
-                                        <div className="pl-10">
-                                            <div className="font-bold text-foreground">{mvt.produit.nom}</div>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                {mvt.variante.taille && (
-                                                    <Badge variant="secondary" className="text-[9px] py-0 h-4">
-                                                        Taille: {mvt.variante.taille.nom}
-                                                    </Badge>
-                                                )}
-                                                <span className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
-                                                    <Users className="size-2.5" /> {mvt.user.name}
-                                                </span>
+                                        <div className="space-y-1">
+                                            <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-40">Quantité</div>
+                                            <div className={cn(
+                                                "text-4xl font-black tracking-tighter scale-100 group-hover:scale-110 origin-left transition-transform duration-500",
+                                                isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+                                            )}>
+                                                {isPositive ? '+' : '-'} {Math.abs(mvt.quantite)}
                                             </div>
-                                            {mvt.commentaire && (
-                                                <p className="text-[11px] text-muted-foreground mt-2 italic border-l-2 border-muted pl-2 py-0.5">
-                                                    {mvt.commentaire}
-                                                </p>
+                                        </div>
+                                    </CardHeader>
+
+                                    <CardContent className="flex-1 space-y-4">
+                                        <div className=" px-4 py-2 rounded-md bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 shadow-inner">
+                                            <div className="text-[9px] font-black text-muted-foreground uppercase tracking-widest opacity-40 mb-1">Produit</div>
+                                            <p className="text-sm font-black uppercase tracking-tight line-clamp-1 text-zinc-900 dark:text-zinc-100">
+                                                {mvt.produit.nom}
+                                            </p>
+                                            {mvt.variante.taille && (
+                                                <Badge variant="secondary" className="mt-2 text-[9px] py-0 px-2 h-4 rounded-lg bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700">
+                                                    Taille: {mvt.variante.taille.nom}
+                                                </Badge>
                                             )}
                                         </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
+
+                                        <div className="flex items-center gap-3">
+                                            <div className="size-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-zinc-200 dark:border-zinc-700">
+                                                <Users className="size-3.5 text-muted-foreground" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <div className="text-[8px] font-black text-muted-foreground uppercase tracking-widest opacity-40">Responsable</div>
+                                                <p className="text-[11px] font-bold text-zinc-700 dark:text-zinc-300 truncate tracking-tight uppercase">
+                                                    {mvt.user.name}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {mvt.commentaire && (
+                                            <div className="p-3 rounded-xl bg-orange-500/5 border border-orange-500/10 italic">
+                                                <p className="text-[10px] text-orange-700/70 dark:text-orange-400/70 line-clamp-2 leading-relaxed font-medium">
+                                                    "{mvt.commentaire}"
+                                                </p>
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            );
+                        })}
                     </div>
                 )}
 
-                {/* Pagination */}
+                {/* PAGINATION */}
                 {mouvements.last_page > 1 && (
-                    <div className="flex justify-center pt-4">
-                        <div className="flex flex-nowrap overflow-x-auto gap-2 scrollbar-hide">
+                    <div className="flex justify-center pt-8">
+                        <div className="flex flex-nowrap overflow-x-auto pb-4 gap-3 w-full justify-start md:justify-center px-4 scrollbar-hide">
                             {Array.from({ length: mouvements.last_page }, (_, i) => i + 1).map((page) => (
-                                <Link key={page} href={MouvementStockController.index.url({ mergeQuery: { page: page } })} preserveScroll preserveState>
-                                    <Button variant={page === mouvements.current_page ? "default" : "outline"} size="sm" className="w-9 h-9 p-0">
+                                <Link key={page} href={MouvementStockController.index.url({ mergeQuery: { page: page } })} preserveScroll preserveState className="shrink-0">
+                                    <Button
+                                        variant={page === mouvements.current_page ? "default" : "outline"}
+                                        className={cn(
+                                            "size-11 rounded-lg font-bold transition-all shadow-md",
+                                            page === mouvements.current_page
+                                                ? "bg-indigo-600 text-white shadow-indigo-500/20 scale-110"
+                                                : "bg-white/50 dark:bg-zinc-800/50 border-white/20 dark:border-zinc-700/50 hover:bg-white dark:hover:bg-zinc-800"
+                                        )}
+                                    >
                                         {page}
                                     </Button>
                                 </Link>

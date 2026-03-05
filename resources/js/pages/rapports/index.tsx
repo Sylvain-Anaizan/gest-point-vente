@@ -15,13 +15,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     BarChart3,
     TrendingUp,
-    ShoppingBag,
     Wallet,
     AlertTriangle,
     PackageOpen,
-    ArrowRightLeft
+    ArrowRightLeft,
+    Store,
+    Target,
+    Zap
 } from 'lucide-react';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, cn } from '@/lib/utils';
 import {
     AreaChart,
     Area,
@@ -29,12 +31,17 @@ import {
     YAxis,
     CartesianGrid,
     Tooltip,
-    ResponsiveContainer
+    ResponsiveContainer,
+    PieChart,
+    Pie,
+    Cell,
+    BarChart,
+    Bar
 } from 'recharts';
 import RapportController from '@/actions/App/Http/Controllers/RapportController';
 import MouvementStockController from '@/actions/App/Http/Controllers/MouvementStockController';
 import { Badge } from '@/components/ui/badge';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Tableau de bord', href: '/dashboard' },
@@ -75,9 +82,13 @@ interface IndexProps {
     kpis: {
         ventes: KPIVentes;
         stock_valeur: number;
+        panier_moyen: number;
     };
     charts: {
         tendance_ventes: ChartData[];
+        par_mode: { mode_paiement: string; total: number; count: number; }[];
+        par_boutique: { nom: string; total: number; count: number; }[];
+        par_categorie: { nom: string; total: number; qte: number; }[];
     };
     top_produits: TopProduit[];
     alertes_stock: AlerteStock[];
@@ -123,28 +134,42 @@ export default function RapportsIndex({
         }, { preserveState: true });
     };
 
+    const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+
+    const pieData = useMemo(() =>
+        charts.par_mode.map(item => ({
+            name: item.mode_paiement,
+            value: item.total
+        }))
+        , [charts.par_mode]);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Rapports & Analyses" />
 
-            <div className="space-y-6 p-4 md:p-6 max-w-[1400px] pb-24">
-                {/* En-tête et Filtres */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 bg-card p-4 rounded-xl border shadow-sm">
-                    <div>
-                        <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                            Analyses & Performances
-                        </h1>
-                        <p className="text-sm text-muted-foreground mt-1">Consultez l'état financier et matériel de votre boutique.</p>
+            <div className="space-y-8 p-4 md:p-8 max-w-[1600px] mx-auto pb-32 animate-in fade-in duration-700">
+                {/* SECTION 1: HEADER & FILTRES */}
+                <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+                    <div className="space-y-1">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] mb-2">
+                            <Target className="size-3" />
+                            Business Intelligence
+                        </div>
+                        <h1 className="text-3xl md:text-4xl font-black tracking-tight text-zinc-900 dark:text-zinc-50 uppercase">Rapports</h1>
+                        <p className="text-sm text-muted-foreground font-medium flex items-center gap-2">
+                            <div className="size-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                            Analyse complète des performances et stocks.
+                        </p>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-end gap-3">
-                        <div className="space-y-1 w-full sm:w-auto">
-                            <label className="text-xs font-medium text-muted-foreground">Période</label>
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 bg-white/50 dark:bg-zinc-900/80 backdrop-blur-xl p-2 rounded-sm border border-white/20 dark:border-zinc-800/50 shadow-sm">
+                        <div className="space-y-1 sm:w-[180px]">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-2">Période</label>
                             <Select value={period} onValueChange={handlePeriodChange}>
-                                <SelectTrigger className="w-full sm:w-[180px]">
+                                <SelectTrigger className="h-10 bg-white dark:bg-zinc-800/50 border-white/20 dark:border-zinc-700/50 rounded-lg font-bold text-xs">
                                     <SelectValue placeholder="Sélectionner" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="rounded-lg">
                                     <SelectItem value="today">Aujourd'hui</SelectItem>
                                     <SelectItem value="week">Cette semaine</SelectItem>
                                     <SelectItem value="month">Ce mois-ci</SelectItem>
@@ -155,258 +180,364 @@ export default function RapportsIndex({
                         </div>
 
                         {isCustom && (
-                            <div className="flex items-end gap-2 animate-in fade-in slide-in-from-left-4 w-full sm:w-auto">
+                            <div className="flex items-end gap-2 animate-in slide-in-from-right-4 fade-in duration-300">
                                 <div className="space-y-1">
-                                    <label className="text-xs font-medium text-muted-foreground">Du</label>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-2">Du</label>
                                     <Input
                                         type="date"
                                         value={customStart}
                                         onChange={e => setCustomStart(e.target.value)}
-                                        className="text-sm h-9"
+                                        className="h-10 bg-white/50 dark:bg-zinc-800/50 border-white/20 dark:border-zinc-700/50 rounded-xl text-xs font-bold"
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-xs font-medium text-muted-foreground">Au</label>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-2">Au</label>
                                     <Input
                                         type="date"
                                         value={customEnd}
                                         onChange={e => setCustomEnd(e.target.value)}
-                                        className="text-sm h-9"
+                                        className="h-10 bg-white/50 dark:bg-zinc-800/50 border-white/20 dark:border-zinc-700/50 rounded-xl text-xs font-bold"
                                     />
                                 </div>
-                                <Button size="sm" onClick={applyCustomDates} className="h-9">Filtrer</Button>
+                                <Button size="sm" onClick={applyCustomDates} className="h-10 rounded-xl bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-900 font-black uppercase tracking-widest text-[10px] px-6">
+                                    OK
+                                </Button>
                             </div>
                         )}
                     </div>
                 </div>
 
-                <Tabs defaultValue="resume" className="space-y-6">
-                    <TabsList className="bg-muted p-1 h-auto grid grid-cols-3 w-full max-w-2xl mx-auto rounded-xl">
-                        <TabsTrigger value="resume" className="py-2.5 rounded-lg data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-sm text-sm font-medium transition-all">
-                            <BarChart3 className="h-4 w-4 mr-2 hidden sm:inline" /> Résumé
+                {/* SECTION 2: TABS NAVIGATION */}
+                <Tabs defaultValue="resume" className="space-y-8">
+                    <TabsList className="bg-white dark:bg-zinc-950/40 backdrop-blur-md py-6 h-auto inline-flex rounded-2xl border border-white/20 dark:border-hinc-800/50 shadow-inner">
+                        <TabsTrigger value="resume" className="px-6 py-6 rounded-xl transition-all data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/20 text-xs font-black uppercase tracking-widest">
+                            <BarChart3 className="size-4 mr-2" /> Vue d'ensemble
                         </TabsTrigger>
-                        <TabsTrigger value="ventes" className="py-2.5 rounded-lg data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-sm text-sm font-medium transition-all">
-                            <TrendingUp className="h-4 w-4 mr-2 hidden sm:inline" /> Ventes détaillées
+                        <TabsTrigger value="ventes" className="px-6 py-6 rounded-xl transition-all data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/20 text-xs font-black uppercase tracking-widest">
+                            <TrendingUp className="size-4 mr-2" /> Ventes & Marges
                         </TabsTrigger>
-                        <TabsTrigger value="stocks" className="py-2.5 rounded-lg data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-sm text-sm font-medium transition-all">
-                            <PackageOpen className="h-4 w-4 mr-2 hidden sm:inline" /> État des Stocks
+                        <TabsTrigger value="stocks" className="px-6 py-6 rounded-xl transition-all data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/20 text-xs font-black uppercase tracking-widest">
+                            <PackageOpen className="size-4 mr-2" /> Inventaire
                         </TabsTrigger>
                     </TabsList>
 
-                    {/* ONGLET: RÉSUMÉ (KPIs + Graphiques) */}
-                    <TabsContent value="resume" className="space-y-6 animate-in fade-in-50 duration-500">
-                        {/* Cartes KPI */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <Card className="border-l-4 border-l-primary shadow-sm">
-                                <CardContent className="p-6">
-                                    <div className="flex items-center justify-between space-y-0 pb-2">
-                                        <p className="text-sm font-medium text-muted-foreground">Chiffre d'Affaires</p>
-                                        <div className="p-2 bg-primary/10 rounded-full">
-                                            <Wallet className="h-4 w-4 text-primary" />
+                    {/* ONGLET 1: RÉSUMÉ (KPIs + Graphiques) */}
+                    <TabsContent value="resume" className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
+                        {/* KPI CARDS */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {[
+                                { label: "Revenue Total", value: formatCurrency(kpis.ventes.total_ca), sub: `${kpis.ventes.nombre_ventes} ventes`, icon: <Wallet />, color: "bg-emerald-500", shadow: "shadow-emerald-500/20" },
+                                { label: "Panier Moyen", value: formatCurrency(kpis.panier_moyen), sub: "Par client", icon: <Zap />, color: "bg-indigo-500", shadow: "shadow-indigo-500/20" },
+                                { label: "Valeur du Stock", value: formatCurrency(kpis.stock_valeur), sub: "Total actifs", icon: <PackageOpen />, color: "bg-blue-500", shadow: "shadow-blue-500/20" },
+                                { label: "Performance", value: period === 'today' ? "LIVE" : "PÉRIODE", sub: period.toUpperCase(), icon: <TrendingUp />, color: "bg-orange-500", shadow: "shadow-orange-500/20" },
+                            ].map((kpi, i) => (
+                                <Card key={i} className="group relative overflow-hidden rounded-lg bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/40 dark:border-zinc-800/40 shadow-sm transition-all hover:scale-105">
+                                    <div className={cn("absolute top-0 right-0 size-24 blur-3xl opacity-10 -mr-6 -mt-6", kpi.color)} />
+                                    <CardContent className="">
+                                        <div className="flex items-center gap-4 mb-6">
+                                            <div className={cn("size-12 rounded-lg flex items-center justify-center text-white", kpi.color, kpi.shadow)}>
+                                                {kpi.icon}
+                                            </div>
+                                            <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-40">
+                                                {kpi.label}
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="text-2xl font-bold">{formatCurrency(kpis.ventes.total_ca)}</div>
-                                    <p className="text-xs text-muted-foreground mt-1">Sur la période ({kpis.ventes.nombre_ventes} ventes)</p>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="border-l-4 border-l-blue-500 shadow-sm">
-                                <CardContent className="p-6">
-                                    <div className="flex items-center justify-between space-y-0 pb-2">
-                                        <p className="text-sm font-medium text-muted-foreground">Valeur Globale Stock</p>
-                                        <div className="p-2 bg-blue-500/10 rounded-full">
-                                            <PackageOpen className="h-4 w-4 text-blue-600" />
+                                        <div className="text-3xl font-black tracking-tighter text-zinc-900 dark:text-zinc-50 mb-1">
+                                            {kpi.value}
                                         </div>
-                                    </div>
-                                    <div className="text-2xl font-bold text-blue-600">{formatCurrency(kpis.stock_valeur)}</div>
-                                    <p className="text-xs text-muted-foreground mt-1">Indépendant de la période</p>
-                                </CardContent>
-                            </Card>
+                                        <div className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">
+                                            {kpi.sub}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
                         </div>
 
-                        {/* Graphiques & Top Produits */}
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <Card className="lg:col-span-2 shadow-sm border-border/50">
-                                <CardHeader>
-                                    <CardTitle className="text-lg">Évolution du Chiffre d'Affaires</CardTitle>
-                                    <CardDescription>Tendance des ventes générées sur la période sélectionnée.</CardDescription>
+                        {/* CHARTS GRID */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            {/* Revenue Evolution Card */}
+                            <Card className="lg:col-span-2 rounded-lg bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 shadow-sm overflow-hidden">
+                                <CardHeader className="">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <CardTitle className="text-xl font-black uppercase tracking-widest text-zinc-800 dark:text-zinc-100 italic">Flux de revenus</CardTitle>
+                                            <CardDescription className="text-xs font-medium">Analyse temporelle des performances directes</CardDescription>
+                                        </div>
+                                        <div className="size-10 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                                            <TrendingUp className="size-5 text-indigo-500" />
+                                        </div>
+                                    </div>
                                 </CardHeader>
-                                <CardContent>
-                                    <div className="h-[300px] w-full">
+                                <CardContent className="">
+                                    <div className="h-[350px] w-full">
                                         {charts.tendance_ventes.length > 0 ? (
                                             <ResponsiveContainer width="100%" height="100%">
                                                 <AreaChart data={charts.tendance_ventes} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                                                     <defs>
                                                         <linearGradient id="colorCA" x1="0" y1="0" x2="0" y2="1">
-                                                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                                                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                                                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                                                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                                                         </linearGradient>
                                                     </defs>
-                                                    <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} opacity={0.6} />
-                                                    <YAxis
-                                                        fontSize={12}
-                                                        tickLine={false}
-                                                        axisLine={false}
-                                                        tickFormatter={(val) => `${val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val}`}
-                                                        opacity={0.6}
-                                                    />
-                                                    <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.2} />
+                                                    <CartesianGrid vertical={false} strokeDasharray="3 3" strokeOpacity={0.1} />
+                                                    <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} tick={{ fontWeight: 700 }} />
+                                                    <YAxis hide />
                                                     <Tooltip
-                                                        formatter={(value: number | string | undefined) => [formatCurrency(Number(value || 0)), "CA"]}
-                                                        contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))' }}
+                                                        cursor={{ stroke: '#6366f1', strokeWidth: 2, strokeDasharray: '5 5' }}
+                                                        content={({ active, payload }) => {
+                                                            if (active && payload && payload.length) {
+                                                                return (
+                                                                    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 rounded-lg shadow-lg">
+                                                                        <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">{payload[0].payload.name}</div>
+                                                                        <div className="text-lg font-black text-indigo-600 dark:text-indigo-400">{formatCurrency(payload[0].value as number)}</div>
+                                                                    </div>
+                                                                );
+                                                            }
+                                                            return null;
+                                                        }}
                                                     />
                                                     <Area
                                                         type="monotone"
                                                         dataKey="ca"
-                                                        stroke="hsl(var(--primary))"
-                                                        strokeWidth={3}
+                                                        stroke="#6366f1"
+                                                        strokeWidth={4}
                                                         fillOpacity={1}
                                                         fill="url(#colorCA)"
-                                                        activeDot={{ r: 6, fill: "hsl(var(--primary))" }}
+                                                        animationDuration={2000}
                                                     />
                                                 </AreaChart>
                                             </ResponsiveContainer>
                                         ) : (
-                                            <div className="h-full flex items-center justify-center text-muted-foreground border-2 border-dashed rounded-lg bg-muted/20">
-                                                Aucune donnée sur cette période
+                                            <div className="h-full flex flex-col items-center justify-center text-muted-foreground border-2 border-dashed rounded-[2rem] bg-zinc-50/50 dark:bg-zinc-800/10">
+                                                <BarChart3 className="size-12 opacity-20 mb-4" />
+                                                <span className="font-black uppercase tracking-widest text-xs opacity-40">Pas de data disponible</span>
                                             </div>
                                         )}
                                     </div>
                                 </CardContent>
                             </Card>
 
-                            <Card className="shadow-sm border-border/50">
-                                <CardHeader className="pb-3 border-b">
-                                    <CardTitle className="text-lg flex items-center">
-                                        <ShoppingBag className="w-5 h-5 mr-2 text-primary" /> Top 5 Ventes
-                                    </CardTitle>
-                                    <CardDescription>Produits les plus vendus.</CardDescription>
+                            {/* Payment Mode Distribution */}
+                            <Card className="rounded-lg bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 shadow-sm">
+                                <CardHeader>
+                                    <CardTitle className="text-xl font-black uppercase tracking-widest italic">Encaissements</CardTitle>
+                                    <CardDescription className="text-xs">Répartition par mode de paiement</CardDescription>
                                 </CardHeader>
-                                <CardContent className="pt-4 p-0">
-                                    {top_produits.length > 0 ? (
-                                        <div className="divide-y">
-                                            {top_produits.map((prod, i) => (
-                                                <div key={i} className="flex items-center justify-between p-4 hover:bg-muted/30 transition-colors">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="h-8 w-8 rounded bg-primary/10 text-primary font-bold flex items-center justify-center text-sm">
-                                                            #{i + 1}
-                                                        </div>
-                                                        <div className="flex flex-col">
-                                                            <span className="font-semibold text-sm line-clamp-1">{prod.nom}</span>
-                                                            <span className="text-xs text-muted-foreground">{prod.total_vendu} unités écoulées</span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="font-bold text-sm text-right">
-                                                        {formatCurrency(prod.ca_genere)}
-                                                        <div className="text-[10px] text-emerald-600 font-normal mt-0.5">de CA généré</div>
+                                <CardContent className="">
+                                    <div className="h-[250px] w-full flex items-center justify-center">
+                                        {pieData.length > 0 ? (
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <PieChart>
+                                                    <Pie
+                                                        data={pieData}
+                                                        cx="50%"
+                                                        cy="50%"
+                                                        innerRadius={60}
+                                                        outerRadius={80}
+                                                        paddingAngle={8}
+                                                        dataKey="value"
+                                                        animationDuration={1500}
+                                                        cornerRadius={8}
+                                                    >
+                                                        {pieData.map((entry, index) => (
+                                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                        ))}
+                                                    </Pie>
+                                                    <Tooltip />
+                                                </PieChart>
+                                            </ResponsiveContainer>
+                                        ) : (
+                                            <div className="text-center opacity-40">--</div>
+                                        )}
+                                    </div>
+                                    <div className="space-y-3 mt-4">
+                                        {charts.par_mode.map((mode, i) => (
+                                            <div key={i} className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="size-2.5 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600 dark:text-zinc-400">{mode.mode_paiement}</span>
+                                                </div>
+                                                <span className="text-xs font-black">{formatCurrency(mode.total)}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+
+                        {/* SECOND ROW: TOP PRODUCTS + BOUTIQUES */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <Card className="rounded-lg bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 shadow-sm overflow-hidden">
+                                <CardHeader className="p-8 border-b border-white/10">
+                                    <CardTitle className="text-xl font-black uppercase tracking-widest italic flex items-center gap-3">
+                                        <Zap className="size-5 text-indigo-500" /> Produits les plus vendus
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-0">
+                                    {top_produits.map((prod, i) => (
+                                        <div key={i} className="flex items-center justify-between p-6 hover:bg-white/40 dark:hover:bg-zinc-800/40 transition-colors border-b border-white/5 group">
+                                            <div className="flex items-center gap-4">
+                                                <div className="size-10 rounded-2xl bg-zinc-100 dark:bg-zinc-800 font-black flex items-center justify-center text-zinc-400 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                                                    {i + 1}
+                                                </div>
+                                                <div>
+                                                    <div className="text-sm font-black uppercase tracking-tight">{prod.nom}</div>
+                                                    <div className="text-[10px] font-bold text-muted-foreground uppercase opacity-40 tracking-widest">
+                                                        {prod.total_vendu} unités
                                                     </div>
                                                 </div>
-                                            ))}
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-sm font-black text-indigo-600 dark:text-indigo-400">
+                                                    {formatCurrency(prod.ca_genere)}
+                                                </div>
+                                                <div className="text-[8px] font-black uppercase text-muted-foreground tracking-widest">Impact Revenue</div>
+                                            </div>
                                         </div>
+                                    ))}
+                                </CardContent>
+                            </Card>
+
+                            <Card className="rounded-lg bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 shadow-sm overflow-hidden">
+                                <CardHeader className="p-8 border-b border-white/10">
+                                    <CardTitle className="text-xl font-black uppercase tracking-widest italic flex items-center gap-3">
+                                        <Store className="size-5 text-indigo-500" /> Performance Boutique
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-0">
+                                    {charts.par_boutique.length > 0 ? (
+                                        charts.par_boutique.map((boutique, i) => (
+                                            <div key={i} className="p-8 border-b border-white/5 last:border-0">
+                                                <div className="flex justify-between items-end mb-4">
+                                                    <div>
+                                                        <div className="text-lg font-black uppercase tracking-tight">{boutique.nom}</div>
+                                                        <div className="text-[10px] font-bold text-muted-foreground uppercase opacity-40 tracking-widest">{boutique.count} transactions</div>
+                                                    </div>
+                                                    <div className="text-2xl font-black text-indigo-600 dark:text-indigo-400">
+                                                        {formatCurrency(boutique.total)}
+                                                    </div>
+                                                </div>
+                                                <div className="w-full h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                                    <div
+                                                        className="h-full bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all duration-1000"
+                                                        style={{ width: `${Math.min(100, (boutique.total / kpis.ventes.total_ca) * 100)}%` }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))
                                     ) : (
-                                        <div className="p-8 text-center text-muted-foreground text-sm">
-                                            Aucune vente enregistrée pour ce top.
-                                        </div>
+                                        <div className="p-12 text-center text-muted-foreground font-black uppercase tracking-[0.2em] italic opacity-20">No Data</div>
                                     )}
                                 </CardContent>
                             </Card>
                         </div>
                     </TabsContent>
 
-                    {/* ONGLET: VENTES DETAILLEES (Placeholder - Expandable in future) */}
-                    <TabsContent value="ventes" className="animate-in fade-in-50 duration-500">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Analyse granulaire des ventes</CardTitle>
-                                <CardDescription>Consultez l'évolution en détail via vos factures dans le module Ventes.</CardDescription>
+                    {/* ONGLET 2: VENTES DÉTAILLÉES (Par Catégorie) */}
+                    <TabsContent value="ventes" className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
+                        <Card className="rounded-lg bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 shadow-lg overflow-hidden">
+                            <CardHeader >
+                                <CardTitle className="text-xl font-black uppercase tracking-widest italic">Répartition par Catégorie</CardTitle>
                             </CardHeader>
-                            <CardContent className="py-12 flex flex-col items-center text-center">
-                                <TrendingUp className="h-16 w-16 text-muted mb-4 opacity-50" />
-                                <h3 className="text-xl font-bold">Pour des détails ligne par ligne...</h3>
-                                <p className="text-muted-foreground max-w-sm mt-2 mb-6">Utilisez la vue principale des ventes pour filtrer les factures et reçus détaillés.</p>
-                                <Link href="/ventes">
-                                    <Button variant="outline">Aller aux factures de ventes</Button>
-                                </Link>
+                            <CardContent className="p-8">
+                                <div className="h-[400px] w-full">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart data={charts.par_categorie}>
+                                            <XAxis dataKey="nom" fontSize={10} axisLine={false} tickLine={false} />
+                                            <YAxis hide />
+                                            <Tooltip
+                                                cursor={{ fill: 'rgba(99, 102, 241, 0.05)' }}
+                                                content={({ active, payload }) => {
+                                                    if (active && payload && payload.length) {
+                                                        const data = payload[0].payload;
+                                                        return (
+                                                            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-[2rem] shadow-2xl">
+                                                                <div className="text-xs font-black uppercase text-muted-foreground italic mb-2">{data.nom}</div>
+                                                                <div className="space-y-1">
+                                                                    <div className="text-2xl font-black text-indigo-600 dark:text-indigo-400">{formatCurrency(data.total)}</div>
+                                                                    <div className="text-[10px] font-bold text-muted-foreground uppercase opacity-40">{data.qte} unités vendues</div>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    }
+                                                    return null;
+                                                }}
+                                            />
+                                            <Bar dataKey="total" fill="#6366f1" radius={[15, 15, 0, 0]} barSize={40} />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
                             </CardContent>
                         </Card>
                     </TabsContent>
 
-                    {/* ONGLET: STOCKS */}
-                    <TabsContent value="stocks" className="animate-in fade-in-50 duration-500">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-                            {/* Alertes de Stock */}
-                            <Card className="shadow-sm border-rose-200">
-                                <CardHeader className="bg-rose-50/50 pb-4 border-b">
-                                    <CardTitle className="text-lg flex items-center text-rose-700">
-                                        <AlertTriangle className="w-5 h-5 mr-2" /> Alertes / Ruptures de Stock
+                    {/* ONGLET 3: INVENTAIRE */}
+                    <TabsContent value="stocks" className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <Card className="rounded-lg bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 shadow-lg overflow-hidden">
+                                <CardHeader className="p-8 bg-rose-500/5 border-b border-rose-500/10">
+                                    <CardTitle className="text-xl font-black uppercase tracking-widest italic flex items-center gap-3 text-rose-600">
+                                        <AlertTriangle className="size-5" /> Stock Critique
                                     </CardTitle>
-                                    <CardDescription>Produits avec une quantité critique (≤ 5).</CardDescription>
                                 </CardHeader>
                                 <CardContent className="p-0">
                                     {alertes_stock.length > 0 ? (
-                                        <div className="divide-y">
-                                            {alertes_stock.map((stock) => (
-                                                <div key={stock.id} className="p-4 flex items-center justify-between hover:bg-muted/20">
-                                                    <div>
-                                                        <div className="font-semibold text-sm">{stock.produit}</div>
-                                                        <span className="text-xs text-muted-foreground">Taille: {stock.taille}</span>
-                                                    </div>
-                                                    <Badge variant={stock.quantite <= 0 ? "destructive" : "outline"} className={stock.quantite > 0 ? "border-orange-300 text-orange-700 bg-orange-50" : ""}>
-                                                        {stock.quantite} restant
-                                                    </Badge>
+                                        alertes_stock.map((stock, i) => (
+                                            <div key={i} className="p-6 flex items-center justify-between border-b border-rose-500/5 last:border-0 hover:bg-rose-500/5 transition-colors">
+                                                <div>
+                                                    <div className="text-sm font-black uppercase tracking-tight">{stock.produit}</div>
+                                                    <span className="text-[10px] font-bold text-muted-foreground uppercase opacity-40 tracking-widest italic">Taille: {stock.taille}</span>
                                                 </div>
-                                            ))}
-                                        </div>
+                                                <Badge variant={stock.quantite <= 0 ? "destructive" : "outline"} className={cn(
+                                                    "px-4 py-1.5 rounded-xl font-black uppercase tracking-widest text-[10px]",
+                                                    stock.quantite > 0 ? "border-orange-500/20 text-orange-600 bg-orange-500/10" : "bg-rose-600 text-white border-0 shadow-lg shadow-rose-500/20"
+                                                )}>
+                                                    {stock.quantite} restant
+                                                </Badge>
+                                            </div>
+                                        ))
                                     ) : (
-                                        <div className="p-8 text-center text-emerald-600 font-medium">
-                                            Tous les stocks sont à des niveaux sains ! 🎉
+                                        <div className="p-20 text-center flex flex-col items-center">
+                                            <div className="size-16 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 mb-4 animate-bounce">
+                                                <TrendingUp className="size-8" />
+                                            </div>
+                                            <div className="font-black uppercase tracking-widest text-emerald-600 italic">Rien à signaler</div>
+                                            <div className="text-xs text-muted-foreground mt-1">Tous vos stocks sont optimaux.</div>
                                         </div>
                                     )}
                                 </CardContent>
                             </Card>
 
-                            {/* Mouvements Récents */}
-                            <Card className="shadow-sm">
-                                <CardHeader className="pb-4 border-b flex flex-row items-center justify-between space-y-0">
-                                    <div>
-                                        <CardTitle className="text-lg flex items-center">
-                                            <ArrowRightLeft className="w-5 h-5 mr-2" /> Récentes Opérations
-                                        </CardTitle>
-                                        <CardDescription>Les 10 derniers mouvements.</CardDescription>
-                                    </div>
+                            <Card className="rounded-lg bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 shadow-lg overflow-hidden">
+                                <CardHeader className="p-8 border-b border-white/10 flex flex-row items-center justify-between">
+                                    <CardTitle className="text-xl font-black uppercase tracking-widest italic flex items-center gap-3">
+                                        <ArrowRightLeft className="size-5 text-indigo-500" /> Flux récents
+                                    </CardTitle>
                                     <Link href={MouvementStockController.index.url()}>
-                                        <Button variant="ghost" size="sm">Voir tout</Button>
+                                        <Button variant="outline" size="sm" className="rounded-lg font-black uppercase tracking-widest text-[9px]">Historique complète</Button>
                                     </Link>
                                 </CardHeader>
                                 <CardContent className="p-0">
-                                    {mouvements_recents.length > 0 ? (
-                                        <div className="divide-y">
-                                            {mouvements_recents.map((mvt) => (
-                                                <div key={mvt.id} className="p-4 flex items-center justify-between hover:bg-muted/30">
-                                                    <div className="flex flex-col">
-                                                        <span className="font-semibold text-sm">{mvt.produit.nom}</span>
-                                                        <span className="text-xs text-muted-foreground">
-                                                            {new Date(mvt.created_at).toLocaleDateString('fr-FR')} par {mvt.user.name}
-                                                        </span>
-                                                    </div>
-                                                    <Badge variant="secondary" className={
-                                                        mvt.type === 'entrée' ? 'bg-emerald-100 text-emerald-700' :
-                                                            mvt.type === 'sortie' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'
-                                                    }>
-                                                        {mvt.type === 'entrée' ? '+' : '-'}{Math.abs(mvt.quantite)} ({mvt.type})
-                                                    </Badge>
-                                                </div>
-                                            ))}
+                                    {mouvements_recents.map((mvt, i) => (
+                                        <div key={i} className="p-6 flex items-center justify-between border-b border-white/5 last:border-0 hover:bg-white/40 dark:hover:bg-zinc-800/40 transition-colors">
+                                            <div className="flex flex-col">
+                                                <span className="text-sm font-black uppercase tracking-tight">{mvt.produit.nom}</span>
+                                                <span className="text-[9px] font-bold text-muted-foreground uppercase opacity-40 tracking-widest italic">
+                                                    {new Date(mvt.created_at).toLocaleDateString('fr-FR')} par {mvt.user.name}
+                                                </span>
+                                            </div>
+                                            <div className={cn(
+                                                "px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border shadow-sm",
+                                                mvt.type === 'entrée' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' :
+                                                    mvt.type === 'sortie' ? 'bg-blue-500/10 text-blue-600 border-blue-500/20' :
+                                                        'bg-rose-500/10 text-rose-600 border-rose-500/20'
+                                            )}>
+                                                {mvt.type === 'entrée' ? '+' : '-'}{Math.abs(mvt.quantite)}
+                                            </div>
                                         </div>
-                                    ) : (
-                                        <div className="p-8 text-center text-muted-foreground text-sm">
-                                            Aucun mouvement enregistré récemment.
-                                        </div>
-                                    )}
+                                    ))}
                                 </CardContent>
                             </Card>
-
                         </div>
                     </TabsContent>
                 </Tabs>

@@ -183,7 +183,7 @@ export default function ClientsShow({
                             Détails du client et informations de contact.
                         </p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-4">
                         <Link href={ClientController.edit.url(client.id)}>
                             <Button>
                                 <PencilIcon className="size-4 mr-2" />
@@ -191,7 +191,7 @@ export default function ClientsShow({
                             </Button>
                         </Link>
                         <Link href={ClientController.index.url()}>
-                            <Button variant="outline">
+                            <Button variant="outline" >
                                 <ArrowLeftIcon className="size-4 mr-2" />
                                 Retour à la liste
                             </Button>
@@ -493,10 +493,10 @@ export default function ClientsShow({
                                     Actions rapides pour ce client
                                 </CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-2">
-                                <Link href={ClientController.edit.url(client.id)} className="w-full">
+                            <CardContent className="space-y-4">
+                                <Link href={ClientController.edit.url(client.id)} className="w-full my4">
                                     <Button className="w-full" variant="outline">
-                                        <PencilIcon className="size-4 mr-2" />
+                                        <PencilIcon className="size-4 mr-2 my-4" />
                                         Modifier le client
                                     </Button>
                                 </Link>
@@ -508,12 +508,12 @@ export default function ClientsShow({
                                 >
                                     {client.actif ? (
                                         <>
-                                            <UserXIcon className="size-4 mr-2" />
+                                            <UserXIcon className="size-4 mr-2 my-4" />
                                             Désactiver le client
                                         </>
                                     ) : (
                                         <>
-                                            <UserCheckIcon className="size-4 mr-2" />
+                                            <UserCheckIcon className="size-4 mr-2 my-4" />
                                             Activer le client
                                         </>
                                     )}

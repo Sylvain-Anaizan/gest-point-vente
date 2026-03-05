@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProduitStoreRequest;
 use App\Http\Requests\ProduitUpdateRequest;
+use App\Models\Boutique;
 use App\Models\Categorie;
 use App\Models\Produit;
 use App\Models\Taille;
+use App\Models\Unite;
 use App\Models\Variante;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -55,8 +58,8 @@ class ProduitController extends Controller
                     ] : null,
                 ]),
             'boutiques' => $user->isAdmin()
-                ? \App\Models\Boutique::all(['id', 'nom'])
-                : \App\Models\Boutique::where('id', $user->boutique_id)->get(['id', 'nom']),
+                ? Boutique::all(['id', 'nom'])
+                : Boutique::where('id', $user->boutique_id)->get(['id', 'nom']),
         ]);
     }
 
@@ -71,15 +74,15 @@ class ProduitController extends Controller
             'categories' => Categorie::query()
                 ->orderBy('nom')
                 ->get(['id', 'nom']),
-            'tailles' => \App\Models\Taille::query()
+            'tailles' => Taille::query()
                 ->orderBy('nom')
                 ->get(['id', 'nom']),
-            'unites' => \App\Models\Unite::query()
+            'unites' => Unite::query()
                 ->orderBy('nom')
                 ->get(['id', 'nom']),
             'boutiques' => $user->isAdmin()
-                ? \App\Models\Boutique::query()->orderBy('nom')->get(['id', 'nom'])
-                : \App\Models\Boutique::where('id', $user->boutique_id)->get(['id', 'nom']),
+                ? Boutique::query()->orderBy('nom')->get(['id', 'nom'])
+                : Boutique::where('id', $user->boutique_id)->get(['id', 'nom']),
         ]);
     }
 
@@ -104,7 +107,7 @@ class ProduitController extends Controller
             $data['image'] = $filename;
         }
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($data, $variantesData) {
+        DB::transaction(function () use ($data, $variantesData) {
             $produit = Produit::create($data);
             foreach ($variantesData as $vData) {
                 $produit->variantes()->create($vData);
@@ -181,15 +184,15 @@ class ProduitController extends Controller
             'categories' => Categorie::query()
                 ->orderBy('nom')
                 ->get(['id', 'nom']),
-            'tailles' => \App\Models\Taille::query()
+            'tailles' => Taille::query()
                 ->orderBy('nom')
                 ->get(['id', 'nom']),
-            'unites' => \App\Models\Unite::query()
+            'unites' => Unite::query()
                 ->orderBy('nom')
                 ->get(['id', 'nom']),
             'boutiques' => $user->isAdmin()
-                ? \App\Models\Boutique::query()->orderBy('nom')->get(['id', 'nom'])
-                : \App\Models\Boutique::where('id', $user->boutique_id)->get(['id', 'nom']),
+                ? Boutique::query()->orderBy('nom')->get(['id', 'nom'])
+                : Boutique::where('id', $user->boutique_id)->get(['id', 'nom']),
         ]);
     }
 

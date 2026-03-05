@@ -77,7 +77,7 @@ export default function MouvementsCreate({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Nouveau Mouvement de stock" />
 
-            <div className="space-y-6 p-4 md:p-6 max-w-[800px] pb-24">
+            <div className="space-y-6 p-4 md:p-6 max-w-[1200px] pb-24">
                 <div className="flex items-center gap-4">
                     <Link href={MouvementStockController.index.url()}>
                         <Button variant="outline" size="icon" className="h-9 w-9 shrink-0">

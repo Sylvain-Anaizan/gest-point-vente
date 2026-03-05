@@ -1,8 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { useState } from 'react';
-import { WhatsAppShareModal } from '@/components/whatsapp-share-modal';
 import {
     ShoppingCart,
     Package,
@@ -16,11 +14,12 @@ import {
     Wallet,
     Banknote,
     Smartphone,
-    Search,
     Calendar,
     Tag,
-    MessageCircle,
     Store,
+    Star,
+    Trophy,
+    History,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -55,7 +54,7 @@ interface Stats {
 interface SalesChartData { date: string; formatted_date: string; total: number; }
 interface LowStockProduct { id: number; nom: string; quantite: number; prix_vente: number; category: { nom: string; }; }
 interface RecentSale { id: number; numero: string; montant_total: number | string; mode_paiement: string; created_at: string; client: { nom: string } | null; vendeur: string; produits_count: number; }
-interface TopProduct { id: number; nom: string; total_vendu: number; total_revenus: number; }
+interface TopProduct { id: number; nom: string; total_vendu: number; total_revenus: number; categorie?: string; }
 interface TopCategory { id: number; nom: string; total_vendu: number; total_revenus: number; }
 interface BoutiqueStat { id: number; nom: string; produits_count: number; }
 interface Client { id: number; nom: string; telephone: string; email: string; }
@@ -69,7 +68,7 @@ export default function Dashboard({
     topProducts,
     topCategories,
     boutiques,
-    clients,
+
 }: {
     stats: Stats;
     salesChart: SalesChartData[];
@@ -80,7 +79,7 @@ export default function Dashboard({
     boutiques: BoutiqueStat[];
     clients: Client[];
 }) {
-    const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
+    //const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
 
     // Évite la division par zéro
     const maxSalesValue = Math.max(...salesChart.map(d => d.total), 1);
@@ -130,7 +129,7 @@ export default function Dashboard({
             <div className="space-y-6 p-4 md:p-8 max-w-[100vw] overflow-x-hidden pb-24">
 
                 {/* HEADER */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center justify-between bg-gradient-to-r from-background to-muted/30 p-6 rounded-2xl border shadow-sm">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center justify-between bg-gradient-to-r from-white to-white/30 p-4 md:p-6 rounded-2xl border shadow-sm">
                     <div>
                         <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">Tableau de bord</h1>
                         <p className="text-sm text-muted-foreground mt-1">
@@ -148,89 +147,124 @@ export default function Dashboard({
                 </div>
 
                 {/* KPI CARDS (Grid 1 colonne mobile -> 2 tablette -> 4 desktop) */}
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-                    {/* Ventes Jour */}
-                    <Card className="relative overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 to-transparent hover:border-primary/50 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-semibold text-primary">Ventes du jour</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-3xl font-black text-foreground">{formatMontant(stats.today_sales)} <span className="text-sm font-normal text-muted-foreground">F</span></div>
-                            <p className="text-xs font-medium text-muted-foreground mt-1">
-                                {stats.today_sales_count} transactions
-                            </p>
-                            <div className="absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-primary/10 to-transparent pointer-events-none" />
-                            <ShoppingCart className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 text-primary/20 transition-transform group-hover:scale-110" />
-                        </CardContent>
+                <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                    {/* Ventes Jour - Glassmorphism & Gradient Primary */}
+                    <Card className="group relative overflow-hidden border-0 bg-white/50 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:bg-zinc-900/50">
+                        <div className="absolute inset-0 bg-linear-to-br from-indigo-500/10 via-transparent to-purple-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                        <div className="relative flex items-center gap-4">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-500/15 text-indigo-600 shadow-inner dark:bg-indigo-500/20 dark:text-indigo-400">
+                                <ShoppingCart className="h-7 w-7 transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium tracking-wide text-muted-foreground uppercase">Ventes Jour</p>
+                                <div className="flex items-baseline gap-2">
+                                    <h3 className="text-2xl font-bold tracking-tight">{formatMontant(stats.today_sales)} F</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-indigo-500/10">
+                            <div className="h-full w-[65%] rounded-full bg-linear-to-r from-indigo-500 to-purple-500 transition-all duration-1000 group-hover:w-[75%]" />
+                        </div>
                     </Card>
 
-                    {/* Revenus Mois */}
-                    <Card className="relative overflow-hidden border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent hover:border-blue-500/50 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-semibold text-blue-600 dark:text-blue-400">Ce mois-ci</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-3xl font-black text-foreground">{formatMontant(stats.month_sales)} <span className="text-sm font-normal text-muted-foreground">F</span></div>
-                            <p className="text-xs font-medium text-muted-foreground mt-1">Revenus cumulés</p>
-                            <div className="absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-blue-500/10 to-transparent pointer-events-none" />
-                            <TrendingUp className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 text-blue-500/20 transition-transform group-hover:scale-110" />
-                        </CardContent>
+                    {/* Revenus Mois - Glassmorphism & Gradient Blue */}
+                    <Card className="group relative overflow-hidden border-0 bg-white/50 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:bg-zinc-900/50">
+                        <div className="absolute inset-0 bg-linear-to-br from-blue-500/10 via-transparent to-cyan-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                        <div className="relative flex items-center gap-4">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-500/15 text-blue-600 shadow-inner dark:bg-blue-500/20 dark:text-blue-400">
+                                <TrendingUp className="h-7 w-7 transition-transform duration-500 group-hover:-rotate-12 group-hover:scale-110" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium tracking-wide text-muted-foreground uppercase">C.A Mois</p>
+                                <div className="flex items-baseline gap-2">
+                                    <h3 className="text-2xl font-bold tracking-tight">{formatMontant(stats.month_sales)} F</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-blue-500/10">
+                            <div className="h-full w-[45%] rounded-full bg-linear-to-r from-blue-500 to-cyan-500 transition-all duration-1000 group-hover:w-[55%]" />
+                        </div>
                     </Card>
 
-                    {/* Valeur Stock */}
-                    <Card className="relative overflow-hidden border-emerald-500/20 bg-gradient-to-br from-emerald-500/5 to-transparent hover:border-emerald-500/50 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Valeur Stock</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-3xl font-black text-foreground">{formatMontant(stats.total_stock_value)} <span className="text-sm font-normal text-muted-foreground">F</span></div>
-                            <p className="text-xs font-medium text-muted-foreground mt-1">{stats.total_produits} produits</p>
-                            <div className="absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none" />
-                            <Package className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 text-emerald-500/20 transition-transform group-hover:scale-110" />
-                        </CardContent>
+                    {/* Valeur Stock - Glassmorphism & Gradient Emerald */}
+                    <Card className="group relative overflow-hidden border-0 bg-white/50 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:bg-zinc-900/50">
+                        <div className="absolute inset-0 bg-linear-to-br from-emerald-500/10 via-transparent to-teal-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                        <div className="relative flex items-center gap-4">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-600 shadow-inner dark:bg-emerald-500/20 dark:text-emerald-400">
+                                <Package className="h-7 w-7 transition-transform duration-500 group-hover:scale-110" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium tracking-wide text-muted-foreground uppercase">Stock Total</p>
+                                <div className="flex items-baseline gap-2">
+                                    <h3 className="text-2xl font-bold tracking-tight">{formatMontant(stats.total_stock_value)} F</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-emerald-500/10">
+                            <div className="h-full w-[80%] rounded-full bg-linear-to-r from-emerald-500 to-teal-500 transition-all duration-1000 group-hover:w-[90%]" />
+                        </div>
                     </Card>
 
-                    {/* Clients */}
-                    <Card className="relative overflow-hidden border-orange-500/20 bg-gradient-to-br from-orange-500/5 to-transparent hover:border-orange-500/50 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-semibold text-orange-600 dark:text-orange-400">Clients Actifs</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-3xl font-black text-foreground">{stats.active_clients}</div>
-                            <p className="text-xs font-medium text-muted-foreground mt-1">Sur {stats.total_clients} total</p>
-                            <div className="absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-orange-500/10 to-transparent pointer-events-none" />
-                            <Users className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 text-orange-500/20 transition-transform group-hover:scale-110" />
-                        </CardContent>
+                    {/* Clients Actifs - Glassmorphism & Gradient Orange */}
+                    <Card className="group relative overflow-hidden border-0 bg-white/50 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:bg-zinc-900/50">
+                        <div className="absolute inset-0 bg-linear-to-br from-orange-500/10 via-transparent to-amber-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                        <div className="relative flex items-center gap-4">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-500/15 text-orange-600 shadow-inner dark:bg-orange-500/20 dark:text-orange-400">
+                                <Users className="h-7 w-7 transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium tracking-wide text-muted-foreground uppercase">Clients</p>
+                                <div className="flex items-baseline gap-2">
+                                    <h3 className="text-2xl font-bold tracking-tight">{stats.active_clients}</h3>
+                                    <span className="flex items-center text-xs font-semibold text-orange-500 bg-orange-500/10 px-2 py-0.5 rounded-full">
+                                        Actifs
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-orange-500/10">
+                            <div className="h-full w-[55%] rounded-full bg-linear-to-r from-orange-500 to-amber-500 transition-all duration-1000 group-hover:w-[65%]" />
+                        </div>
                     </Card>
                 </div>
 
-                {/* ACTIONS RAPIDES (Grid 2 cols Mobile / 4 cols Desktop) */}
-                <div className="pt-2">
-                    <h2 className="text-sm font-semibold mb-3 px-1 text-muted-foreground uppercase tracking-wider">Raccourcis</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {/* ACTIONS RAPIDES */}
+                <div className="pt-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <h2 className="text-xs font-bold mb-4 px-1 text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
+                        Accès Rapide
+                    </h2>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <Link href="/ventes/create" className="group">
-                            <Button variant="outline" className="w-full h-20 flex flex-col gap-2 items-center justify-center border-dashed border-primary/30 hover:border-primary hover:bg-primary/5 bg-background shadow-sm hover:shadow-md transition-all duration-300">
-                                <Plus className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
-                                <span className="text-xs font-semibold">Vente</span>
-                            </Button>
+                            <Card className="h-24 flex flex-col gap-2 items-center justify-center border-0 bg-white/50 shadow-sm hover:shadow-lg hover:bg-indigo-500 hover:text-white transition-all duration-500 dark:bg-zinc-900/50 dark:hover:bg-indigo-600">
+                                <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 group-hover:bg-white/20 group-hover:text-white transition-colors">
+                                    <Plus className="h-6 w-6 transition-transform duration-500 group-hover:rotate-90 group-hover:scale-110" />
+                                </div>
+                                <span className="text-xs font-bold uppercase tracking-wider">Nouvelle Vente</span>
+                            </Card>
                         </Link>
                         <Link href="/produits/create" className="group">
-                            <Button variant="outline" className="w-full h-20 flex flex-col gap-2 items-center justify-center border-dashed border-blue-500/30 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-500/10 bg-background shadow-sm hover:shadow-md transition-all duration-300">
-                                <Package className="h-6 w-6 text-blue-500 group-hover:scale-110 transition-transform" />
-                                <span className="text-xs font-semibold">Produit</span>
-                            </Button>
+                            <Card className="h-24 flex flex-col gap-2 items-center justify-center border-0 bg-white/50 shadow-sm hover:shadow-lg hover:bg-blue-500 hover:text-white transition-all duration-500 dark:bg-zinc-900/50 dark:hover:bg-blue-600">
+                                <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 group-hover:bg-white/20 group-hover:text-white transition-colors">
+                                    <Package className="h-6 w-6 transition-transform duration-500 group-hover:scale-110" />
+                                </div>
+                                <span className="text-xs font-bold uppercase tracking-wider">Nouveau Produit</span>
+                            </Card>
                         </Link>
                         <Link href="/clients/create" className="group">
-                            <Button variant="outline" className="w-full h-20 flex flex-col gap-2 items-center justify-center border-dashed border-orange-500/30 hover:border-orange-500 hover:bg-orange-50/50 dark:hover:bg-orange-500/10 bg-background shadow-sm hover:shadow-md transition-all duration-300">
-                                <Users className="h-6 w-6 text-orange-500 group-hover:scale-110 transition-transform" />
-                                <span className="text-xs font-semibold">Client</span>
-                            </Button>
+                            <Card className="h-24 flex flex-col gap-2 items-center justify-center border-0 bg-white/50 shadow-sm hover:shadow-lg hover:bg-orange-500 hover:text-white transition-all duration-500 dark:bg-zinc-900/50 dark:hover:bg-orange-600">
+                                <div className="p-2 rounded-xl bg-orange-500/10 text-orange-600 group-hover:bg-white/20 group-hover:text-white transition-colors">
+                                    <Users className="h-6 w-6 transition-transform duration-500 group-hover:scale-110" />
+                                </div>
+                                <span className="text-xs font-bold uppercase tracking-wider">Nouveau Client</span>
+                            </Card>
                         </Link>
-                        <Link href="/ventes" className="group">
-                            <Button variant="outline" className="w-full h-20 flex flex-col gap-2 items-center justify-center border-dashed border-emerald-500/30 hover:border-emerald-500 hover:bg-emerald-50/50 dark:hover:bg-emerald-500/10 bg-background shadow-sm hover:shadow-md transition-all duration-300">
-                                <Search className="h-6 w-6 text-emerald-500 group-hover:scale-110 transition-transform" />
-                                <span className="text-xs font-semibold">Recherche</span>
-                            </Button>
+                        <Link href="/mouvements" className="group">
+                            <Card className="h-24 flex flex-col gap-2 items-center justify-center border-0 bg-white/50 shadow-sm hover:shadow-lg hover:bg-emerald-500 hover:text-white transition-all duration-500 dark:bg-zinc-900/50 dark:hover:bg-emerald-600">
+                                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 group-hover:bg-white/20 group-hover:text-white transition-colors">
+                                    <History className="h-6 w-6 transition-transform duration-500 group-hover:scale-110" />
+                                </div>
+                                <span className="text-xs font-bold uppercase tracking-wider">Mouvement de Stock</span>
+                            </Card>
                         </Link>
                     </div>
                 </div>
@@ -260,141 +294,156 @@ export default function Dashboard({
                 <div className="grid gap-6 grid-cols-1 xl:grid-cols-7">
 
                     {/* GRAPHIQUE DES VENTES (Colspan 4) */}
-                    <Card className="xl:col-span-4 shadow-sm overflow-hidden border-border/50 hover:shadow-md transition-shadow duration-300">
+                    <Card className="xl:col-span-4 relative overflow-hidden border-0 bg-white/50 shadow-sm dark:bg-zinc-900/50 group">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
+                            <BarChart3 className="h-24 w-24 text-indigo-500" />
+                        </div>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-base flex items-center gap-2">
-                                <BarChart3 className="h-4 w-4 text-primary" />
-                                Évolution (30 jours)
+                            <CardTitle className="text-lg font-bold flex items-center gap-2">
+                                <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                                    <BarChart3 className="h-5 w-5" />
+                                </div>
+                                Évolution des Ventes
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            {/* Scroll horizontal pour mobile : min-w-[600px] force le scroll si l'écran est petit */}
                             <ScrollArea className="w-full pb-4">
-                                <div className="h-[200px] min-w-[600px] w-full pt-4 pr-4">
+                                <div className="h-[240px] min-w-[600px] w-full pt-8 pr-4">
                                     {salesChart.length > 0 ? (
-                                        <div className="flex h-full items-end gap-2">
+                                        <div className="flex h-full items-end gap-3 px-2">
                                             {salesChart.map((data, i) => (
-                                                <div key={i} className="group relative flex h-full flex-1 flex-col justify-end">
-                                                    <div className="w-full rounded-t-sm bg-primary/80 transition-all hover:bg-primary"
+                                                <div key={i} className="group/bar relative flex h-full flex-1 flex-col justify-end">
+                                                    {/* Tooltip on hover */}
+                                                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover/bar:opacity-100 transition-all duration-300 bg-zinc-900 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-10 scale-90 group-hover/bar:scale-100">
+                                                        {formatMontant(data.total)} F
+                                                    </div>
+                                                    <div className="w-full rounded-t-lg bg-linear-to-t from-indigo-500/80 to-purple-500/80 transition-all duration-500 hover:from-indigo-500 hover:to-purple-500 group-hover/bar:scale-x-110 shadow-sm"
                                                         style={{ height: `${(data.total / maxSalesValue) * 100}%` }}
                                                     />
-                                                    {/* Date en petit en bas */}
-                                                    <span className="text-[9px] text-muted-foreground text-center mt-1 truncate w-full block">
+                                                    <span className="text-[10px] font-medium text-muted-foreground text-center mt-3 truncate w-full block">
                                                         {data.formatted_date.split(' ')[0]}
                                                     </span>
                                                 </div>
                                             ))}
                                         </div>
                                     ) : (
-                                        <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
-                                            Pas de données
+                                        <div className="flex h-full items-center justify-center text-muted-foreground bg-zinc-100/50 dark:bg-zinc-800/50 rounded-xl border border-dashed">
+                                            Aucune donnée disponible
                                         </div>
                                     )}
                                 </div>
                             </ScrollArea>
-                            <Separator className="my-2" />
-                            <div className="flex justify-between items-center text-xs sm:text-sm">
-                                <span className="text-muted-foreground">Total Annuel</span>
-                                <span className="font-bold">{formatMontant(stats.yearly_revenue)} F</span>
+                            <Separator className="my-4 opacity-50" />
+                            <div className="flex justify-between items-center p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/10">
+                                <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Total Annuel</span>
+                                <span className="text-xl font-black text-indigo-600 dark:text-indigo-400">{formatMontant(stats.yearly_revenue)} F</span>
                             </div>
                         </CardContent>
                     </Card>
 
                     {/* TOP PRODUITS (Colspan 3) */}
-                    <Card className="xl:col-span-3 shadow-sm flex flex-col border-border/50 hover:shadow-md transition-shadow duration-300">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-base flex items-center gap-2">
-                                <TrendingUp className="h-4 w-4 text-blue-500" />
-                                Top Produits
+                    <Card className="xl:col-span-3 border-0 bg-white/50 shadow-sm dark:bg-zinc-900/50 overflow-hidden flex flex-col group">
+                        <CardHeader className="pb-3 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30">
+                            <CardTitle className="text-lg font-bold flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <div className="p-2 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400">
+                                        <Star className="h-5 w-5" />
+                                    </div>
+                                    Top Produits
+                                </div>
+                                <Trophy className="h-5 w-5 text-yellow-500 opacity-50" />
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="flex-1 p-0">
-                            <ScrollArea className="h-[280px]">
-                                {topProducts.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-6">
-                                        <Package className="h-8 w-8 opacity-20 mb-2" />
-                                        <p className="text-sm">Aucune vente</p>
-                                    </div>
-                                ) : (
-                                    <div className="divide-y">
-                                        {topProducts.map((product, index) => (
-                                            <div key={product.id} className="flex items-center justify-between p-3 hover:bg-primary/5 transition-colors group">
+                        <CardContent className="p-0 flex-1">
+                            <ScrollArea className="h-[340px]">
+                                <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                                    {topProducts.length > 0 ? (
+                                        topProducts.map((p, i) => (
+                                            <div key={i} className="flex items-center justify-between p-4 hover:bg-orange-500/5 transition-all duration-300 group/item">
                                                 <div className="flex items-center gap-3 min-w-0">
-                                                    <span className={cn(
-                                                        "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
-                                                        index === 0 ? "bg-yellow-100 text-yellow-700" :
-                                                            index === 1 ? "bg-slate-100 text-slate-700" :
-                                                                index === 2 ? "bg-orange-100 text-orange-700" :
-                                                                    "bg-muted text-muted-foreground"
+                                                    <div className={cn(
+                                                        "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg font-bold transition-all duration-300",
+                                                        i === 0 ? "bg-yellow-500 text-white shadow-sm shadow-yellow-500/30 scale-110" :
+                                                            i === 1 ? "bg-slate-400 text-white shadow-sm shadow-slate-400/30" :
+                                                                i === 2 ? "bg-orange-400 text-white shadow-sm shadow-orange-400/30" :
+                                                                    "bg-zinc-100 text-zinc-500 dark:bg-zinc-800"
                                                     )}>
-                                                        {index + 1}
-                                                    </span>
+                                                        {i + 1}
+                                                    </div>
                                                     <div className="min-w-0">
-                                                        <p className="text-sm font-medium truncate pr-2">{product.nom}</p>
-                                                        <p className="text-xs text-muted-foreground">
-                                                            {product.total_vendu} ventes
-                                                        </p>
+                                                        <p className="font-bold text-sm truncate group-hover/item:text-orange-600 transition-colors">{p.nom}</p>
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">{p.categorie}</p>
+                                                            {i < 3 && <Badge className="h-4 text-[8px] bg-emerald-500/10 text-emerald-600 border-0">Top Tier</Badge>}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div className="text-xs font-semibold shrink-0">
-                                                    {formatMontant(product.total_revenus)} F
+                                                <div className="text-right shrink-0 ml-2">
+                                                    <p className="text-sm font-black">{p.total_vendu} v.</p>
+                                                    <p className="text-[10px] font-bold text-zinc-400">{formatMontant(p.total_revenus)} F</p>
                                                 </div>
                                             </div>
-                                        ))}
-                                    </div>
-                                )}
+                                        ))
+                                    ) : (
+                                        <div className="p-12 text-center text-muted-foreground text-sm italic">
+                                            Pas encore de ventes
+                                        </div>
+                                    )}
+                                </div>
                             </ScrollArea>
                         </CardContent>
                     </Card>
 
                     {/* STATS BOUTIQUES */}
-                    <Card className="shadow-sm flex flex-col xl:col-span-7 border-border/50 hover:shadow-md transition-shadow duration-300">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-base flex items-center gap-2">
-                                <Store className="h-4 w-4 text-emerald-500" />
-                                Boutiques & Inventaire
+                    <Card className="xl:col-span-7 border-0 bg-white/50 shadow-sm dark:bg-zinc-900/50 overflow-hidden group/main">
+                        <CardHeader className="pb-3 border-b border-zinc-100 dark:border-zinc-800">
+                            <CardTitle className="text-lg font-bold flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                                        <Store className="h-5 w-5" />
+                                    </div>
+                                    Boutiques & Inventaire
+                                </div>
+                                <Badge variant="outline" className="text-[10px] font-bold border-emerald-500/30 text-emerald-600">Vue d'ensemble</Badge>
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="flex-1 p-0">
-                            <ScrollArea className="h-[280px]">
-                                {boutiques.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-6">
-                                        <Store className="h-8 w-8 opacity-20 mb-2" />
-                                        <p className="text-sm">Aucune boutique</p>
-                                    </div>
-                                ) : (
-                                    <div className="divide-y">
-                                        {boutiques.map((boutique) => (
-                                            <div key={boutique.id} className="flex items-center justify-between p-3 hover:bg-emerald-50/50 dark:hover:bg-emerald-500/10 transition-colors group">
-                                                <div className="flex items-center gap-3 min-w-0">
-                                                    <div className="h-8 w-8 shrink-0 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                                                        <Store className="h-4 w-4" />
+                        <CardContent className="p-0">
+                            <ScrollArea className="h-[300px]">
+                                <div className="grid grid-cols-1 md:grid-cols-2 divide-x divide-zinc-100 dark:divide-zinc-800">
+                                    {boutiques.length > 0 ? (
+                                        boutiques.map((boutique) => (
+                                            <div key={boutique.id} className="flex items-center justify-between p-5 hover:bg-emerald-500/5 transition-all duration-300 group/boutique">
+                                                <div className="flex items-center gap-4 min-w-0">
+                                                    <div className="h-12 w-12 shrink-0 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner group-hover/boutique:bg-emerald-100 dark:bg-zinc-800 dark:text-emerald-400">
+                                                        <Store className="h-6 w-6 transition-transform duration-500 group-hover/boutique:scale-110" />
                                                     </div>
                                                     <div className="min-w-0">
-                                                        <p className="text-sm font-medium truncate pr-2">{boutique.nom}</p>
-                                                        <p className="text-xs text-muted-foreground">
-                                                            {boutique.produits_count} produits référencés
+                                                        <p className="font-bold text-base truncate group-hover/boutique:text-emerald-600 transition-colors uppercase tracking-tight">{boutique.nom}</p>
+                                                        <p className="text-xs text-muted-foreground font-medium">
+                                                            {boutique.produits_count} références actives
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <div className="shrink-0">
-                                                    <Link href={`/boutiques/${boutique.id}`}>
-                                                        <Button variant="ghost" size="sm" className="text-xs h-7">
-                                                            Voir
-                                                        </Button>
-                                                    </Link>
-                                                </div>
+                                                <Link href={`/boutiques/${boutique.id}`}>
+                                                    <Button variant="ghost" size="sm" className="rounded-xl hover:bg-emerald-500 hover:text-white transition-all duration-300">
+                                                        Détails
+                                                    </Button>
+                                                </Link>
                                             </div>
-                                        ))}
-                                    </div>
-                                )}
+                                        ))
+                                    ) : (
+                                        <div className="col-span-2 p-12 text-center text-muted-foreground text-sm italic">
+                                            Aucune boutique configurée
+                                        </div>
+                                    )}
+                                </div>
                             </ScrollArea>
                         </CardContent>
-                        <Separator />
-                        <div className="p-3 text-center">
+                        <Separator className="opacity-50" />
+                        <div className="p-4 flex justify-center bg-zinc-50/50 dark:bg-zinc-800/30">
                             <Link href="/boutiques">
-                                <Button variant="link" size="sm" className="text-xs">
-                                    Gérer les boutiques
+                                <Button variant="link" size="sm" className="text-xs font-bold uppercase tracking-widest text-emerald-600 hover:text-emerald-700">
+                                    Gérer toutes les boutiques →
                                 </Button>
                             </Link>
                         </div>
@@ -404,48 +453,44 @@ export default function Dashboard({
                 {/* NOUVELLE SECTION: TOP CATÉGORIES ET GRAPHIQUE */}
                 <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
                     {/* TOP CATÉGORIES */}
-                    <Card className="shadow-sm flex flex-col border-border/50 hover:shadow-md transition-shadow duration-300">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-base flex items-center gap-2">
-                                <Tag className="h-4 w-4 text-purple-500" />
-                                Top Catégories
+                    <Card className="border-0 bg-white/50 shadow-sm dark:bg-zinc-900/50 overflow-hidden flex flex-col group">
+                        <CardHeader className="pb-3 border-b border-zinc-100 dark:border-zinc-800 bg-purple-50/30 dark:bg-purple-900/10">
+                            <CardTitle className="text-lg font-bold flex items-center gap-2">
+                                <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                                    <Tag className="h-5 w-5" />
+                                </div>
+                                Performance Catégories
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="flex-1 p-0">
-                            <ScrollArea className="h-[280px]">
-                                {topCategories.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-6">
-                                        <Tag className="h-8 w-8 opacity-20 mb-2" />
-                                        <p className="text-sm">Aucune vente</p>
-                                    </div>
-                                ) : (
-                                    <div className="divide-y">
-                                        {topCategories.map((category, index) => (
-                                            <div key={category.id} className="flex items-center justify-between p-3 hover:bg-purple-50/50 dark:hover:bg-purple-500/10 transition-colors group">
-                                                <div className="flex items-center gap-3 min-w-0">
-                                                    <span className={cn(
-                                                        "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
-                                                        index === 0 ? "bg-yellow-100 text-yellow-700" :
-                                                            index === 1 ? "bg-slate-100 text-slate-700" :
-                                                                index === 2 ? "bg-orange-100 text-orange-700" :
-                                                                    "bg-muted text-muted-foreground"
-                                                    )}>
-                                                        {index + 1}
-                                                    </span>
-                                                    <div className="min-w-0">
-                                                        <p className="text-sm font-medium truncate pr-2">{category.nom}</p>
-                                                        <p className="text-xs text-muted-foreground">
-                                                            {category.total_vendu} articles vendus
-                                                        </p>
+                        <CardContent className="p-0 flex-1">
+                            <ScrollArea className="h-[300px]">
+                                <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                                    {topCategories.length > 0 ? (
+                                        topCategories.map((cat, i) => (
+                                            <div key={i} className="flex items-center justify-between p-4 hover:bg-purple-500/5 transition-all duration-300 group/cat">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-purple-100 text-purple-600 font-black dark:bg-zinc-800">
+                                                        {i + 1}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-bold text-sm group-hover/cat:text-purple-600 transition-colors uppercase tracking-tight">{cat.nom}</p>
+                                                        <div className="h-1.5 w-32 bg-zinc-100 rounded-full mt-1 overflow-hidden dark:bg-zinc-800 shadow-inner">
+                                                            <div className="h-full bg-linear-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-1000" style={{ width: `${Math.min(100, (cat.total_vendu / 100) * 100)}%` }} />
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div className="text-xs font-semibold shrink-0">
-                                                    {formatMontant(category.total_revenus)} F
+                                                <div className="text-right">
+                                                    <p className="text-sm font-black">{cat.total_vendu} v.</p>
+                                                    <p className="text-[10px] font-bold text-purple-500">{formatMontant(cat.total_revenus)} F</p>
                                                 </div>
                                             </div>
-                                        ))}
-                                    </div>
-                                )}
+                                        ))
+                                    ) : (
+                                        <div className="p-12 text-center text-muted-foreground text-sm italic">
+                                            Données insuffisantes
+                                        </div>
+                                    )}
+                                </div>
                             </ScrollArea>
                         </CardContent>
                     </Card>
@@ -536,8 +581,7 @@ export default function Dashboard({
 
 
 
-                {/* WhatsApp Catalog Section */}
-                <div className="pt-4">
+                {/* <div className="pt-4">
                     <h2 className="text-sm font-semibold mb-3 px-1 text-muted-foreground uppercase tracking-wider">Communication</h2>
                     <Button
                         onClick={() => setWhatsappModalOpen(true)}
@@ -547,16 +591,15 @@ export default function Dashboard({
                         <MessageCircle className="h-6 w-6 group-hover:scale-110 transition-transform" />
                         <span className="font-bold text-base tracking-wide">Envoyer Catalogue WhatsApp</span>
                     </Button>
-                </div>
+                </div> */}
 
             </div>
 
-            {/* WhatsApp Modal */}
-            <WhatsAppShareModal
+            {/* <WhatsAppShareModal
                 open={whatsappModalOpen}
                 onOpenChange={setWhatsappModalOpen}
                 clients={clients}
-            />
+            /> */}
         </AppLayout>
     );
 }

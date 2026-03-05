@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -27,12 +28,13 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { UserMenuContent } from '@/components/user-menu-content';
+import { useAppearance } from '@/hooks/use-appearance';
 import { useInitials } from '@/hooks/use-initials';
 import { cn, isSameUrl, resolveUrl } from '@/lib/utils';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, Menu, Moon, Search, Sun, Monitor } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
@@ -67,6 +69,7 @@ interface AppHeaderProps {
 export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const page = usePage<SharedData>();
     const { auth } = page.props;
+    const { appearance, updateAppearance } = useAppearance();
     const getInitials = useInitials();
     return (
         <>
@@ -226,6 +229,41 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 ))}
                             </div>
                         </div>
+
+                        {/* Theme Toggle */}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                                    <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                                    <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                                    <span className="sr-only">Changer de thème</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="bg-popover/80 backdrop-blur-xl border-white/10 rounded-xl min-w-[120px]">
+                                <DropdownMenuItem
+                                    onClick={() => updateAppearance('light')}
+                                    className={cn("flex items-center gap-2 cursor-pointer", appearance === 'light' && "bg-accent")}
+                                >
+                                    <Sun className="h-4 w-4" />
+                                    <span>Clair</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={() => updateAppearance('dark')}
+                                    className={cn("flex items-center gap-2 cursor-pointer", appearance === 'dark' && "bg-accent")}
+                                >
+                                    <Moon className="h-4 w-4" />
+                                    <span>Sombre</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={() => updateAppearance('system')}
+                                    className={cn("flex items-center gap-2 cursor-pointer", appearance === 'system' && "bg-accent")}
+                                >
+                                    <Monitor className="h-4 w-4" />
+                                    <span>Système</span>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button
