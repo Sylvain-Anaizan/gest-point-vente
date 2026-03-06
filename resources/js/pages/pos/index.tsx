@@ -383,20 +383,28 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                                             variant="outline"
                                             role="combobox"
                                             aria-expanded={openCombobox}
-                                            className="w-full justify-between bg-background font-normal"
+                                            className="w-full justify-between bg-background font-normal h-11 lg:h-10 px-3 hover:bg-muted/50 transition-colors"
                                         >
-                                            {selectedClient === 'anonymous'
-                                                ? "Client Anonyme"
-                                                : clients.find((client) => client.id.toString() === selectedClient)?.nom || "Sélectionner un client..."}
+                                            <div className="flex items-center gap-2 truncate">
+                                                <div className={cn("size-2 rounded-full", selectedClient === 'anonymous' ? "bg-zinc-300" : "bg-indigo-500")} />
+                                                {selectedClient === 'anonymous'
+                                                    ? "Client Anonyme"
+                                                    : clients.find((client) => client.id.toString() === selectedClient)?.nom || "Sélectionner un client..."}
+                                            </div>
                                             <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                         </Button>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-[300px] p-0" align="start">
-                                        <Command>
-                                            <CommandInput placeholder="Rechercher un client..." />
-                                            <CommandList>
-                                                <CommandEmpty>Aucun client trouvé.</CommandEmpty>
-                                                <CommandGroup>
+                                    <PopoverContent className="w-[300px] p-0 shadow-2xl border-indigo-500/20" align="start" sideOffset={8}>
+                                        <Command className="rounded-lg">
+                                            <CommandInput placeholder="Rechercher par nom ou mobile..." className="h-12" />
+                                            <CommandList className="max-h-[300px] overflow-y-auto pointer-events-auto">
+                                                <CommandEmpty className="py-6 text-center text-sm">
+                                                    <div className="flex flex-col items-center gap-2 opacity-40">
+                                                        <SearchIcon className="size-8" />
+                                                        <span>Aucun client trouvé</span>
+                                                    </div>
+                                                </CommandEmpty>
+                                                <CommandGroup heading="Sélection" className="px-2">
                                                     <CommandItem
                                                         value="anonymous"
                                                         onSelect={() => {
@@ -404,35 +412,40 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                                                             setData('client_id', null);
                                                             setOpenCombobox(false);
                                                         }}
+                                                        onPointerDown={(e) => e.stopPropagation()}
+                                                        className="rounded-md cursor-pointer pointer-events-auto"
                                                     >
                                                         <CheckIcon
                                                             className={cn(
-                                                                "mr-2 h-4 w-4",
+                                                                "mr-2 h-4 w-4 text-indigo-600",
                                                                 selectedClient === 'anonymous' ? "opacity-100" : "opacity-0"
                                                             )}
                                                         />
-                                                        Client Anonyme
+                                                        <span className="font-bold">Client Anonyme</span>
                                                     </CommandItem>
                                                     {clients.map((client) => (
                                                         <CommandItem
                                                             key={client.id}
-                                                            value={`${client.nom} ${client.telephone || ''}`}
+                                                            value={`${client.nom} ${client.telephone || ''} ${client.id}`}
                                                             onSelect={() => {
-                                                                setSelectedClient(client.id.toString());
+                                                                const idStr = client.id.toString();
+                                                                setSelectedClient(idStr);
                                                                 setData('client_id', client.id);
                                                                 setOpenCombobox(false);
                                                             }}
+                                                            onPointerDown={(e) => e.stopPropagation()}
+                                                            className="rounded-md py-3 cursor-pointer pointer-events-auto"
                                                         >
                                                             <CheckIcon
                                                                 className={cn(
-                                                                    "mr-2 h-4 w-4",
+                                                                    "mr-2 h-4 w-4 text-indigo-600",
                                                                     selectedClient === client.id.toString() ? "opacity-100" : "opacity-0"
                                                                 )}
                                                             />
-                                                            <div className="flex flex-col">
-                                                                <span>{client.nom}</span>
+                                                            <div className="flex flex-col min-w-0">
+                                                                <span className="font-bold truncate">{client.nom}</span>
                                                                 {client.telephone && (
-                                                                    <span className="text-xs text-muted-foreground">{client.telephone}</span>
+                                                                    <span className="text-[10px] font-black text-indigo-500/60 uppercase tracking-tighter">{client.telephone}</span>
                                                                 )}
                                                             </div>
                                                         </CommandItem>
@@ -544,20 +557,28 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                                                     variant="outline"
                                                     role="combobox"
                                                     aria-expanded={openCombobox}
-                                                    className="w-full justify-between bg-background font-normal"
+                                                    className="w-full justify-between bg-zinc-50 dark:bg-zinc-900 font-normal h-12 rounded-xl border-zinc-200 dark:border-zinc-800 shadow-sm"
                                                 >
-                                                    {selectedClient === 'anonymous'
-                                                        ? "Client Anonyme"
-                                                        : clients.find((client) => client.id.toString() === selectedClient)?.nom || "Sélectionner un client..."}
+                                                    <div className="flex items-center gap-2 truncate">
+                                                        <div className={cn("size-2 rounded-full shadow-sm", selectedClient === 'anonymous' ? "bg-zinc-300" : "bg-indigo-500")} />
+                                                        {selectedClient === 'anonymous'
+                                                            ? "Client Anonyme"
+                                                            : clients.find((client) => client.id.toString() === selectedClient)?.nom || "Sélectionner un client..."}
+                                                    </div>
                                                     <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                 </Button>
                                             </PopoverTrigger>
-                                            <PopoverContent className="w-[300px] p-0" align="start">
-                                                <Command>
-                                                    <CommandInput placeholder="Rechercher un client..." />
-                                                    <CommandList>
-                                                        <CommandEmpty>Aucun client trouvé.</CommandEmpty>
-                                                        <CommandGroup>
+                                            <PopoverContent className="w-[calc(100vw-3rem)] p-0 shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-indigo-500/20 rounded-2xl overflow-hidden" align="center" sideOffset={12}>
+                                                <Command className="rounded-none">
+                                                    <CommandInput placeholder="Nom ou téléphone..." className="h-14 bg-background/50" />
+                                                    <CommandList className="max-h-[40vh] overflow-y-auto pointer-events-auto">
+                                                        <CommandEmpty className="py-10 text-center">
+                                                            <div className="flex flex-col items-center gap-3 opacity-30">
+                                                                <SearchIcon className="size-10" />
+                                                                <span className="text-sm font-bold uppercase tracking-widest">Inconnu</span>
+                                                            </div>
+                                                        </CommandEmpty>
+                                                        <CommandGroup heading="Sélection Client" className="px-2 pt-2 pb-4">
                                                             <CommandItem
                                                                 value="anonymous"
                                                                 onSelect={() => {
@@ -565,35 +586,39 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                                                                     setData('client_id', null);
                                                                     setOpenCombobox(false);
                                                                 }}
+                                                                onPointerDown={(e) => e.stopPropagation()}
+                                                                className="rounded-xl py-4 aria-selected:bg-indigo-500/10 cursor-pointer pointer-events-auto"
                                                             >
                                                                 <CheckIcon
                                                                     className={cn(
-                                                                        "mr-2 h-4 w-4",
+                                                                        "mr-2 h-5 w-5 text-indigo-500",
                                                                         selectedClient === 'anonymous' ? "opacity-100" : "opacity-0"
                                                                     )}
                                                                 />
-                                                                Client Anonyme
+                                                                <span className="font-black uppercase tracking-tight text-sm">Client Anonyme</span>
                                                             </CommandItem>
                                                             {clients.map((client) => (
                                                                 <CommandItem
                                                                     key={client.id}
-                                                                    value={`${client.nom} ${client.telephone || ''}`}
+                                                                    value={`${client.nom} ${client.telephone || ''} ${client.id}`}
                                                                     onSelect={() => {
                                                                         setSelectedClient(client.id.toString());
                                                                         setData('client_id', client.id);
                                                                         setOpenCombobox(false);
                                                                     }}
+                                                                    onPointerDown={(e) => e.stopPropagation()}
+                                                                    className="rounded-xl py-5 aria-selected:bg-indigo-500/10 border-b border-zinc-100 dark:border-zinc-800 last:border-0 cursor-pointer pointer-events-auto"
                                                                 >
                                                                     <CheckIcon
                                                                         className={cn(
-                                                                            "mr-2 h-4 w-4",
+                                                                            "mr-2 h-5 w-5 text-indigo-500",
                                                                             selectedClient === client.id.toString() ? "opacity-100" : "opacity-0"
                                                                         )}
                                                                     />
-                                                                    <div className="flex flex-col">
-                                                                        <span>{client.nom}</span>
+                                                                    <div className="flex flex-col min-w-0">
+                                                                        <span className="font-black uppercase tracking-tight text-sm truncate">{client.nom}</span>
                                                                         {client.telephone && (
-                                                                            <span className="text-xs text-muted-foreground">{client.telephone}</span>
+                                                                            <span className="text-[10px] font-bold text-indigo-500/70 tracking-[0.1em] mt-0.5 italic">{client.telephone}</span>
                                                                         )}
                                                                     </div>
                                                                 </CommandItem>

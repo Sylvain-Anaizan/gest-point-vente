@@ -111,7 +111,7 @@ export default function CategoriesIndex({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Catégories" />
 
-            <div className="space-y-6">
+            <div className="space-y-6 px-4 md:px-8">
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">

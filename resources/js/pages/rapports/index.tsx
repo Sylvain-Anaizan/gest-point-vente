@@ -147,7 +147,7 @@ export default function RapportsIndex({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Rapports & Analyses" />
 
-            <div className="space-y-8 p-4 md:p-8 max-w-[1600px] mx-auto pb-32 animate-in fade-in duration-700">
+            <div className="space-y-8 p-4 md:p-8 max-w-[1600px] pb-32 animate-in fade-in duration-700">
                 {/* SECTION 1: HEADER & FILTRES */}
                 <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
                     <div className="space-y-1">

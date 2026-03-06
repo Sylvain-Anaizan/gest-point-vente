@@ -89,7 +89,7 @@ export default function ClientsIndex({ clients, filters }: { clients: { data: Cl
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Liste des Clients" />
 
-            <div className="space-y-8">
+            <div className="space-y-8 p-4 md:p-8">
 
                 {/* EN-TÊTE AVEC KPI */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
