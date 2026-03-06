@@ -14,7 +14,8 @@ import {
     XCircle,
     Plus,
     Trash2,
-    Package
+    Package,
+    Store as StoreIcon
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -53,7 +54,9 @@ interface Commande {
     lignes_commande?: LigneCommande[];
 }
 
-export default function CommandesEdit({ commande, clients }: { commande: Commande, clients: Client[] }) {
+interface Boutique { id: number; nom: string; }
+
+export default function CommandesEdit({ commande, clients, boutiques = [] }: { commande: Commande, clients: Client[], boutiques?: Boutique[] }) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Tableau de bord', href: '/dashboard' },
         { title: 'Commandes', href: '/commandes' },
@@ -69,7 +72,8 @@ export default function CommandesEdit({ commande, clients }: { commande: Command
         statut: commande.statut,
         montant_total: commande.montant_total,
         observations: commande.observations || '',
-        lignes_commande: commande.lignes_commande || [{ nom: '', quantite: 1, prix: 0 }],
+        boutique_id: (commande as any).boutique_id?.toString() || '',
+        lignes_commande: (commande as any).lignes_commande || [{ nom: '', quantite: 1, prix: 0 }],
     });
 
     const addLine = () => {
@@ -333,6 +337,29 @@ export default function CommandesEdit({ commande, clients }: { commande: Command
                     </div>
 
                     <div className="space-y-6">
+                        {boutiques.length > 0 && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-lg flex items-center gap-2">
+                                        <StoreIcon className="h-4 w-4" /> Boutique
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <Select value={data.boutique_id} onValueChange={value => setData('boutique_id', value)}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Choisir une boutique" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {boutiques.map(boutique => (
+                                                <SelectItem key={boutique.id} value={boutique.id.toString()}>{boutique.nom}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.boutique_id && <p className="text-xs text-red-500">{errors.boutique_id}</p>}
+                                </CardContent>
+                            </Card>
+                        )}
+
                         <Card>
                             <CardHeader>
                                 <CardTitle className="text-lg">Statut de la Commande</CardTitle>

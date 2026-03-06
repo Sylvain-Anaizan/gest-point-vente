@@ -30,6 +30,7 @@ class UpdateCommandeRequest extends FormRequest
             'statut' => 'sometimes|string|in:en_attente,en_cours,livrée,annulée',
             'montant_total' => 'sometimes|numeric|min:0',
             'observations' => 'nullable|string',
+            'boutique_id' => 'sometimes|exists:boutiques,id',
             'lignes_commande' => 'sometimes|array|min:1',
             'lignes_commande.*.id' => 'nullable|exists:ligne_commandes,id',
             'lignes_commande.*.nom' => 'required_with:lignes_commande|string|max:255',

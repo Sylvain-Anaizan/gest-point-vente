@@ -30,6 +30,7 @@ class StoreCommandeRequest extends FormRequest
             'statut' => 'required|string|in:en_attente,en_cours,livrée,annulée',
             'montant_total' => 'required|numeric|min:0',
             'observations' => 'nullable|string',
+            'boutique_id' => 'nullable|exists:boutiques,id',
             'lignes_commande' => 'required|array|min:1',
             'lignes_commande.*.nom' => 'required|string|max:255',
             'lignes_commande.*.quantite' => 'required|integer|min:1',

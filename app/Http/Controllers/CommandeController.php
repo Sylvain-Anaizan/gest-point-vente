@@ -49,16 +49,41 @@ class CommandeController extends Controller
 
     public function create(): Response
     {
+        $user = auth()->user();
+        $boutiques = ($user->isAdmin() || !$user->boutique_id) 
+            ? \App\Models\Boutique::all(['id', 'nom'])
+            : [];
+
         return Inertia::render('Commandes/Create', [
             'clients' => Client::actifs()->get(['id', 'nom', 'telephone']),
+            'boutiques' => $boutiques,
         ]);
     }
 
     public function store(StoreCommandeRequest $request): RedirectResponse
     {
         $data = $request->validated();
+        $user = auth()->user();
+        
         $data['numero'] = 'CMD-'.strtoupper(Str::random(8));
-        $data['boutique_id'] = auth()->user()->boutique_id;
+        
+        // Priorité : boutique demandée (si admin) > boutique de l'utilisateur > première boutique (si admin)
+        if ($user->isAdmin() && isset($data['boutique_id'])) {
+            $boutiqueId = $data['boutique_id'];
+        } else {
+            $boutiqueId = $user->boutique_id;
+        }
+
+        // Fallback pour les admins sans boutique assignée
+        if (!$boutiqueId && $user->isAdmin()) {
+            $boutiqueId = \App\Models\Boutique::first()?->id;
+        }
+
+        if (!$boutiqueId) {
+            return back()->with('error', 'Vous devez appartenir à une boutique pour créer une commande.');
+        }
+
+        $data['boutique_id'] = $boutiqueId;
 
         DB::transaction(function () use ($data) {
             $commande = Commande::create(collect($data)->except('lignes_commande')->toArray());
@@ -86,9 +111,15 @@ class CommandeController extends Controller
         $this->authorizeBoutique($commande);
         $commande->load('lignesCommande');
 
+        $user = auth()->user();
+        $boutiques = ($user->isAdmin() || !$user->boutique_id) 
+            ? \App\Models\Boutique::all(['id', 'nom'])
+            : [];
+
         return Inertia::render('Commandes/Edit', [
             'commande' => $commande,
             'clients' => Client::actifs()->get(['id', 'nom', 'telephone']),
+            'boutiques' => $boutiques,
         ]);
     }
 

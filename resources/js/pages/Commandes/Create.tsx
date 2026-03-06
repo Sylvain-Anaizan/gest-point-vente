@@ -12,7 +12,8 @@ import {
     Info,
     Plus,
     Trash2,
-    Package
+    Package,
+    Store as StoreIcon
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -38,7 +39,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 interface Client { id: number; nom: string; telephone: string | null; }
 
-export default function CommandesCreate({ clients }: { clients: Client[] }) {
+interface Boutique { id: number; nom: string; }
+
+export default function CommandesCreate({ clients, boutiques = [] }: { clients: Client[], boutiques?: Boutique[] }) {
     const { data, setData, post, processing, errors } = useForm({
         client_id: '',
         nom_client: '',
@@ -48,6 +51,7 @@ export default function CommandesCreate({ clients }: { clients: Client[] }) {
         statut: 'en_attente',
         montant_total: 0,
         observations: '',
+        boutique_id: '',
         lignes_commande: [{ nom: '', quantite: 1, prix: 0 }],
     });
 
@@ -320,6 +324,33 @@ export default function CommandesCreate({ clients }: { clients: Client[] }) {
                     </div>
 
                     <div className="space-y-6">
+                        {boutiques.length > 0 && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-lg flex items-center gap-2">
+                                        <StoreIcon className="h-4 w-4" /> Boutique
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <Select value={data.boutique_id} onValueChange={value => setData('boutique_id', value)}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Choisir une boutique" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {boutiques.map(boutique => (
+                                                <SelectItem key={boutique.id} value={boutique.id.toString()}>{boutique.nom}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <p className="text-[10px] text-muted-foreground bg-amber-50 dark:bg-amber-900/20 p-2 rounded flex gap-2">
+                                        <Info className="h-3 w-3 shrink-0 text-amber-500" />
+                                        Si vous ne choisissez pas de boutique, la commande sera automatiquement assignée à votre boutique par défaut ou à la première boutique disponible.
+                                    </p>
+                                    {errors.boutique_id && <p className="text-xs text-red-500">{errors.boutique_id}</p>}
+                                </CardContent>
+                            </Card>
+                        )}
+
                         <Card>
                             <CardHeader>
                                 <CardTitle className="text-lg">Statut Initial</CardTitle>

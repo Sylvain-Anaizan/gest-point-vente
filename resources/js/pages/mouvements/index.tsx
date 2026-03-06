@@ -109,10 +109,10 @@ export default function MouvementsIndex({
                             Journal de flux
                         </div>
                         <h1 className="text-3xl md:text-4xl font-black tracking-tight text-zinc-900 dark:text-zinc-50 uppercase">Mouvements</h1>
-                        <p className="text-sm text-muted-foreground font-medium flex items-center gap-2">
+                        <div className="text-sm text-muted-foreground font-medium flex items-center gap-2">
                             <div className="size-1.5 rounded-full bg-indigo-500 animate-pulse" />
                             Historique précis des entrées et sorties de stock.
-                        </p>
+                        </div>
                     </div>
                     <Link href={MouvementStockController.create.url()} className="group">
                         <Button className="h-14 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-600/20 border-0 font-black uppercase tracking-widest text-xs transition-all hover:scale-[1.02] active:scale-95 group overflow-hidden relative w-full sm:w-auto">
