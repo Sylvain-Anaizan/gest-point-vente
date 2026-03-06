@@ -59,6 +59,7 @@ interface Commande {
     observations: string | null;
     created_at: string;
     client?: Client;
+    boutique?: { id: number; nom: string; adresse: string | null; telephone: string | null; };
     lignes_commande?: LigneCommande[];
 }
 
@@ -237,8 +238,45 @@ export default function CommandesShow({ commande }: { commande: Commande }) {
                         </Card>
                     </div>
 
-                    {/* INFOS CLIENT & FINANCES */}
+                    {/* INFOS BOUTIQUE & CLIENT */}
                     <div className="space-y-6">
+                        {commande.boutique && (
+                            <Card className="border-l-4 border-l-indigo-500 shadow-sm">
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="text-lg flex items-center gap-2">
+                                        <Building2 className="h-5 w-5 text-indigo-500" />
+                                        Boutique
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div>
+                                        <p className="font-black text-xl text-zinc-900 dark:text-zinc-50 uppercase tracking-tight">
+                                            {commande.boutique.nom}
+                                        </p>
+                                        <div className="mt-3 space-y-2">
+                                            {commande.boutique.adresse && (
+                                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                    <MapPin className="h-3.5 w-3.5 shrink-0" />
+                                                    <span>{commande.boutique.adresse}</span>
+                                                </div>
+                                            )}
+                                            {commande.boutique.telephone && (
+                                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                    <Phone className="h-3.5 w-3.5 shrink-0" />
+                                                    <span>{commande.boutique.telephone}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <Link href={`/boutiques/${commande.boutique.id}`} className="block">
+                                        <Button variant="outline" size="sm" className="w-full border-indigo-100 hover:bg-indigo-50 text-indigo-600">
+                                            Voir la boutique
+                                        </Button>
+                                    </Link>
+                                </CardContent>
+                            </Card>
+                        )}
+
                         <Card className="shadow-lg">
                             <CardHeader>
                                 <CardTitle className="text-lg">Détails du Client</CardTitle>

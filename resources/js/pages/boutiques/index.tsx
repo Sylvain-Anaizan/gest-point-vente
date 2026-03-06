@@ -1,7 +1,7 @@
 import BoutiqueController from '@/actions/App/Http/Controllers/BoutiqueController';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, SearchIcon, MapPinIcon, PhoneIcon, StoreIcon } from 'lucide-react';
+import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, SearchIcon, MapPinIcon, PhoneIcon, StoreIcon, MoreVertical } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,12 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
@@ -149,8 +155,8 @@ export default function BoutiquesIndex({
                                     exit={{ opacity: 0, scale: 0.95 }}
                                     transition={{ delay: index * 0.05 }}
                                 >
-                                    <Card className="group relative h-full transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 border-indigo-100/50 overflow-hidden bg-white/70 backdrop-blur-sm">
-                                        <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                                    <Card className="group relative h-full transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 border-zinc-200 dark:border-zinc-800 overflow-hidden bg-white dark:bg-zinc-950">
+                                        <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
                                             <StoreIcon className="size-16 -mr-4 -mt-4 rotate-12" />
                                         </div>
                                         <CardHeader className="pb-4">
@@ -158,9 +164,39 @@ export default function BoutiquesIndex({
                                                 <div className="size-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                                                     <StoreIcon className="size-6" />
                                                 </div>
-                                                <Badge className="bg-indigo-500 text-white border-0 font-bold">
-                                                    {boutique.produits_count} {boutique.produits_count <= 1 ? 'PRODUIT' : 'PRODUITS'}
-                                                </Badge>
+                                                <div className="flex items-center gap-2">
+                                                    <Badge className="bg-indigo-500 text-white border-0 font-bold whitespace-nowrap">
+                                                        {boutique.produits_count} {boutique.produits_count <= 1 ? 'PRODUIT' : 'PRODUITS'}
+                                                    </Badge>
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                                            <Button size="icon" variant="ghost" className="size-8 rounded-lg text-indigo-950/40 hover:text-indigo-600 hover:bg-indigo-50 transition-colors">
+                                                                <MoreVertical className="size-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl border-zinc-200 dark:border-zinc-800 shadow-2xl">
+                                                            <Link href={BoutiqueController.show.url(boutique.id)}>
+                                                                <DropdownMenuItem className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 font-bold text-xs uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+                                                                    <EyeIcon className="size-4 text-indigo-500" />
+                                                                    Inventaire
+                                                                </DropdownMenuItem>
+                                                            </Link>
+                                                            <Link href={BoutiqueController.edit.url(boutique.id)}>
+                                                                <DropdownMenuItem className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 font-bold text-xs uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+                                                                    <PencilIcon className="size-4 text-emerald-500" />
+                                                                    Modifier
+                                                                </DropdownMenuItem>
+                                                            </Link>
+                                                            <DropdownMenuItem
+                                                                className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-rose-50 dark:hover:bg-rose-500/10 font-bold text-xs uppercase tracking-widest text-rose-600 focus:bg-rose-50 focus:text-rose-600"
+                                                                onClick={() => handleDeleteClick(boutique)}
+                                                            >
+                                                                <TrashIcon className="size-4" />
+                                                                Supprimer
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </div>
                                             </div>
                                             <CardTitle className="text-2xl font-black text-indigo-950 group-hover:text-indigo-600 transition-colors">
                                                 {boutique.nom}
@@ -184,28 +220,13 @@ export default function BoutiquesIndex({
                                                 )}
                                             </div>
                                         </CardHeader>
-                                        <CardFooter className="flex gap-2 pt-6 border-t border-indigo-50/50 bg-indigo-50/20 group-hover:bg-indigo-50/40 transition-colors">
-                                            <Link href={BoutiqueController.show.url(boutique.id)} className="flex-1">
-                                                <Button className="w-full bg-white hover:bg-indigo-600 hover:text-white text-indigo-600 border border-indigo-100 font-bold shadow-sm">
+                                        <CardFooter className="pt-6 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 transition-colors">
+                                            <Link href={BoutiqueController.show.url(boutique.id)} className="w-full">
+                                                <Button className="w-full bg-white dark:bg-zinc-900 hover:bg-indigo-600 dark:hover:bg-indigo-500 hover:text-white dark:hover:text-white text-indigo-600 dark:text-indigo-400 border border-zinc-200 dark:border-zinc-800 font-bold shadow-sm rounded-xl transition-all">
                                                     <EyeIcon className="size-4 mr-2" />
-                                                    Inventaire
+                                                    Voir l'inventaire
                                                 </Button>
                                             </Link>
-                                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-4 group-hover:translate-x-0">
-                                                <Link href={BoutiqueController.edit.url(boutique.id)}>
-                                                    <Button variant="outline" size="icon" className="rounded-lg hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200">
-                                                        <PencilIcon className="size-4" />
-                                                    </Button>
-                                                </Link>
-                                                <Button
-                                                    variant="outline"
-                                                    size="icon"
-                                                    className="rounded-lg hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200"
-                                                    onClick={() => handleDeleteClick(boutique)}
-                                                >
-                                                    <TrashIcon className="size-4" />
-                                                </Button>
-                                            </div>
                                         </CardFooter>
                                     </Card>
                                 </motion.div>

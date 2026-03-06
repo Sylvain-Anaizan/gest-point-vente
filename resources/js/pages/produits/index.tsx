@@ -11,6 +11,8 @@ import {
     TrendingUp,
     Warehouse,
     Store,
+    MoreVertical,
+    Eye,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -34,6 +36,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import AppLayout from '@/layouts/app-layout';
@@ -167,7 +175,7 @@ export default function ProduitsIndex({
                         { title: 'Valeur du Stock', value: stats.totalValue.toLocaleString('fr-FR'), suffix: 'FCFA', icon: TrendingUp, color: 'blue', desc: 'Estimation à la vente' },
                         { title: 'Stock Faible', value: stats.lowStock, icon: AlertTriangle, color: stats.lowStock > 0 ? 'rose' : 'emerald', desc: 'À réapprovisionner' }
                     ].map((stat, i) => (
-                        <Card key={i} className="group relative overflow-hidden bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 rounded-lg shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
+                        <Card key={i} className="group relative overflow-hidden bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 rounded-lg shadow-md hover:shadow-lg transition-all duration-500 hover:-translate-y-1">
                             <div className={`absolute -right-6 -top-6 size-32 bg-${stat.color}-500/5 rounded-full blur-3xl group-hover:bg-${stat.color}-500/10 transition-all duration-700`} />
                             <CardHeader className="flex flex-row items-center justify-between space-y-0">
                                 <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
@@ -198,7 +206,7 @@ export default function ProduitsIndex({
 
                 {/* --- SECTION 3: FILTRES --- */}
                 <Card className="bg-white dark:bg-zinc-900/50 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 rounded-lg shadow">
-                    <CardContent className="p-6">
+                    <CardContent>
                         <div className="flex flex-col lg:flex-row items-center gap-4">
                             <div className="relative flex-1 w-full group">
                                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-indigo-500 transition-colors" />
@@ -249,43 +257,49 @@ export default function ProduitsIndex({
                             const isOutOfStock = produit.totalStock === 0;
 
                             return (
-                                <Card key={produit.id} className="group relative flex flex-col rounded-lg bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/40 dark:border-zinc-800/40 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden">
-                                    <div className="relative aspect-[4/3] overflow-hidden rounded-lg m-3 bg-zinc-100 dark:bg-zinc-800/50">
+                                <Card key={produit.id} className="group relative flex flex-col rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 hover:-translate-y-2 overflow-hidden">
+                                    <div className="relative aspect-[4/3] overflow-hidden rounded-xl m-2 bg-zinc-100 dark:bg-zinc-900">
                                         <img
                                             src={produit.imageUrl || placeholderUrl}
                                             alt={produit.nom}
                                             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                                             onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl; }}
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                                        <div className="absolute top-3 left-3">
-                                            <Badge className="bg-white/90 dark:bg-zinc-900/90 text-zinc-900 dark:text-zinc-50 border-0 shadow-sm backdrop-blur-md px-3 py-1 rounded-xl font-black uppercase text-[9px] tracking-widest">
-                                                {produit.category.nom}
-                                            </Badge>
+                                        <div className="absolute top-3 right-3 z-30">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                                    <Button size="icon" className="size-8 rounded-xl bg-white/90 dark:bg-zinc-800/90 hover:bg-white dark:hover:bg-zinc-700 border-0 shadow-lg text-zinc-900 dark:text-zinc-50 transition-colors active:scale-95">
+                                                        <MoreVertical className="size-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl border-zinc-200 dark:border-zinc-800 shadow-2xl bg-white dark:bg-zinc-900">
+                                                    <Link href={ProduitController.show.url(produit.id)}>
+                                                        <DropdownMenuItem className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 font-bold text-xs uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+                                                            <Eye className="size-4 text-indigo-500" />
+                                                            Détails
+                                                        </DropdownMenuItem>
+                                                    </Link>
+                                                    <Link href={ProduitController.edit.url(produit.id)}>
+                                                        <DropdownMenuItem className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 font-bold text-xs uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+                                                            <PencilIcon className="size-4 text-emerald-500" />
+                                                            Modifier
+                                                        </DropdownMenuItem>
+                                                    </Link>
+                                                    <DropdownMenuItem
+                                                        className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-rose-50 dark:hover:bg-rose-500/10 font-bold text-xs uppercase tracking-widest text-rose-600 focus:bg-rose-50 focus:text-rose-600"
+                                                        onClick={() => handleDeleteClick(produit)}
+                                                    >
+                                                        <TrashIcon className="size-4" />
+                                                        Supprimer
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </div>
 
-                                        <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500 delay-75">
-                                            <div className="flex gap-2">
-                                                <Link href={ProduitController.edit.url(produit.id)}>
-                                                    <Button size="icon" className="size-8 rounded-xl bg-white/20 hover:bg-white/40 backdrop-blur-md border border-white/30 text-white transition-colors">
-                                                        <PencilIcon className="size-4" />
-                                                    </Button>
-                                                </Link>
-                                                <Button
-                                                    size="icon"
-                                                    variant="destructive"
-                                                    className="size-8 rounded-xl backdrop-blur-md border border-rose-500/30 transition-all"
-                                                    onClick={() => handleDeleteClick(produit)}
-                                                >
-                                                    <TrashIcon className="size-4" />
-                                                </Button>
-                                            </div>
-                                            <Link href={ProduitController.show.url(produit.id)}>
-                                                <Button size="sm" className="h-8 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white border-0 font-bold uppercase text-[9px] tracking-widest px-4 shadow-lg shadow-indigo-500/20">
-                                                    Détails
-                                                </Button>
-                                            </Link>
+                                        <div className="absolute top-3 left-3">
+                                            <Badge className="bg-white/90 dark:bg-zinc-800/90 text-zinc-900 dark:text-zinc-50 border-0 shadow-sm backdrop-blur-md px-3 py-1 rounded-xl font-black uppercase text-[9px] tracking-widest">
+                                                {produit.category.nom}
+                                            </Badge>
                                         </div>
                                     </div>
 
@@ -311,9 +325,9 @@ export default function ProduitsIndex({
                                             <div className="flex flex-col items-end gap-2">
                                                 <div className={cn(
                                                     "flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest shadow-sm transition-all duration-500 group-hover:scale-105",
-                                                    isOutOfStock ? "bg-rose-500/10 text-rose-600 border-rose-500/20" :
-                                                        isLowStock ? "bg-orange-500/10 text-orange-600 border-orange-500/20 animate-pulse" :
-                                                            "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                                                    isOutOfStock ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20" :
+                                                        isLowStock ? "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20 animate-pulse" :
+                                                            "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
                                                 )}>
                                                     <Warehouse className="size-3" />
                                                     {produit.totalStock} en stock

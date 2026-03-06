@@ -162,8 +162,8 @@ export default function RapportsIndex({
                         </p>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 bg-white/50 dark:bg-zinc-900/80 backdrop-blur-xl p-2 rounded-sm border border-white/20 dark:border-zinc-800/50 shadow-sm">
-                        <div className="space-y-1 sm:w-[180px]">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 bg-white/50 dark:bg-zinc-900/80 backdrop-blur-xl p-2 rounded-sm border border-white/20 dark:border-zinc-800/50 shadow-sm w-full lg:w-auto">
+                        <div className="space-y-1 w-full sm:w-[180px]">
                             <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-2">Période</label>
                             <Select value={period} onValueChange={handlePeriodChange}>
                                 <SelectTrigger className="h-10 bg-white dark:bg-zinc-800/50 border-white/20 dark:border-zinc-700/50 rounded-lg font-bold text-xs">
@@ -180,26 +180,26 @@ export default function RapportsIndex({
                         </div>
 
                         {isCustom && (
-                            <div className="flex items-end gap-2 animate-in slide-in-from-right-4 fade-in duration-300">
-                                <div className="space-y-1">
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 animate-in slide-in-from-right-4 fade-in duration-300 w-full">
+                                <div className="space-y-1 flex-1">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-2">Du</label>
                                     <Input
                                         type="date"
                                         value={customStart}
                                         onChange={e => setCustomStart(e.target.value)}
-                                        className="h-10 bg-white/50 dark:bg-zinc-800/50 border-white/20 dark:border-zinc-700/50 rounded-xl text-xs font-bold"
+                                        className="h-10 bg-white/50 dark:bg-zinc-800/50 border-white/20 dark:border-zinc-700/50 rounded-xl text-xs font-bold w-full"
                                     />
                                 </div>
-                                <div className="space-y-1">
+                                <div className="space-y-1 flex-1">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-2">Au</label>
                                     <Input
                                         type="date"
                                         value={customEnd}
                                         onChange={e => setCustomEnd(e.target.value)}
-                                        className="h-10 bg-white/50 dark:bg-zinc-800/50 border-white/20 dark:border-zinc-700/50 rounded-xl text-xs font-bold"
+                                        className="h-10 bg-white/50 dark:bg-zinc-800/50 border-white/20 dark:border-zinc-700/50 rounded-xl text-xs font-bold w-full"
                                     />
                                 </div>
-                                <Button size="sm" onClick={applyCustomDates} className="h-10 rounded-xl bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-900 font-black uppercase tracking-widest text-[10px] px-6">
+                                <Button size="sm" onClick={applyCustomDates} className="h-10 rounded-xl bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-900 font-black uppercase tracking-widest text-[10px] px-6 w-full sm:w-auto">
                                     OK
                                 </Button>
                             </div>
@@ -209,17 +209,19 @@ export default function RapportsIndex({
 
                 {/* SECTION 2: TABS NAVIGATION */}
                 <Tabs defaultValue="resume" className="space-y-8">
-                    <TabsList className="bg-white dark:bg-zinc-950/40 backdrop-blur-md py-6 h-auto inline-flex rounded-2xl border border-white/20 dark:border-hinc-800/50 shadow-inner">
-                        <TabsTrigger value="resume" className="px-6 py-6 rounded-xl transition-all data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/20 text-xs font-black uppercase tracking-widest">
-                            <BarChart3 className="size-4 mr-2" /> Vue d'ensemble
-                        </TabsTrigger>
-                        <TabsTrigger value="ventes" className="px-6 py-6 rounded-xl transition-all data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/20 text-xs font-black uppercase tracking-widest">
-                            <TrendingUp className="size-4 mr-2" /> Ventes & Marges
-                        </TabsTrigger>
-                        <TabsTrigger value="stocks" className="px-6 py-6 rounded-xl transition-all data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/20 text-xs font-black uppercase tracking-widest">
-                            <PackageOpen className="size-4 mr-2" /> Inventaire
-                        </TabsTrigger>
-                    </TabsList>
+                    <div className="overflow-x-auto pb-2 scrollbar-none">
+                        <TabsList className="bg-white dark:bg-zinc-950/40 backdrop-blur-md py-6 h-auto inline-flex rounded-2xl border border-white/20 dark:border-hinc-800/50 shadow-inner min-w-full sm:min-w-0">
+                            <TabsTrigger value="resume" className="px-6 py-6 rounded-xl transition-all data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/20 text-xs font-black uppercase tracking-widest whitespace-nowrap">
+                                <BarChart3 className="size-4 mr-2" /> Vue d'ensemble
+                            </TabsTrigger>
+                            <TabsTrigger value="ventes" className="px-6 py-6 rounded-xl transition-all data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/20 text-xs font-black uppercase tracking-widest whitespace-nowrap">
+                                <TrendingUp className="size-4 mr-2" /> Ventes & Marges
+                            </TabsTrigger>
+                            <TabsTrigger value="stocks" className="px-6 py-6 rounded-xl transition-all data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/20 text-xs font-black uppercase tracking-widest whitespace-nowrap">
+                                <PackageOpen className="size-4 mr-2" /> Inventaire
+                            </TabsTrigger>
+                        </TabsList>
+                    </div>
 
                     {/* ONGLET 1: RÉSUMÉ (KPIs + Graphiques) */}
                     <TabsContent value="resume" className="space-y-8 animate-in fade-in zoom-in-95 duration-500">

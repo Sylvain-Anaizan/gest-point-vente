@@ -14,15 +14,13 @@ import {
     Eye,
     MapPin,
     Calendar,
-    Phone,
-    User
+
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
@@ -45,7 +43,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
 import { useState } from 'react';
 
@@ -69,9 +66,12 @@ interface Commande {
     observations: string | null;
     created_at: string;
     client?: Client;
+    boutique?: { id: number; nom: string; };
+    boutique_id: number;
 }
 
-export default function CommandesIndex({ commandes, filters }: {
+export default function CommandesIndex({ auth, commandes, filters }: {
+    auth: { user: { id: number; name: string; role: string; boutique_id: number | null; } };
     commandes: { data: Commande[]; current_page: number; last_page: number; per_page: number; total: number; links: any[]; };
     filters: { search?: string; statut?: string; };
 }) {
@@ -176,16 +176,25 @@ export default function CommandesIndex({ commandes, filters }: {
                         {commandes.data.map((commande) => (
                             <Card key={commande.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden border-t-4 border-t-primary/20">
                                 <CardHeader className="pb-3 border-b bg-muted/5 group-hover:bg-muted/10 transition-colors">
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">N° {commande.numero}</span>
-                                            <CardTitle className="text-base font-bold mt-1">
-                                                {commande.client?.nom || commande.nom_client || 'Client Inconnu'}
-                                            </CardTitle>
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex flex-col gap-1">
+                                                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">N° {commande.numero}</span>
+                                                {auth.user.role === 'admin' && commande.boutique && (
+                                                    <div className="flex">
+                                                        <Badge variant="secondary" className="text-[8px] h-3.5 py-0 px-1.5 bg-indigo-50 text-indigo-600 border-indigo-100 uppercase font-black">
+                                                            {commande.boutique.nom}
+                                                        </Badge>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="shrink-0">
+                                                {getStatutBadge(commande.statut)}
+                                            </div>
                                         </div>
-                                        <div className="flex gap-2">
-                                            {getStatutBadge(commande.statut)}
-                                        </div>
+                                        <CardTitle className="text-base font-bold leading-tight">
+                                            {commande.client?.nom || commande.nom_client || 'Client Inconnu'}
+                                        </CardTitle>
                                     </div>
                                 </CardHeader>
                                 <CardContent className="pt-4 space-y-4">

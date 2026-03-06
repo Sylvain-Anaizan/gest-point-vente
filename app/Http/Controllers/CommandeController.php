@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCommandeRequest;
 use App\Http\Requests\UpdateCommandeRequest;
+use App\Models\Boutique;
 use App\Models\Client;
 use App\Models\Commande;
 use Illuminate\Http\RedirectResponse;
@@ -16,9 +17,13 @@ class CommandeController extends Controller
 {
     public function index(): Response
     {
-        $boutiqueId = auth()->user()->boutique_id;
+        $user = auth()->user();
+        $boutiqueId = $user->boutique_id;
+        
         $commandes = Commande::query()
-            ->where('boutique_id', $boutiqueId)
+            ->when(!$user->isAdmin(), function ($query) use ($boutiqueId) {
+                return $query->where('boutique_id', $boutiqueId);
+            })
             ->when(request('search'), function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('numero', 'like', "%{$search}%")
@@ -36,7 +41,7 @@ class CommandeController extends Controller
                     $query->where('statut', $statut);
                 }
             })
-            ->with('client')
+            ->with(['client', 'boutique'])
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -51,7 +56,7 @@ class CommandeController extends Controller
     {
         $user = auth()->user();
         $boutiques = ($user->isAdmin() || !$user->boutique_id) 
-            ? \App\Models\Boutique::all(['id', 'nom'])
+            ? Boutique::all(['id', 'nom'])
             : [];
 
         return Inertia::render('Commandes/Create', [
@@ -76,7 +81,7 @@ class CommandeController extends Controller
 
         // Fallback pour les admins sans boutique assignée
         if (!$boutiqueId && $user->isAdmin()) {
-            $boutiqueId = \App\Models\Boutique::first()?->id;
+            $boutiqueId = Boutique::first()?->id;
         }
 
         if (!$boutiqueId) {
@@ -99,7 +104,7 @@ class CommandeController extends Controller
     public function show(Commande $commande): Response
     {
         $this->authorizeBoutique($commande);
-        $commande->load(['client', 'lignesCommande']);
+        $commande->load(['client', 'lignesCommande', 'boutique']);
 
         return Inertia::render('Commandes/Show', [
             'commande' => $commande,
@@ -155,7 +160,8 @@ class CommandeController extends Controller
 
     protected function authorizeBoutique(Commande $commande): void
     {
-        if ($commande->boutique_id !== auth()->user()->boutique_id) {
+        $user = auth()->user();
+        if (!$user->isAdmin() && $commande->boutique_id !== $user->boutique_id) {
             abort(403);
         }
     }
