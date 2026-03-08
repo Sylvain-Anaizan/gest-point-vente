@@ -1,6 +1,6 @@
 import ProduitController from '@/actions/App/Http/Controllers/ProduitController';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     PlusIcon,
     PencilIcon,
@@ -82,6 +82,9 @@ export default function ProduitsIndex({
     produits: Produit[];
     boutiques: Boutique[];
 }) {
+    const { auth } = usePage().props as unknown as { auth: { user: { permissions: string[] } } };
+    const canManage = auth.user.permissions.includes('manage products');
+
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedBoutique, setSelectedBoutique] = useState<string>('all');
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -158,14 +161,16 @@ export default function ProduitsIndex({
                             Gérez votre catalogue et suivez vos niveaux de stock.
                         </p>
                     </div>
-                    <Link href={ProduitController.create.url()} className="group">
-                        <Button className="h-14 px-8 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 border-0 font-black uppercase tracking-widest text-xs transition-all hover:scale-[1.02] active:scale-95 group overflow-hidden relative w-full sm:w-auto">
-                            <span className="relative z-10 flex items-center gap-2">
-                                <PlusIcon className="size-5 stroke-[3px]" /> Ajouter un produit
-                            </span>
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
-                        </Button>
-                    </Link>
+                    {canManage && (
+                        <Link href={ProduitController.create.url()} className="group">
+                            <Button className="h-14 px-8 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 border-0 font-black uppercase tracking-widest text-xs transition-all hover:scale-[1.02] active:scale-95 group overflow-hidden relative w-full sm:w-auto">
+                                <span className="relative z-10 flex items-center gap-2">
+                                    <PlusIcon className="size-5 stroke-[3px]" /> Ajouter un produit
+                                </span>
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
+                            </Button>
+                        </Link>
+                    )}
                 </div>
 
                 {/* --- SECTION 2: STATS --- */}
@@ -279,19 +284,23 @@ export default function ProduitsIndex({
                                                             Détails
                                                         </DropdownMenuItem>
                                                     </Link>
-                                                    <Link href={ProduitController.edit.url(produit.id)}>
-                                                        <DropdownMenuItem className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 font-bold text-xs uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
-                                                            <PencilIcon className="size-4 text-emerald-500" />
-                                                            Modifier
-                                                        </DropdownMenuItem>
-                                                    </Link>
-                                                    <DropdownMenuItem
-                                                        className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-rose-50 dark:hover:bg-rose-500/10 font-bold text-xs uppercase tracking-widest text-rose-600 focus:bg-rose-50 focus:text-rose-600"
-                                                        onClick={() => handleDeleteClick(produit)}
-                                                    >
-                                                        <TrashIcon className="size-4" />
-                                                        Supprimer
-                                                    </DropdownMenuItem>
+                                                    {canManage && (
+                                                        <>
+                                                            <Link href={ProduitController.edit.url(produit.id)}>
+                                                                <DropdownMenuItem className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 font-bold text-xs uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+                                                                    <PencilIcon className="size-4 text-emerald-500" />
+                                                                    Modifier
+                                                                </DropdownMenuItem>
+                                                            </Link>
+                                                            <DropdownMenuItem
+                                                                className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-rose-50 dark:hover:bg-rose-500/10 font-bold text-xs uppercase tracking-widest text-rose-600 focus:bg-rose-50 focus:text-rose-600"
+                                                                onClick={() => handleDeleteClick(produit)}
+                                                            >
+                                                                <TrashIcon className="size-4" />
+                                                                Supprimer
+                                                            </DropdownMenuItem>
+                                                        </>
+                                                    )}
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
                                         </div>

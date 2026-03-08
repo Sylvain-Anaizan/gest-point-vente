@@ -1,6 +1,6 @@
 import VenteController from '@/actions/App/Http/Controllers/VenteController';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     Plus,
     Search,
@@ -58,6 +58,8 @@ interface LigneVente { id: number; produit_id: number; quantite: number; prix_un
 interface Vente { id: number; numero: string; client_id: number | null; user_id: number; montant_total: number | string; statut: 'complétée' | 'annulée'; mode_paiement: 'espèces' | 'carte' | 'virement' | 'mobile_money'; created_at: string; updated_at: string; client?: Client; user: User; lignes: LigneVente[]; boutique?: { id: number; nom: string; }; }
 
 export default function VentesIndex({ ventes, filters }: { ventes: { data: Vente[]; current_page: number; last_page: number; per_page: number; total: number; }; filters: { search?: string; statut?: string; date_debut?: string; date_fin?: string; }; }) {
+    const { auth } = usePage().props as unknown as { auth: { user: { permissions: string[] } } };
+    const canManage = auth.user.permissions.includes('manage sales');
 
     const [searchQuery, setSearchQuery] = useState(filters.search || '');
     const [statutFilter, setStatutFilter] = useState(filters.statut || 'none');
@@ -160,14 +162,16 @@ export default function VentesIndex({ ventes, filters }: { ventes: { data: Vente
                             Suivi en temps réel des transactions et revenus.
                         </p>
                     </div>
-                    <Link href={VenteController.create.url()} className="group">
-                        <Button className="h-14 px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl shadow-indigo-600/20 border-0 font-black uppercase tracking-widest text-xs transition-all hover:scale-[1.02] active:scale-95 group overflow-hidden relative">
-                            <span className="relative z-10 flex items-center gap-2">
-                                <Plus className="size-5 stroke-[3px]" /> Nouvelle vente
-                            </span>
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
-                        </Button>
-                    </Link>
+                    {canManage && (
+                        <Link href={VenteController.create.url()} className="group">
+                            <Button className="h-14 px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl shadow-indigo-600/20 border-0 font-black uppercase tracking-widest text-xs transition-all hover:scale-[1.02] active:scale-95 group overflow-hidden relative">
+                                <span className="relative z-10 flex items-center gap-2">
+                                    <Plus className="size-5 stroke-[3px]" /> Nouvelle vente
+                                </span>
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
+                            </Button>
+                        </Link>
+                    )}
                 </div>
 
                 {/* SECTION 2: STATS */}
@@ -352,15 +356,19 @@ export default function VentesIndex({ ventes, filters }: { ventes: { data: Vente
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="rounded-2xl border-zinc-200 dark:border-zinc-800 p-2 shadow-2xl min-w-[160px]">
                                                 <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground p-3">Options de vente</DropdownMenuLabel>
-                                                <DropdownMenuItem asChild className="rounded-xl h-11">
-                                                    <Link href={VenteController.edit.url(vente.id)} className="cursor-pointer w-full flex items-center font-bold uppercase tracking-tight text-xs">
-                                                        <Pencil className="mr-3 size-4 text-emerald-500" /> Modifier
-                                                    </Link>
-                                                </DropdownMenuItem>
-                                                <DropdownMenuSeparator className="bg-zinc-100 dark:bg-zinc-800" />
-                                                <DropdownMenuItem onClick={() => handleDeleteClick(vente)} className="rounded-xl h-11 text-rose-500 focus:text-rose-500 focus:bg-rose-50 dark:focus:bg-rose-950/30 cursor-pointer font-bold uppercase tracking-tight text-xs">
-                                                    <Trash2 className="mr-3 size-4" /> Supprimer
-                                                </DropdownMenuItem>
+                                                {canManage && (
+                                                    <>
+                                                        <DropdownMenuItem asChild className="rounded-xl h-11">
+                                                            <Link href={VenteController.edit.url(vente.id)} className="cursor-pointer w-full flex items-center font-bold uppercase tracking-tight text-xs">
+                                                                <Pencil className="mr-3 size-4 text-emerald-500" /> Modifier
+                                                            </Link>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuSeparator className="bg-zinc-100 dark:bg-zinc-800" />
+                                                        <DropdownMenuItem onClick={() => handleDeleteClick(vente)} className="rounded-xl h-11 text-rose-500 focus:text-rose-500 focus:bg-rose-50 dark:focus:bg-rose-950/30 cursor-pointer font-bold uppercase tracking-tight text-xs">
+                                                            <Trash2 className="mr-3 size-4" /> Supprimer
+                                                        </DropdownMenuItem>
+                                                    </>
+                                                )}
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </CardFooter>

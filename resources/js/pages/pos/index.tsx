@@ -94,8 +94,9 @@ interface PanierItem {
 interface Boutique { id: number; nom: string; }
 
 export default function POSIndex({ produits, clients, boutiques }: { produits: Produit[]; clients: Client[]; boutiques: Boutique[] }) {
-    const { auth } = usePage().props as unknown as { auth: { user?: { role?: string } } };
-    const userRole = auth.user?.role;
+    const { auth } = usePage().props as unknown as { auth: { user: { role: string; permissions: string[] } } };
+    const userRole = auth.user.role;
+    const canManage = auth.user.permissions.includes('manage sales');
 
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -514,13 +515,19 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                                     </div>
                                 </div>
 
-                                <Button
-                                    className="w-full h-14 text-lg font-bold shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary rounded-xl"
-                                    disabled={panier.length === 0 || processing}
-                                    onClick={handleCheckout}
-                                >
-                                    {processing ? '...' : 'Encaisser'}
-                                </Button>
+                                {canManage ? (
+                                    <Button
+                                        className="w-full h-14 text-lg font-bold shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary rounded-xl"
+                                        disabled={panier.length === 0 || processing}
+                                        onClick={handleCheckout}
+                                    >
+                                        {processing ? '...' : 'Encaisser'}
+                                    </Button>
+                                ) : (
+                                    <div className="bg-muted p-4 rounded-xl text-center text-sm text-muted-foreground border border-dashed">
+                                        Action non autorisée
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </CardContent>
@@ -687,13 +694,19 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                                             </div>
                                         </div>
 
-                                        <Button
-                                            className="w-full h-14 text-lg font-bold shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary rounded-xl"
-                                            disabled={panier.length === 0 || processing}
-                                            onClick={handleCheckout}
-                                        >
-                                            {processing ? '...' : 'Encaisser'}
-                                        </Button>
+                                        {canManage ? (
+                                            <Button
+                                                className="w-full h-14 text-lg font-bold shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary rounded-xl"
+                                                disabled={panier.length === 0 || processing}
+                                                onClick={handleCheckout}
+                                            >
+                                                {processing ? '...' : 'Encaisser'}
+                                            </Button>
+                                        ) : (
+                                            <div className="bg-muted p-4 rounded-xl text-center text-sm text-muted-foreground border border-dashed">
+                                                Action non autorisée
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

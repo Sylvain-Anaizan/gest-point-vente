@@ -1,6 +1,6 @@
 import CategoryController from '@/actions/App/Http/Controllers/CategoryController';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, SearchIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -53,6 +53,8 @@ export default function CategoriesIndex({
 }: {
     categories: Category[];
 }) {
+    const { auth } = usePage().props as unknown as { auth: { user: { permissions: string[] } } };
+    const canManage = auth.user.permissions.includes('manage categories');
     // États pour la suppression
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(
@@ -121,12 +123,14 @@ export default function CategoriesIndex({
                             Gérez et organisez vos catégories de produits.
                         </p>
                     </div>
-                    <Link href={CategoryController.create.url()}>
-                        <Button>
-                            <PlusIcon className="size-4 mr-2" />
-                            Nouvelle catégorie
-                        </Button>
-                    </Link>
+                    {canManage && (
+                        <Link href={CategoryController.create.url()}>
+                            <Button>
+                                <PlusIcon className="size-4 mr-2" />
+                                Nouvelle catégorie
+                            </Button>
+                        </Link>
+                    )}
                 </div>
 
                 {/* --- Tableau de bord / Barre de contrôle --- */}
@@ -217,23 +221,27 @@ export default function CategoriesIndex({
                                             Voir
                                         </Button>
                                     </Link>
-                                    <Link
-                                        href={CategoryController.edit.url(category.id)}
-                                        className="flex-1"
-                                    >
-                                        <Button variant="outline" size="sm" className="w-full bg-background">
-                                            <PencilIcon className="size-4 mr-2" />
-                                            Modifier
-                                        </Button>
-                                    </Link>
-                                    <Button
-                                        variant="destructive"
-                                        size="sm"
-                                        onClick={() => handleDeleteClick(category)}
-                                        className="flex-shrink-0"
-                                    >
-                                        <TrashIcon className="size-4" />
-                                    </Button>
+                                    {canManage && (
+                                        <>
+                                            <Link
+                                                href={CategoryController.edit.url(category.id)}
+                                                className="flex-1"
+                                            >
+                                                <Button variant="outline" size="sm" className="w-full bg-background">
+                                                    <PencilIcon className="size-4 mr-2" />
+                                                    Modifier
+                                                </Button>
+                                            </Link>
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                onClick={() => handleDeleteClick(category)}
+                                                className="flex-shrink-0"
+                                            >
+                                                <TrashIcon className="size-4" />
+                                            </Button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         ))}

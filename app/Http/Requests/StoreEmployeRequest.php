@@ -27,7 +27,8 @@ class StoreEmployeRequest extends FormRequest
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'numero' => ['nullable', 'string', 'max:255'],
             'password' => ['required', 'confirmed', Password::defaults()],
-            'role' => ['required', 'string', 'in:admin,employé'],
+            'roles' => ['required', 'array', 'min:1'],
+            'roles.*' => ['string', 'exists:roles,name'],
             'boutique_id' => ['nullable', 'exists:boutiques,id'],
         ];
     }

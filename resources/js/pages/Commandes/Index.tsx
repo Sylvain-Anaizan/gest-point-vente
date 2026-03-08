@@ -1,5 +1,5 @@
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     Plus,
     Search,
@@ -70,11 +70,12 @@ interface Commande {
     boutique_id: number;
 }
 
-export default function CommandesIndex({ auth, commandes, filters }: {
-    auth: { user: { id: number; name: string; role: string; boutique_id: number | null; } };
+export default function CommandesIndex({ commandes, filters }: {
     commandes: { data: Commande[]; current_page: number; last_page: number; per_page: number; total: number; links: any[]; };
     filters: { search?: string; statut?: string; };
 }) {
+    const { auth } = usePage().props as unknown as { auth: { user: { role: string; permissions: string[] } } };
+    const canManage = auth.user.permissions.includes('manage sales');
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
     const [statutFilter, setStatutFilter] = useState(filters.statut || 'all');
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -132,11 +133,13 @@ export default function CommandesIndex({ auth, commandes, filters }: {
                         <h1 className="text-3xl font-bold tracking-tight">Commandes</h1>
                         <p className="text-muted-foreground mt-1">Gérez le suivi et l'acheminement de vos commandes clients.</p>
                     </div>
-                    <Link href="/commandes/create">
-                        <Button className="shadow-lg shadow-primary/20">
-                            <Plus className="h-4 w-4 mr-2" /> Nouvelle Commande
-                        </Button>
-                    </Link>
+                    {canManage && (
+                        <Link href="/commandes/create">
+                            <Button className="shadow-lg shadow-primary/20">
+                                <Plus className="h-4 w-4 mr-2" /> Nouvelle Commande
+                            </Button>
+                        </Link>
+                    )}
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-card p-4 rounded-xl border shadow-sm">
@@ -180,7 +183,7 @@ export default function CommandesIndex({ auth, commandes, filters }: {
                                         <div className="flex justify-between items-start">
                                             <div className="flex flex-col gap-1">
                                                 <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">N° {commande.numero}</span>
-                                                {auth.user.role === 'admin' && commande.boutique && (
+                                                {auth.user.permissions.includes('manage boutiques') && commande.boutique && (
                                                     <div className="flex">
                                                         <Badge variant="secondary" className="text-[8px] h-3.5 py-0 px-1.5 bg-indigo-50 text-indigo-600 border-indigo-100 uppercase font-black">
                                                             {commande.boutique.nom}
@@ -237,15 +240,19 @@ export default function CommandesIndex({ auth, commandes, filters }: {
                                                             <Eye className="mr-2 h-4 w-4" /> Détails
                                                         </Link>
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem asChild>
-                                                        <Link href={`/commandes/${commande.id}/edit`} className="cursor-pointer">
-                                                            <Pencil className="mr-2 h-4 w-4" /> Modifier
-                                                        </Link>
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuSeparator />
-                                                    <DropdownMenuItem onClick={() => handleDeleteClick(commande)} className="text-red-600 focus:text-red-600 cursor-pointer">
-                                                        <Trash2 className="mr-2 h-4 w-4" /> Supprimer
-                                                    </DropdownMenuItem>
+                                                    {canManage && (
+                                                        <>
+                                                            <DropdownMenuItem asChild>
+                                                                <Link href={`/commandes/${commande.id}/edit`} className="cursor-pointer">
+                                                                    <Pencil className="mr-2 h-4 w-4" /> Modifier
+                                                                </Link>
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem onClick={() => handleDeleteClick(commande)} className="text-red-600 focus:text-red-600 cursor-pointer">
+                                                                <Trash2 className="mr-2 h-4 w-4" /> Supprimer
+                                                            </DropdownMenuItem>
+                                                        </>
+                                                    )}
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
                                         </div>

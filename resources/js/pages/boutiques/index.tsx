@@ -1,6 +1,6 @@
 import BoutiqueController from '@/actions/App/Http/Controllers/BoutiqueController';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, SearchIcon, MapPinIcon, PhoneIcon, StoreIcon, MoreVertical } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -51,6 +51,8 @@ export default function BoutiquesIndex({
 }: {
     boutiques: Boutique[];
 }) {
+    const { auth } = usePage().props as unknown as { auth: { user: { permissions: string[] } } };
+    const canManage = auth.user.permissions.includes('manage boutiques');
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [boutiqueToDelete, setBoutiqueToDelete] = useState<Boutique | null>(
         null,
@@ -102,12 +104,14 @@ export default function BoutiquesIndex({
                             Supervisez l'intégralité de votre réseau de vente. Suivez les performances et l'inventaire en temps réel.
                         </p>
                     </div>
-                    <Link href={BoutiqueController.create.url()}>
-                        <Button className="h-14 px-8 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 border-0 font-black uppercase tracking-widest text-xs transition-all hover:scale-[1.02] active:scale-95">
-                            <PlusIcon className="size-5 mr-2 stroke-[3px]" />
-                            Nouvelle boutique
-                        </Button>
-                    </Link>
+                    {canManage && (
+                        <Link href={BoutiqueController.create.url()}>
+                            <Button className="h-14 px-8 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 border-0 font-black uppercase tracking-widest text-xs transition-all hover:scale-[1.02] active:scale-95">
+                                <PlusIcon className="size-5 mr-2 stroke-[3px]" />
+                                Nouvelle boutique
+                            </Button>
+                        </Link>
+                    )}
                 </div>
 
                 <div className="relative group max-w-md">
@@ -131,7 +135,7 @@ export default function BoutiquesIndex({
                                     ? `Aucun résultat pour "${searchTerm}".`
                                     : `Aucune boutique enregistrée.`}
                             </p>
-                            {boutiques.length === 0 && !searchTerm && (
+                            {boutiques.length === 0 && !searchTerm && canManage && (
                                 <Link
                                     href={BoutiqueController.create.url()}
                                     className="mt-4"
@@ -181,19 +185,23 @@ export default function BoutiquesIndex({
                                                                     Inventaire
                                                                 </DropdownMenuItem>
                                                             </Link>
-                                                            <Link href={BoutiqueController.edit.url(boutique.id)}>
-                                                                <DropdownMenuItem className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 font-bold text-xs uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
-                                                                    <PencilIcon className="size-4 text-emerald-500" />
-                                                                    Modifier
-                                                                </DropdownMenuItem>
-                                                            </Link>
-                                                            <DropdownMenuItem
-                                                                className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-rose-50 dark:hover:bg-rose-500/10 font-bold text-xs uppercase tracking-widest text-rose-600 focus:bg-rose-50 focus:text-rose-600"
-                                                                onClick={() => handleDeleteClick(boutique)}
-                                                            >
-                                                                <TrashIcon className="size-4" />
-                                                                Supprimer
-                                                            </DropdownMenuItem>
+                                                            {canManage && (
+                                                                <>
+                                                                    <Link href={BoutiqueController.edit.url(boutique.id)}>
+                                                                        <DropdownMenuItem className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 font-bold text-xs uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+                                                                            <PencilIcon className="size-4 text-emerald-500" />
+                                                                            Modifier
+                                                                        </DropdownMenuItem>
+                                                                    </Link>
+                                                                    <DropdownMenuItem
+                                                                        className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-rose-50 dark:hover:bg-rose-500/10 font-bold text-xs uppercase tracking-widest text-rose-600 focus:bg-rose-50 focus:text-rose-600"
+                                                                        onClick={() => handleDeleteClick(boutique)}
+                                                                    >
+                                                                        <TrashIcon className="size-4" />
+                                                                        Supprimer
+                                                                    </DropdownMenuItem>
+                                                                </>
+                                                            )}
                                                         </DropdownMenuContent>
                                                     </DropdownMenu>
                                                 </div>

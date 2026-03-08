@@ -12,7 +12,7 @@ class LigneCommandeController extends Controller
      */
     public function index()
     {
-        //
+        return LigneCommande::all();
     }
 
     /**
@@ -20,7 +20,7 @@ class LigneCommandeController extends Controller
      */
     public function create()
     {
-        //
+        return view('ligne_commande.create');
     }
 
     /**
@@ -28,7 +28,7 @@ class LigneCommandeController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        return LigneCommande::create($request->all());
     }
 
     /**
@@ -36,7 +36,7 @@ class LigneCommandeController extends Controller
      */
     public function show(LigneCommande $ligneCommande)
     {
-        //
+        return $ligneCommande;
     }
 
     /**

@@ -1,6 +1,6 @@
 import UniteController from '@/actions/App/Http/Controllers/UniteController';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, SearchIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -48,6 +48,8 @@ interface Unite {
 type FilterStatus = 'all' | 'with_products' | 'empty';
 
 export default function UnitesIndex({ unites }: { unites: Unite[] }) {
+    const { auth } = usePage().props as unknown as { auth: { user: { permissions: string[] } } };
+    const canManage = auth.user.permissions.includes('manage units');
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [uniteToDelete, setUniteToDelete] = useState<Unite | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -104,12 +106,14 @@ export default function UnitesIndex({ unites }: { unites: Unite[] }) {
                             Gérez les unités de mesure de vos produits (Kg, Pièce, Litre, etc.)
                         </p>
                     </div>
-                    <Link href={UniteController.create.url()}>
-                        <Button>
-                            <PlusIcon className="size-4 mr-2" />
-                            Nouvelle unité
-                        </Button>
-                    </Link>
+                    {canManage && (
+                        <Link href={UniteController.create.url()}>
+                            <Button>
+                                <PlusIcon className="size-4 mr-2" />
+                                Nouvelle unité
+                            </Button>
+                        </Link>
+                    )}
                 </div>
 
                 {/* Barre de recherche et filtres */}
@@ -159,7 +163,7 @@ export default function UnitesIndex({ unites }: { unites: Unite[] }) {
                                     Réinitialiser les filtres
                                 </Button>
                             )}
-                            {unites.length === 0 && !searchTerm && (
+                            {unites.length === 0 && !searchTerm && canManage && (
                                 <Link href={UniteController.create.url()} className="mt-4">
                                     <Button>
                                         <PlusIcon className="size-4 mr-2" />
@@ -204,23 +208,27 @@ export default function UnitesIndex({ unites }: { unites: Unite[] }) {
                                             Voir
                                         </Button>
                                     </Link>
-                                    <Link
-                                        href={UniteController.edit.url(unite.id)}
-                                        className="flex-1"
-                                    >
-                                        <Button variant="outline" size="sm" className="w-full bg-background">
-                                            <PencilIcon className="size-4 mr-2" />
-                                            Modifier
-                                        </Button>
-                                    </Link>
-                                    <Button
-                                        variant="destructive"
-                                        size="sm"
-                                        onClick={() => handleDeleteClick(unite)}
-                                        className="flex-shrink-0"
-                                    >
-                                        <TrashIcon className="size-4" />
-                                    </Button>
+                                    {canManage && (
+                                        <>
+                                            <Link
+                                                href={UniteController.edit.url(unite.id)}
+                                                className="flex-1"
+                                            >
+                                                <Button variant="outline" size="sm" className="w-full bg-background">
+                                                    <PencilIcon className="size-4 mr-2" />
+                                                    Modifier
+                                                </Button>
+                                            </Link>
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                onClick={() => handleDeleteClick(unite)}
+                                                className="flex-shrink-0"
+                                            >
+                                                <TrashIcon className="size-4" />
+                                            </Button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         ))}

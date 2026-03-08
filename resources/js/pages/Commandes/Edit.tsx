@@ -72,8 +72,8 @@ export default function CommandesEdit({ commande, clients, boutiques = [] }: { c
         statut: commande.statut,
         montant_total: commande.montant_total,
         observations: commande.observations || '',
-        boutique_id: (commande as any).boutique_id?.toString() || '',
-        lignes_commande: (commande as any).lignes_commande || [{ nom: '', quantite: 1, prix: 0 }],
+        boutique_id: (commande as unknown as { boutique_id?: number }).boutique_id?.toString() || '',
+        lignes_commande: commande.lignes_commande || [{ nom: '', quantite: 1, prix: 0 }] as LigneCommande[],
     });
 
     const addLine = () => {
@@ -233,7 +233,7 @@ export default function CommandesEdit({ commande, clients, boutiques = [] }: { c
                                     </div>
 
                                     <div className="space-y-3">
-                                        {data.lignes_commande.map((line, index) => (
+                                        {data.lignes_commande.map((line: LigneCommande, index: number) => (
                                             <div key={index} className="flex flex-col md:flex-row gap-3 p-4 bg-muted/30 rounded-lg border group relative">
                                                 <div className="flex-1 space-y-2">
                                                     <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Description de l'article</Label>

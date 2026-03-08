@@ -1,6 +1,6 @@
 import TailleController from '@/actions/App/Http/Controllers/TailleController';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, SearchIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -48,6 +48,8 @@ interface Taille {
 type FilterStatus = 'all' | 'with_products' | 'empty';
 
 export default function TaillesIndex({ tailles }: { tailles: Taille[] }) {
+    const { auth } = usePage().props as unknown as { auth: { user: { permissions: string[] } } };
+    const canManage = auth.user.permissions.includes('manage categories');
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [tailleToDelete, setTailleToDelete] = useState<Taille | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -104,12 +106,14 @@ export default function TaillesIndex({ tailles }: { tailles: Taille[] }) {
                             Gérez les tailles de vos produits.
                         </p>
                     </div>
-                    <Link href={TailleController.create.url()}>
-                        <Button>
-                            <PlusIcon className="size-4 mr-2" />
-                            Nouvelle taille
-                        </Button>
-                    </Link>
+                    {canManage && (
+                        <Link href={TailleController.create.url()}>
+                            <Button>
+                                <PlusIcon className="size-4 mr-2" />
+                                Nouvelle taille
+                            </Button>
+                        </Link>
+                    )}
                 </div>
 
                 {/* Barre de recherche et filtres */}
@@ -159,7 +163,7 @@ export default function TaillesIndex({ tailles }: { tailles: Taille[] }) {
                                     Réinitialiser les filtres
                                 </Button>
                             )}
-                            {tailles.length === 0 && !searchTerm && (
+                            {tailles.length === 0 && !searchTerm && canManage && (
                                 <Link href={TailleController.create.url()} className="mt-4">
                                     <Button>
                                         <PlusIcon className="size-4 mr-2" />
@@ -204,23 +208,27 @@ export default function TaillesIndex({ tailles }: { tailles: Taille[] }) {
                                             Voir
                                         </Button>
                                     </Link>
-                                    <Link
-                                        href={TailleController.edit.url(taille.id)}
-                                        className="flex-1"
-                                    >
-                                        <Button variant="outline" size="sm" className="w-full bg-background">
-                                            <PencilIcon className="size-4 mr-2" />
-                                            Modifier
-                                        </Button>
-                                    </Link>
-                                    <Button
-                                        variant="destructive"
-                                        size="sm"
-                                        onClick={() => handleDeleteClick(taille)}
-                                        className="flex-shrink-0"
-                                    >
-                                        <TrashIcon className="size-4" />
-                                    </Button>
+                                    {canManage && (
+                                        <>
+                                            <Link
+                                                href={TailleController.edit.url(taille.id)}
+                                                className="flex-1"
+                                            >
+                                                <Button variant="outline" size="sm" className="w-full bg-background">
+                                                    <PencilIcon className="size-4 mr-2" />
+                                                    Modifier
+                                                </Button>
+                                            </Link>
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                onClick={() => handleDeleteClick(taille)}
+                                                className="flex-shrink-0"
+                                            >
+                                                <TrashIcon className="size-4" />
+                                            </Button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         ))}

@@ -23,7 +23,7 @@ class EmployeController extends Controller
 
         return Inertia::render('employes/index', [
             'employes' => User::query()
-                ->with('boutique')
+                ->with(['boutique', 'roles'])
                 ->where('role', '!=', 'customer')
                 ->latest()
                 ->get(),
@@ -37,6 +37,7 @@ class EmployeController extends Controller
     {
         return Inertia::render('employes/create', [
             'boutiques' => Boutique::all(['id', 'nom']),
+            'roles' => \Spatie\Permission\Models\Role::all(['id', 'name']),
         ]);
     }
 
@@ -46,9 +47,16 @@ class EmployeController extends Controller
     public function store(StoreEmployeRequest $request): RedirectResponse
     {
         $validated = $request->validated();
+        $roles = $validated['roles'] ?? [];
+        unset($validated['roles']);
+        
         $validated['password'] = Hash::make($validated['password']);
+        
+        // Legacy column sync
+        $validated['role'] = in_array('admin', $roles) ? 'admin' : 'employé';
 
-        User::create($validated);
+        $user = User::create($validated);
+        $user->assignRole($roles);
 
         return redirect()->route('employes.index')
             ->with('success', 'Employé créé avec succès.');
@@ -60,8 +68,9 @@ class EmployeController extends Controller
     public function edit(User $employe): Response
     {
         return Inertia::render('employes/edit', [
-            'employe' => $employe->load('boutique'),
+            'employe' => $employe->load(['boutique', 'roles']),
             'boutiques' => Boutique::all(['id', 'nom']),
+            'roles' => \Spatie\Permission\Models\Role::all(['id', 'name']),
         ]);
     }
 
@@ -71,6 +80,8 @@ class EmployeController extends Controller
     public function update(UpdateEmployeRequest $request, User $employe): RedirectResponse
     {
         $validated = $request->validated();
+        $roles = $validated['roles'] ?? [];
+        unset($validated['roles']);
 
         if (! empty($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);
@@ -78,7 +89,14 @@ class EmployeController extends Controller
             unset($validated['password']);
         }
 
+        // Legacy column sync
+        if (!empty($roles)) {
+            $validated['role'] = in_array('admin', $roles) ? 'admin' : 'employé';
+        }
+
         $employe->update($validated);
+        
+        $employe->syncRoles($roles);
 
         return redirect()->route('employes.index')
             ->with('success', 'Employé mis à jour avec succès.');

@@ -55,14 +55,17 @@ interface User {
     numero: string | null;
     role: 'admin' | 'employé';
     boutique_id: number | null;
+    roles: { id: number, name: string }[];
 }
 
 export default function EmployesEdit({
     employe,
     boutiques,
+    roles,
 }: {
     employe: User;
     boutiques: Boutique[];
+    roles: { id: number, name: string }[];
 }) {
     const { data, setData, patch, processing, errors } = useForm({
         name: employe.name,
@@ -70,9 +73,10 @@ export default function EmployesEdit({
         numero: employe.numero || '',
         password: '',
         password_confirmation: '',
-        role: employe.role,
+        roles: employe.roles.map(r => r.name),
         boutique_id: employe.boutique_id,
     });
+
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -173,21 +177,27 @@ export default function EmployesEdit({
                             </CardHeader>
                             <CardContent className="p-6 space-y-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="role">Rôle <span className="text-destructive">*</span></Label>
+                                    <Label htmlFor="roles" className="text-sm font-bold uppercase tracking-wider opacity-60">Rôle assigné <span className="text-destructive">*</span></Label>
                                     <Select
-                                        name="role"
-                                        value={data.role}
-                                        onValueChange={(value) => setData('role', value as 'admin' | 'employé')}
+                                        name="roles"
+                                        value={data.roles[0] || ""}
+                                        onValueChange={(value) => {
+                                            setData('roles', [value]);
+                                        }}
                                     >
-                                        <SelectTrigger>
+                                        <SelectTrigger className="h-12">
+                                            <ShieldIcon className="size-4 mr-2 text-muted-foreground" />
                                             <SelectValue placeholder="Sélectionner un rôle" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="admin">Administrateur</SelectItem>
-                                            <SelectItem value="employé">Employé</SelectItem>
+                                            {roles.map((role) => (
+                                                <SelectItem key={role.id} value={role.name}>
+                                                    <span className="capitalize">{role.name === 'admin' ? 'Administrateur' : (role.name === 'employé' ? 'Employé standard' : role.name)}</span>
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
-                                    <InputError message={errors.role} />
+                                    <InputError message={errors.roles} />
                                 </div>
 
                                 <div className="space-y-2">

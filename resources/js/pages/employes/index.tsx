@@ -1,6 +1,6 @@
 import EmployeController from '@/actions/App/Http/Controllers/EmployeController';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { PlusIcon, PencilIcon, TrashIcon, UserIcon, ShieldIcon, StoreIcon, PhoneIcon, MailIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -50,6 +50,8 @@ export default function EmployesIndex({
 }: {
     employes: User[];
 }) {
+    const { auth } = usePage().props as unknown as { auth: { user: { permissions: string[] } } };
+    const canManage = auth.user.permissions.includes('manage users');
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [employeToDelete, setEmployeToDelete] = useState<User | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -100,12 +102,14 @@ export default function EmployesIndex({
                             Gérez les accès et les affectations aux boutiques.
                         </p>
                     </div>
-                    <Link href={EmployeController.create.url()}>
-                        <Button>
-                            <PlusIcon className="size-4 mr-2" />
-                            Ajouter un membre
-                        </Button>
-                    </Link>
+                    {canManage && (
+                        <Link href={EmployeController.create.url()}>
+                            <Button>
+                                <PlusIcon className="size-4 mr-2" />
+                                Ajouter un membre
+                            </Button>
+                        </Link>
+                    )}
                 </div>
 
                 <div className="relative">
@@ -164,22 +168,26 @@ export default function EmployesIndex({
                                     </div>
                                 </CardHeader>
                                 <CardContent className="flex gap-2 pt-4 border-t bg-muted/20">
-                                    <Link
-                                        href={EmployeController.edit.url(employe.id)}
-                                        className="flex-1"
-                                    >
-                                        <Button variant="outline" size="sm" className="w-full">
-                                            <PencilIcon className="size-4 mr-2" />
-                                            Modifier
-                                        </Button>
-                                    </Link>
-                                    <Button
-                                        variant="destructive"
-                                        size="sm"
-                                        onClick={() => handleDeleteClick(employe)}
-                                    >
-                                        <TrashIcon className="size-4" />
-                                    </Button>
+                                    {canManage && (
+                                        <>
+                                            <Link
+                                                href={EmployeController.edit.url(employe.id)}
+                                                className="flex-1"
+                                            >
+                                                <Button variant="outline" size="sm" className="w-full">
+                                                    <PencilIcon className="size-4 mr-2" />
+                                                    Modifier
+                                                </Button>
+                                            </Link>
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                onClick={() => handleDeleteClick(employe)}
+                                            >
+                                                <TrashIcon className="size-4" />
+                                            </Button>
+                                        </>
+                                    )}
                                 </CardContent>
                             </Card>
                         ))}

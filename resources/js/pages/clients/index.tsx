@@ -1,6 +1,6 @@
 import ClientController from '@/actions/App/Http/Controllers/ClientController';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     Plus,
     Search,
@@ -64,6 +64,8 @@ interface Client { id: number; nom: string; email: string; telephone: string | n
 type FilterStatus = 'all' | 'actifs' | 'inactifs';
 
 export default function ClientsIndex({ clients, filters }: { clients: { data: Client[]; current_page: number; last_page: number; per_page: number; total: number; links: any[]; }; filters: { search?: string; actif?: string; sort?: string; direction?: string; }; }) {
+    const { auth } = usePage().props as unknown as { auth: { user: { permissions: string[] } } };
+    const canManage = auth.user.permissions.includes('manage sales');
 
     // ... (Logique d'état identique) ...
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -150,11 +152,13 @@ export default function ClientsIndex({ clients, filters }: { clients: { data: Cl
                         </Select>
                     </div>
 
-                    <Link href={ClientController.create.url()}>
-                        <Button className="shadow-lg shadow-primary/20">
-                            <Plus className="h-4 w-4 mr-2" /> Nouveau Client
-                        </Button>
-                    </Link>
+                    {canManage && (
+                        <Link href={ClientController.create.url()}>
+                            <Button className="shadow-lg shadow-primary/20">
+                                <Plus className="h-4 w-4 mr-2" /> Nouveau Client
+                            </Button>
+                        </Link>
+                    )}
                 </div>
 
                 {/* GRILLE DES CLIENTS */}
@@ -204,19 +208,23 @@ export default function ClientsIndex({ clients, filters }: { clients: { data: Cl
                                                     <Eye className="mr-2 h-4 w-4" /> Voir détails
                                                 </Link>
                                             </DropdownMenuItem>
-                                            <DropdownMenuItem asChild>
-                                                <Link href={ClientController.edit.url(client.id)} className="cursor-pointer">
-                                                    <Pencil className="mr-2 h-4 w-4" /> Modifier
-                                                </Link>
-                                            </DropdownMenuItem>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem onClick={() => handleToggleStatus(client)} className="cursor-pointer">
-                                                <Power className="mr-2 h-4 w-4" />
-                                                {client.actif ? 'Désactiver' : 'Activer'}
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => handleDeleteClick(client)} className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
-                                                <Trash2 className="mr-2 h-4 w-4" /> Supprimer
-                                            </DropdownMenuItem>
+                                            {canManage && (
+                                                <>
+                                                    <DropdownMenuItem asChild>
+                                                        <Link href={ClientController.edit.url(client.id)} className="cursor-pointer">
+                                                            <Pencil className="mr-2 h-4 w-4" /> Modifier
+                                                        </Link>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem onClick={() => handleToggleStatus(client)} className="cursor-pointer">
+                                                        <Power className="mr-2 h-4 w-4" />
+                                                        {client.actif ? 'Désactiver' : 'Activer'}
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleDeleteClick(client)} className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer">
+                                                        <Trash2 className="mr-2 h-4 w-4" /> Supprimer
+                                                    </DropdownMenuItem>
+                                                </>
+                                            )}
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </CardHeader>

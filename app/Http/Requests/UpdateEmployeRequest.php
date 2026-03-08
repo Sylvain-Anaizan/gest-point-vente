@@ -28,7 +28,8 @@ class UpdateEmployeRequest extends FormRequest
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($this->route('employe'))],
             'numero' => ['nullable', 'string', 'max:255'],
             'password' => ['nullable', 'confirmed', Password::defaults()],
-            'role' => ['required', 'string', 'in:admin,employé'],
+            'roles' => ['required', 'array', 'min:1'],
+            'roles.*' => ['string', 'exists:roles,name'],
             'boutique_id' => ['nullable', 'exists:boutiques,id'],
         ];
     }

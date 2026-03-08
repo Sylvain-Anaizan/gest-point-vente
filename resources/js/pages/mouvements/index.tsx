@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { type BreadcrumbItem } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,6 +42,9 @@ export default function MouvementsIndex({
     mouvements: { data: MouvementStock[]; current_page: number; last_page: number; };
     filters: { search?: string; type?: string; date_debut?: string; date_fin?: string; };
 }) {
+    const { auth } = usePage().props as unknown as { auth: { user: { permissions: string[] } } };
+    const canManage = auth.user.permissions.includes('manage products');
+
     const [searchQuery, setSearchQuery] = useState(filters.search || '');
     const [typeFilter, setTypeFilter] = useState(filters.type || 'none');
     const [dateDebut, setDateDebut] = useState(filters.date_debut || '');
@@ -114,14 +117,16 @@ export default function MouvementsIndex({
                             Historique précis des entrées et sorties de stock.
                         </div>
                     </div>
-                    <Link href={MouvementStockController.create.url()} className="group">
-                        <Button className="h-14 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-600/20 border-0 font-black uppercase tracking-widest text-xs transition-all hover:scale-[1.02] active:scale-95 group overflow-hidden relative w-full sm:w-auto">
-                            <span className="relative z-10 flex items-center gap-2">
-                                <Plus className="size-5 stroke-[3px]" /> Nouveau mouvement
-                            </span>
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
-                        </Button>
-                    </Link>
+                    {canManage && (
+                        <Link href={MouvementStockController.create.url()} className="group">
+                            <Button className="h-14 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-600/20 border-0 font-black uppercase tracking-widest text-xs transition-all hover:scale-[1.02] active:scale-95 group overflow-hidden relative w-full sm:w-auto">
+                                <span className="relative z-10 flex items-center gap-2">
+                                    <Plus className="size-5 stroke-[3px]" /> Nouveau mouvement
+                                </span>
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
+                            </Button>
+                        </Link>
+                    )}
                 </div>
 
                 {/* SECTION 2: FILTRES */}

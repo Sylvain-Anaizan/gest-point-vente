@@ -37,35 +37,38 @@ import VenteController from '@/actions/App/Http/Controllers/VenteController';
 import EmployeController from '@/actions/App/Http/Controllers/EmployeController';
 import RapportController from '@/actions/App/Http/Controllers/RapportController';
 import MouvementStockController from '@/actions/App/Http/Controllers/MouvementStockController';
-import { ArrowLeftRight, PieChart } from 'lucide-react';
+import RoleController from '@/actions/App/Http/Controllers/RoleController';
+import { ArrowLeftRight, PieChart, ShieldPlus } from 'lucide-react';
+import { type NavGroup } from '@/types';
 
-const navigationGroups = [
+const navigationGroups: NavGroup[] = [
     {
         title: 'Tableau de bord',
         items: [
-            { title: 'Vue d\'ensemble', href: dashboard(), icon: LayoutGrid },
-            { title: 'Point de Vente (POS)', href: POSController.index.url(), icon: ShoppingBag },
-            { title: 'Rapports & Analyses', href: RapportController.index.url(), icon: PieChart },
+            { title: 'Vue d\'ensemble', href: dashboard(), icon: LayoutGrid, permission: 'view dashboard' },
+            { title: 'Point de Vente (POS)', href: POSController.index.url(), icon: ShoppingBag, permission: 'manage sales' },
+            { title: 'Rapports & Analyses', href: RapportController.index.url(), icon: PieChart, permission: 'manage reports' },
         ]
     },
     {
         title: 'Commerce & Ventes',
         items: [
-            { title: 'Ventes & Factures', href: VenteController.index.url(), icon: ReceiptText },
-            { title: 'Produits & Stocks', href: ProduitController.index.url(), icon: PackageSearch },
-            { title: 'Mouvements stock', href: MouvementStockController.index.url(), icon: ArrowLeftRight },
-            { title: 'Clients', href: ClientController.index.url(), icon: Users },
-            { title: 'Suivi Commandes', href: '/commandes', icon: Truck },
+            { title: 'Ventes & Factures', href: VenteController.index.url(), icon: ReceiptText, permission: 'manage sales' },
+            { title: 'Produits & Stocks', href: ProduitController.index.url(), icon: PackageSearch, permission: 'manage products' },
+            { title: 'Mouvements stock', href: MouvementStockController.index.url(), icon: ArrowLeftRight, permission: 'manage products' },
+            { title: 'Clients', href: ClientController.index.url(), icon: Users, permission: 'manage sales' },
+            { title: 'Suivi Commandes', href: '/commandes', icon: Truck, permission: 'manage sales' },
         ]
     },
     {
         title: 'Administration',
         items: [
-            { title: 'Boutiques', href: BoutiqueController.index.url(), icon: Store },
-            { title: 'Catégories', href: CategoryController.index.url(), icon: Tag },
-            { title: 'Tailles', href: TailleController.index.url(), icon: Ruler },
-            { title: 'Unités de mesure', href: UniteController.index.url(), icon: Ruler },
-            { title: 'Équipe & Staff', href: EmployeController.index.url(), icon: UserCheck },
+            { title: 'Boutiques', href: BoutiqueController.index.url(), icon: Store, permission: 'manage boutiques' },
+            { title: 'Catégories', href: CategoryController.index.url(), icon: Tag, permission: 'manage categories' },
+            { title: 'Tailles', href: TailleController.index.url(), icon: Ruler, permission: 'manage categories' },
+            { title: 'Unités de mesure', href: UniteController.index.url(), icon: Ruler, permission: 'manage units' },
+            { title: 'Équipe & Staff', href: EmployeController.index.url(), icon: UserCheck, permission: 'manage users' },
+            { title: 'Rôles & Permissions', href: RoleController.index.url(), icon: ShieldPlus, permission: 'manage roles' },
         ]
     },
     {
@@ -77,10 +80,8 @@ const navigationGroups = [
 ];
 
 export function AppSidebar() {
-    const { auth } = usePage().props as unknown as { auth: { user: { name: string; email: string; role: string; avatar?: string } } };
+    const { auth } = usePage().props as unknown as { auth: { user: { name: string; email: string; roles: string[]; permissions: string[]; avatar?: string } } };
     const user = auth.user;
-
-    const adminOnly = ['Boutiques', 'Catégories', 'Tailles', 'Unités de mesure', 'Équipe & Staff'];
 
     return (
         <Sidebar collapsible="icon" variant="floating" className="border-r border-white/5 bg-background/50 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] transition-all duration-500">
@@ -109,10 +110,8 @@ export function AppSidebar() {
             <SidebarContent className="gap-0 py-2 scrollbar-hide">
                 {navigationGroups.map((group) => {
                     const filteredItems = group.items.filter(item => {
-                        if (adminOnly.includes(item.title)) {
-                            return user?.role === 'admin';
-                        }
-                        return true;
+                        if (!item.permission) return true;
+                        return user?.permissions?.includes(item.permission);
                     });
 
                     return (
