@@ -57,4 +57,28 @@ class UserFactory extends Factory
             'two_factor_confirmed_at' => null,
         ]);
     }
+
+    /**
+     * Indicate that the user is an admin.
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'admin',
+        ])->afterCreating(function (\App\Models\User $user) {
+            $user->assignRole('admin');
+        });
+    }
+
+    /**
+     * Indicate that the user is an employee.
+     */
+    public function employe(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'employé',
+        ])->afterCreating(function (\App\Models\User $user) {
+            $user->assignRole('employé');
+        });
+    }
 }

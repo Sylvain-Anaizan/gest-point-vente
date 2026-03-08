@@ -29,18 +29,20 @@ class RoleAndPermissionSeeder extends Seeder
             'manage sales',
             'manage reports',
             'manage roles',
+            'manage payments',
+            'manage settings',
         ];
 
         foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
         // Create roles and assign permissions
-        $adminRole = Role::firstOrCreate(['name' => 'admin']);
-        $adminRole->givePermissionTo(Permission::all());
+        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        $adminRole->syncPermissions(Permission::all());
 
-        $employeRole = Role::firstOrCreate(['name' => 'employé']);
-        $employeRole->givePermissionTo([
+        $employeRole = Role::firstOrCreate(['name' => 'employé', 'guard_name' => 'web']);
+        $employeRole->syncPermissions([
             'view dashboard',
             'manage products',
             'manage sales',
@@ -48,9 +50,9 @@ class RoleAndPermissionSeeder extends Seeder
 
         // Assign roles to existing users based on their current 'role' column
         User::all()->each(function (User $user) {
-            if ($user->role === 'admin') {
+            if ($user->role === 'admin' && !$user->hasRole('admin')) {
                 $user->assignRole('admin');
-            } elseif ($user->role === 'employé' || $user->role === 'vendeur') {
+            } elseif (($user->role === 'employé' || $user->role === 'vendeur') && !$user->hasRole('employé')) {
                 $user->assignRole('employé');
             }
         });

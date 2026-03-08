@@ -14,26 +14,25 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
         \App\Models\Boutique::firstOrCreate(
             ['nom' => 'Boutique Principale'],
             ['adresse' => 'Bamako, Mali', 'telephone' => '00000000']
         );
 
         $this->call([
+            RoleAndPermissionSeeder::class,
             AdminSeeder::class,
         ]);
 
-        User::firstOrCreate(
-            ['email' => 'test@example.com'],
-            [
+        if (!User::where('email', 'test@example.com')->exists()) {
+            User::factory()->create([
                 'name' => 'Test User',
+                'email' => 'test@example.com',
                 'numero' => '0123456789',
                 'password' => 'password',
                 'email_verified_at' => now(),
-            ]
-        );
+            ]);
+        }
 
         // Créer 20 clients pour le test
         Client::factory(20)->create();

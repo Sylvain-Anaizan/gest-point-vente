@@ -12,15 +12,19 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        User::firstOrCreate(
-            ['email' => 'admin@anaizan.com'],
-            [
+        $admin = User::where('email', 'admin@anaizan.com')->first();
+
+        if (!$admin) {
+            $admin = User::factory()->admin()->create([
                 'name' => 'Administrateur',
+                'email' => 'admin@anaizan.com',
                 'numero' => '00000000',
                 'password' => 'password',
-                'role' => 'admin',
                 'email_verified_at' => now(),
-            ]
-        );
+            ]);
+        } else {
+            $admin->update(['role' => 'admin']);
+            $admin->assignRole('admin');
+        }
     }
 }
