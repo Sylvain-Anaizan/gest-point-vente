@@ -12,18 +12,18 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        $admin = User::where('email', 'admin@anaizan.com')->first();
-
-        if (!$admin) {
-            $admin = User::factory()->admin()->create([
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@anaizan.com'],
+            [
                 'name' => 'Administrateur',
-                'email' => 'admin@anaizan.com',
                 'numero' => '00000000',
                 'password' => 'password',
+                'role' => 'admin',
                 'email_verified_at' => now(),
-            ]);
-        } else {
-            $admin->update(['role' => 'admin']);
+            ]
+        );
+
+        if (!$admin->hasRole('admin')) {
             $admin->assignRole('admin');
         }
     }
