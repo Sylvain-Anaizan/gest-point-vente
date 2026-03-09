@@ -14,7 +14,8 @@ jobs:
       - name: ⚡️ Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4' # Votre version actuelle
+          php-version: '8.4'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql
 
       - name: 📥 Composer Install
         run: composer install --no-dev --optimize-autoloader
@@ -27,20 +28,14 @@ jobs:
       - name: 🚀 Sync Files (Rsync)
         uses: Burnett01/rsync-deployments@7.0.1
         with:
-          switches: -avzr --delete
+          # Correction : Les exclusions se mettent ICI, pas dans un champ 'exclude'
+          switches: -avzr --delete --exclude='.git/' --exclude='.github/' --exclude='node_modules/' --exclude='storage/' --exclude='.env'
           path: ./
           remote_path: /home/anaizan1/stock.anaizancloud.com
           remote_host: ${{ secrets.SSH_HOST }}
           remote_user: ${{ secrets.SSH_USER }}
           remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
           remote_port: ${{ secrets.SSH_PORT }}
-          # On exclut le .env du serveur pour ne pas écraser la config BD !
-          exclude: |
-            .git/
-            .github/
-            node_modules/
-            storage/
-            .env
 
       - name: ⚙️ Post-Deployment Commands
         uses: appleboy/ssh-action@master
@@ -54,4 +49,3 @@ jobs:
             php artisan migrate --force
             php artisan config:cache
             php artisan route:cache
-            php artisan view:cache
