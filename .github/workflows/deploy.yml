@@ -1,49 +1,57 @@
-name: Deploy Website
+name: Pro SSH Deployment
 
 on:
   push:
-    branches:
-      - main # Se déclenche quand vous pushez sur la branche main
+    branches: [main]
 
 jobs:
-  web-deploy:
-    name: Deploy
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: 🚚 Get latest code
+      - name: 🚚 Checkout Code
         uses: actions/checkout@v4
 
       - name: ⚡️ Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4' # Laravel 12 supporte PHP 8.2+
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql
+          php-version: '8.4' # Votre version actuelle
 
-      - name: 📥 Install Composer Dependencies
+      - name: 📥 Composer Install
         run: composer install --no-dev --optimize-autoloader
 
-      - name: 📦 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: 🛠️ Build Assets (React/Vite)
+      - name: 🛠️ Build React (Vite)
         run: |
           npm install
           npm run build
 
-      - name: 📂 Sync files via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: 🚀 Sync Files (Rsync)
+        uses: Burnett01/rsync-deployments@7.0.1
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          # Chemin vers le dossier de votre sous-domaine sur le serveur :
-          server-dir:
-          # On exclut les fichiers inutiles en production
+          switches: -avzr --delete
+          path: ./
+          remote_path: /home/anaizan1/stock.anaizancloud.com
+          remote_host: ${{ secrets.SSH_HOST }}
+          remote_user: ${{ secrets.SSH_USER }}
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          remote_port: ${{ secrets.SSH_PORT }}
+          # On exclut le .env du serveur pour ne pas écraser la config BD !
           exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            **/tests/**
+            .git/
+            .github/
+            node_modules/
+            storage/
             .env
+
+      - name: ⚙️ Post-Deployment Commands
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd /home/anaizan1/stock.anaizancloud.com
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
