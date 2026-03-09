@@ -1,51 +1,49 @@
-name: Pro SSH Deployment
+name: Deploy Website
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main # Se déclenche quand vous pushez sur la branche main
 
 jobs:
-  deploy:
+  web-deploy:
+    name: Deploy
     runs-on: ubuntu-latest
     steps:
-      - name: 🚚 Checkout Code
+      - name: 🚚 Get latest code
         uses: actions/checkout@v4
 
       - name: ⚡️ Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: '8.4' # Laravel 12 supporte PHP 8.2+
           extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql
 
-      - name: 📥 Composer Install
+      - name: 📥 Install Composer Dependencies
         run: composer install --no-dev --optimize-autoloader
 
-      - name: 🛠️ Build React (Vite)
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 🛠️ Build Assets (React/Vite)
         run: |
           npm install
           npm run build
 
-      - name: 🚀 Sync Files (Rsync)
-        uses: Burnett01/rsync-deployments@7.0.1
+      - name: 📂 Sync files via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          # Correction : Les exclusions se mettent ICI, pas dans un champ 'exclude'
-          switches: -avzr --delete --exclude='.git/' --exclude='.github/' --exclude='node_modules/' --exclude='storage/' --exclude='.env'
-          path: ./
-          remote_path: /home/anaizan1/stock.anaizancloud.com
-          remote_host: ${{ secrets.SSH_HOST }}
-          remote_user: ${{ secrets.SSH_USER }}
-          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          remote_port: ${{ secrets.SSH_PORT }}
-
-      - name: ⚙️ Post-Deployment Commands
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd /home/anaizan1/stock.anaizancloud.com
-            php artisan migrate --force
-            php artisan config:cache
-            php artisan route:cache
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          # Chemin vers le dossier de votre sous-domaine sur le serveur :
+          server-dir:
+          # On exclut les fichiers inutiles en production
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/tests/**
+            .env
