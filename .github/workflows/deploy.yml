@@ -1,0 +1,49 @@
+name: Deploy Website
+
+on:
+  push:
+    branches:
+      - main # Se déclenche quand vous pushez sur la branche main
+
+jobs:
+  web-deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v4
+
+      - name: ⚡️ Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3' # Laravel 12 supporte PHP 8.2+
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql
+
+      - name: 📥 Install Composer Dependencies
+        run: composer install --no-dev --optimize-autoloader
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 🛠️ Build Assets (React/Vite)
+        run: |
+          npm install
+          npm run build
+
+      - name: 📂 Sync files via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          # Chemin vers le dossier de votre sous-domaine sur le serveur :
+          server-dir:
+          # On exclut les fichiers inutiles en production
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/tests/**
+            .env

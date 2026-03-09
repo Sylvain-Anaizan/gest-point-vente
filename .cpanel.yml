@@ -1,0 +1,32 @@
+---
+deployment:
+  tasks:
+    # Install/update Composer dependencies (production only, no dev)
+    - export DEPLOYPATH=/home/$USER/gest-anaizan
+    - /usr/local/bin/composer install --no-dev --optimize-autoloader --working-dir=$DEPLOYPATH
+
+    # Install/build frontend assets
+    - cd $DEPLOYPATH && npm ci --prefer-offline
+    - cd $DEPLOYPATH && npm run build
+
+    # Laravel maintenance mode
+    - $DEPLOYPATH/artisan down --render="errors::503" || true
+
+    # Run migrations
+    - $DEPLOYPATH/artisan migrate --force
+
+    # Clear and rebuild caches
+    - $DEPLOYPATH/artisan config:cache
+    - $DEPLOYPATH/artisan route:cache
+    - $DEPLOYPATH/artisan view:cache
+    - $DEPLOYPATH/artisan event:cache
+
+    # Storage link
+    - $DEPLOYPATH/artisan storage:link || true
+
+    # Set correct permissions
+    - chmod -R 755 $DEPLOYPATH/storage
+    - chmod -R 755 $DEPLOYPATH/bootstrap/cache
+
+    # Bring app back online
+    - $DEPLOYPATH/artisan up
