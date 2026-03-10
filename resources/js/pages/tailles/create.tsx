@@ -38,7 +38,7 @@ export default function TaillesCreate() {
                             Nouvelle taille
                         </h1>
                         <p className="text-muted-foreground mt-2">
-                            Cr?ez une nouvelle taille de produit
+                            Créez une nouvelle taille de produit
                         </p>
                     </div>
                 </div>
@@ -87,8 +87,8 @@ export default function TaillesCreate() {
                                             disabled={processing}
                                         >
                                             {processing
-                                                ? 'Cr?ation...'
-                                                : 'Cr?er la taille'}
+                                                ? 'Création...'
+                                                : 'Créer la taille'}
                                         </Button>
                                         <Link href={TailleController.index.url()}>
                                             <Button variant="outline" type="button">

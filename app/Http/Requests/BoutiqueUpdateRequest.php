@@ -27,4 +27,16 @@ class BoutiqueUpdateRequest extends FormRequest
             'telephone' => 'nullable|string|max:20',
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'nom.required' => "Le champ nom est obligatoire",
+            "nom.string" =>"Le doit être une chaîne de caractères",
+            "telephone.max" => "Le numéro de téléphone ne doit pas dépasser 20 caractères",
+            "telephone.string" => "Le numéro de téléphone doit être une chaîne de caractères",
+            "adresse.max" => "L'adresse ne doit pas dépasser 255 caractères",
+            "adresse.string" => "L'adresse doit être une chaîne de caractères",
+        ];
+    }
 }

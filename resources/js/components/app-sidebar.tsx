@@ -48,6 +48,7 @@ const navigationGroups: NavGroup[] = [
             { title: 'Vue d\'ensemble', href: dashboard(), icon: LayoutGrid, permission: 'view dashboard' },
             { title: 'Point de Vente (POS)', href: POSController.index.url(), icon: ShoppingBag, permission: 'manage sales' },
             { title: 'Rapports & Analyses', href: RapportController.index.url(), icon: PieChart, permission: 'manage reports' },
+            { title: 'Rapports Journaliers', href: '/rapport-journaliers', icon: ReceiptText },
         ]
     },
     {

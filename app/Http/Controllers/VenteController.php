@@ -42,7 +42,7 @@ class VenteController extends Controller
                 $query->where('boutique_id', $user->boutique_id);
             })
             ->orderBy('created_at', 'desc')
-            ->paginate(8);
+            ->paginate(5);
 
         // S'assurer que les montants sont des nombres valides
         $ventes->getCollection()->transform(function ($vente) {

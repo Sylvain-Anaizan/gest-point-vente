@@ -120,7 +120,7 @@ export default function BoutiquesIndex({
                         <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-indigo-500/50" />
                         <Input
                             placeholder="Rechercher par nom, adresse..."
-                            className="w-full h-12 pl-12 rounded-xl border-indigo-100 bg-white/50 backdrop-blur-sm focus-visible:ring-indigo-500 shadow-sm"
+                            className="w-full h-12 pl-12 rounded-xl border-indigo-100 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm focus-visible:ring-indigo-500 shadow-sm transition-all"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -165,7 +165,7 @@ export default function BoutiquesIndex({
                                         </div>
                                         <CardHeader className="pb-4">
                                             <div className="flex justify-between items-start mb-4">
-                                                <div className="size-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                                <div className="size-12 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                                                     <StoreIcon className="size-6" />
                                                 </div>
                                                 <div className="flex items-center gap-2">
@@ -174,7 +174,7 @@ export default function BoutiquesIndex({
                                                     </Badge>
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                                            <Button size="icon" variant="ghost" className="size-8 rounded-lg text-indigo-950/40 hover:text-indigo-600 hover:bg-indigo-50 transition-colors">
+                                                            <Button size="icon" variant="ghost" className="size-8 rounded-lg text-indigo-950/40 dark:text-white/40 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors">
                                                                 <MoreVertical className="size-4" />
                                                             </Button>
                                                         </DropdownMenuTrigger>
@@ -206,22 +206,22 @@ export default function BoutiquesIndex({
                                                     </DropdownMenu>
                                                 </div>
                                             </div>
-                                            <CardTitle className="text-2xl font-black text-indigo-950 group-hover:text-indigo-600 transition-colors">
+                                            <CardTitle className="text-2xl font-black text-indigo-950 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                                                 {boutique.nom}
                                             </CardTitle>
                                             <div className="space-y-2 mt-4">
                                                 {boutique.adresse && (
-                                                    <div className="flex items-center text-sm font-medium text-slate-600">
-                                                        <div className="size-6 rounded-full bg-slate-100 flex items-center justify-center mr-3">
-                                                            <MapPinIcon className="size-3 text-slate-500" />
+                                                    <div className="flex items-center text-sm font-medium text-slate-600 dark:text-slate-400">
+                                                        <div className="size-6 rounded-full bg-slate-100 dark:bg-zinc-800 flex items-center justify-center mr-3">
+                                                            <MapPinIcon className="size-3 text-slate-500 dark:text-slate-400" />
                                                         </div>
                                                         {boutique.adresse}
                                                     </div>
                                                 )}
                                                 {boutique.telephone && (
-                                                    <div className="flex items-center text-sm font-medium text-slate-600">
-                                                        <div className="size-6 rounded-full bg-slate-100 flex items-center justify-center mr-3">
-                                                            <PhoneIcon className="size-3 text-slate-500" />
+                                                    <div className="flex items-center text-sm font-medium text-slate-600 dark:text-slate-400">
+                                                        <div className="size-6 rounded-full bg-slate-100 dark:bg-zinc-800 flex items-center justify-center mr-3">
+                                                            <PhoneIcon className="size-3 text-slate-500 dark:text-slate-400" />
                                                         </div>
                                                         {boutique.telephone}
                                                     </div>

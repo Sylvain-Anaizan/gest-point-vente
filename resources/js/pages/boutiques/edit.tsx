@@ -40,31 +40,31 @@ export default function BoutiquesEdit({ boutique }: { boutique: Boutique }) {
             <Head title={`Modifier : ${boutique.nom}`} />
 
             <div className="mx-auto max-w-4xl space-y-8 p-4 md:p-8 pb-32 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <div className="flex flex-col md:flex-row items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-indigo-50">
+                <div className="flex flex-col md:flex-row items-center gap-4 bg-white dark:bg-zinc-950 p-6 rounded-2xl shadow-sm border border-indigo-50 dark:border-zinc-800">
                     <Link href={BoutiqueController.index.url()}>
-                        <Button variant="secondary" size="icon" className="size-12 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 shrink-0">
+                        <Button variant="secondary" size="icon" className="size-12 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 shrink-0">
                             <ArrowLeftIcon className="size-6" />
                         </Button>
                     </Link>
                     <div>
-                        <h1 className="text-4xl font-black tracking-tight text-indigo-950">
+                        <h1 className="text-4xl font-black tracking-tight text-indigo-950 dark:text-white">
                             Modifier la boutique
                         </h1>
-                        <p className="text-slate-500 font-medium mt-1">
-                            Mise à jour des informations de <strong className="text-indigo-600 font-black">{boutique.nom}</strong>.
+                        <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">
+                            Mise à jour des informations de <strong className="text-indigo-600 dark:text-indigo-400 font-black">{boutique.nom}</strong>.
                         </p>
                     </div>
                 </div>
 
-                <Card className="border-0 shadow-xl shadow-indigo-500/5 ring-1 ring-indigo-100 bg-white/70 backdrop-blur-xl">
-                    <CardHeader className="pb-8 border-b border-indigo-50/50 mb-8">
-                        <CardTitle className="text-2xl font-black text-indigo-950 flex items-center gap-3">
+                <Card className="border-0 shadow-xl shadow-indigo-500/5 ring-1 ring-indigo-100 dark:ring-zinc-800 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl">
+                    <CardHeader className="pb-8 border-b border-indigo-50/50 dark:border-zinc-800/50 mb-8">
+                        <CardTitle className="text-2xl font-black text-indigo-950 dark:text-white flex items-center gap-3">
                             <div className="p-2.5 bg-indigo-600 rounded-xl text-white shadow-lg shadow-indigo-200">
                                 <StoreIcon className="size-6" />
                             </div>
                             Paramètres Opérationnels
                         </CardTitle>
-                        <CardDescription className="font-medium text-slate-500">
+                        <CardDescription className="font-medium text-slate-500 dark:text-slate-400">
                             Ajustez les coordonnées et informations de contact.
                         </CardDescription>
                     </CardHeader>
@@ -77,7 +77,7 @@ export default function BoutiquesEdit({ boutique }: { boutique: Boutique }) {
                                 <>
                                     <div className="grid gap-8 md:grid-cols-2">
                                         <div className="space-y-3">
-                                            <Label htmlFor="nom" className="text-xs font-black uppercase tracking-widest text-slate-400">
+                                            <Label htmlFor="nom" className="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
                                                 Nom de l'enseigne <span className="text-rose-500 font-bold">*</span>
                                             </Label>
                                             <Input
@@ -86,13 +86,13 @@ export default function BoutiquesEdit({ boutique }: { boutique: Boutique }) {
                                                 required
                                                 defaultValue={boutique.nom}
                                                 placeholder="Ex: Boutique Centre-Ville"
-                                                className="h-12 border-slate-200 focus-visible:ring-indigo-500 rounded-xl"
+                                                className="h-12 border-slate-200 dark:border-zinc-800 dark:bg-zinc-950 focus-visible:ring-indigo-500 rounded-xl"
                                             />
                                             <InputError message={errors.nom} />
                                         </div>
 
                                         <div className="space-y-3">
-                                            <Label htmlFor="telephone" className="text-xs font-black uppercase tracking-widest text-slate-400">
+                                            <Label htmlFor="telephone" className="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
                                                 Contact Téléphonique
                                             </Label>
                                             <Input
@@ -100,14 +100,14 @@ export default function BoutiquesEdit({ boutique }: { boutique: Boutique }) {
                                                 name="telephone"
                                                 defaultValue={boutique.telephone || ''}
                                                 placeholder="Ex: +225 07 00 00 00 00"
-                                                className="h-12 border-slate-200 focus-visible:ring-indigo-500 rounded-xl"
+                                                className="h-12 border-slate-200 dark:border-zinc-800 dark:bg-zinc-950 focus-visible:ring-indigo-500 rounded-xl"
                                             />
                                             <InputError message={errors.telephone} />
                                         </div>
                                     </div>
 
                                     <div className="space-y-3 pt-4">
-                                        <Label htmlFor="adresse" className="text-xs font-black uppercase tracking-widest text-slate-400">
+                                        <Label htmlFor="adresse" className="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
                                             Adresse de localisation
                                         </Label>
                                         <Input
@@ -115,7 +115,7 @@ export default function BoutiquesEdit({ boutique }: { boutique: Boutique }) {
                                             name="adresse"
                                             defaultValue={boutique.adresse || ''}
                                             placeholder="Ex: 123 Rue de la République, Abidjan"
-                                            className="h-12 border-slate-200 focus-visible:ring-indigo-500 rounded-xl"
+                                            className="h-12 border-slate-200 dark:border-zinc-800 dark:bg-zinc-950 focus-visible:ring-indigo-500 rounded-xl"
                                         />
                                         <InputError message={errors.adresse} />
                                     </div>
@@ -130,7 +130,7 @@ export default function BoutiquesEdit({ boutique }: { boutique: Boutique }) {
                                             {processing ? 'SAUVEGARDE...' : 'ENREGISTRER LES MODIFICATIONS'}
                                         </Button>
                                         <Link href={BoutiqueController.index.url()} className="flex-1">
-                                            <Button variant="outline" type="button" className="h-14 w-full rounded-xl border-slate-200 font-black uppercase tracking-widest text-xs hover:bg-slate-50 transition-all">
+                                            <Button variant="outline" type="button" className="h-14 w-full rounded-xl border-slate-200 dark:border-zinc-800 font-black uppercase tracking-widest text-xs hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all">
                                                 Annuler
                                             </Button>
                                         </Link>

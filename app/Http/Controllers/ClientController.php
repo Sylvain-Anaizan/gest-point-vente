@@ -37,7 +37,7 @@ class ClientController extends Controller
 
         $query->orderBy($sortField, $sortDirection);
 
-        $clients = $query->paginate(15)->withQueryString();
+        $clients = $query->paginate(10)->withQueryString();
 
         return Inertia::render('clients/index', [
             'clients' => $clients,

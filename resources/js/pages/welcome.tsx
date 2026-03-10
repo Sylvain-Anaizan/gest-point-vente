@@ -40,7 +40,7 @@ export default function Welcome() {
                         <div className="relative">
                             <div className="absolute -inset-2 bg-primary/20 rounded-xl blur-lg group-hover:bg-primary/30 transition-all" />
                             <div className="relative p-2.5 bg-slate-900/80 border border-white/10 rounded-xl group-hover:scale-105 transition-all duration-500 shadow-2xl">
-                                <img src="/storage/anaizan.png" alt="Logo" className="h-7 w-7 object-contain" />
+                                <img src="/anaizan.png" alt="Logo" className="h-7 w-7 object-contain" />
                             </div>
                         </div>
                         <div className="hidden sm:block">
@@ -49,7 +49,7 @@ export default function Welcome() {
                             </h2>
                             <div className="flex items-center gap-1.5">
                                 <span className="h-1 w-1 rounded-full bg-emerald-500 animate-pulse" />
-                                <p className="text-[9px] uppercase tracking-[0.3em] text-slate-500 font-black">Powered by AI</p>
+                                <p className="text-[9px] uppercase tracking-[0.3em] text-slate-500 font-black">Version 1.0</p>
                             </div>
                         </div>
                     </div>
@@ -82,77 +82,21 @@ export default function Welcome() {
                 <div className="text-center space-y-8 mb-24">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary animate-in fade-in zoom-in duration-700">
                         <Zap className="h-3 w-3 fill-current" />
-                        <span className="text-[10px] font-black uppercase tracking-[.25em]">Version 2.0 • Excellence Opérationnelle</span>
+                        <span className="text-[10px] font-black uppercase tracking-[.25em]">Version 1.0 • Excellence Opérationnelle</span>
                     </div>
 
                     <h1 className="text-6xl lg:text-8xl font-black tracking-tight text-white max-w-5xl mx-auto leading-[0.95] animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                        Pilotez votre <br />
-                        <span className="text-transparent bg-clip-text bg-[linear-gradient(135deg,#fff_0%,#475569_100%)]">Écosystème</span> <br />
+                        Piloter la <br />
+                        <span className="text-transparent bg-clip-text bg-[linear-gradient(135deg,#fff_0%,#475569_100%)]">gestion de stock</span> <br />
                         <span className="text-primary italic">Anaizan.</span>
                     </h1>
 
                     <p className="text-lg md:text-xl text-slate-400 leading-relaxed max-w-2xl mx-auto font-medium animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
-                        L'interface de gestion unifiée la plus avancée du Mali.
-                        Simplifiez votre logistique, décuplez votre rentabilité.
+                        L'interface de gestion unifiée.
+                        Simplifiez votre gestion de stock, décuplez votre rentabilité.
                     </p>
                 </div>
 
-                {/* Login Portal Cards */}
-                {!auth.user && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-32 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300">
-                        {/* Admin Card */}
-                        <div className="group relative">
-                            <div className="absolute -inset-0.5 bg-gradient-to-br from-primary to-blue-600 rounded-[2.5rem] blur opacity-10 group-hover:opacity-30 transition duration-700" />
-                            <div className="relative h-full bg-slate-900/40 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-10 flex flex-col items-center text-center transition-all duration-700 group-hover:-translate-y-3 group-hover:bg-slate-900/60 shadow-2xl">
-                                <div className="mb-8 relative">
-                                    <div className="absolute -inset-4 bg-primary/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    <div className="relative h-20 w-20 flex items-center justify-center bg-primary/10 rounded-[2rem] border border-primary/20 rotate-6 group-hover:rotate-12 transition-transform duration-500">
-                                        <Shield className="h-10 w-10 text-primary" />
-                                    </div>
-                                </div>
-
-                                <h3 className="text-2xl font-black text-white mb-4">Administration</h3>
-                                <p className="text-sm text-slate-400 font-medium mb-12 leading-relaxed h-12">
-                                    Supervision globale, analyses de données massives
-                                    et gestion stratégique multi-boutiques.
-                                </p>
-
-                                <Link
-                                    href={`${login()}?role=admin`}
-                                    className="w-full mt-auto py-5 rounded-2xl bg-white text-black font-black text-sm uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-[0_20px_50px_rgba(255,255,255,0.1)]"
-                                >
-                                    Accès Stratégique
-                                </Link>
-                            </div>
-                        </div>
-
-                        {/* Staff Card */}
-                        <div className="group relative">
-                            <div className="absolute -inset-0.5 bg-gradient-to-br from-primary to-orange-500 rounded-[2.5rem] blur opacity-10 group-hover:opacity-30 transition duration-700" />
-                            <div className="relative h-full bg-slate-900/40 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-10 flex flex-col items-center text-center transition-all duration-700 group-hover:-translate-y-3 group-hover:bg-slate-900/60 shadow-2xl">
-                                <div className="mb-8 relative">
-                                    <div className="absolute -inset-4 bg-primary/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    <div className="relative h-20 w-20 flex items-center justify-center bg-primary rounded-[2rem] border border-white/10 -rotate-6 group-hover:-rotate-12 transition-transform duration-500 shadow-xl shadow-primary/30">
-                                        <Store className="h-10 w-10 text-primary-foreground" />
-                                    </div>
-                                </div>
-
-                                <h3 className="text-2xl font-black text-white mb-4">Point de Vente</h3>
-                                <p className="text-sm text-slate-400 font-medium mb-12 leading-relaxed h-12">
-                                    Optimisez vos ventes quotidiennes, gérez vos
-                                    stocks en local et suivez vos performances.
-                                </p>
-
-                                <Link
-                                    href={`${login()}?role=employé`}
-                                    className="w-full mt-auto py-5 rounded-2xl bg-primary text-primary-foreground font-black text-sm uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)]"
-                                >
-                                    Accès Opérationnel
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
-                )}
 
                 {/* Micro Features Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
@@ -160,7 +104,7 @@ export default function Welcome() {
                         { icon: Activity, title: 'Temps Réel', desc: 'Sychronisation instantanée' },
                         { icon: LineChart, title: 'Analytique', desc: 'Visualisation de croissance' },
                         { icon: Package, title: 'Logistique', desc: 'Gestion de flux intelligents' },
-                        { icon: Shield, title: 'Sécurité', desc: 'Cryptage de niveau bancaire' },
+                        { icon: Shield, title: 'Sécurité', desc: 'Cryptage des données' },
                     ].map((feature, i) => (
                         <div
                             key={i}
@@ -179,14 +123,14 @@ export default function Welcome() {
                 <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12 items-center">
                     <div className="flex flex-col gap-2">
                         <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">
-                            © {new Date().getFullYear()} ANAIZAN MALI
+                            © {new Date().getFullYear()} ANAIZAN
                         </p>
                         <p className="text-[10px] text-slate-600 font-medium">BAMAKO • Excellence Tech</p>
                     </div>
 
                     <div className="flex justify-center gap-8">
-                        <span className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-700">AES Connect</span>
-                        <span className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-700">Mali Hub</span>
+                        <span className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-700">Technologie</span>
+                        <span className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-700">Innovation</span>
                     </div>
 
                     <div className="flex flex-col md:items-end gap-2">

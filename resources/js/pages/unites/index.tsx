@@ -177,10 +177,10 @@ export default function UnitesIndex({ unites }: { unites: Unite[] }) {
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {filteredUnites.map((unite) => (
                             <div key={unite.id} className="group flex flex-col transition-all duration-200 hover:shadow-lg hover:[&>div:first-child]:border-primary/50 hover:[&>div:last-child]:border-primary/50">
-                                <Card className="rounded-b-none border-b-0 transition-colors duration-200">
-                                    <CardHeader>
+                                <Card className="rounded-b-none border-b-0 transition-colors duration-200 flex-1 flex flex-col dark:bg-zinc-950 dark:border-zinc-800">
+                                    <CardHeader className="flex-1">
                                         <div className="flex justify-between items-start">
-                                            <CardTitle className="text-xl">
+                                            <CardTitle className="text-xl dark:text-white">
                                                 {unite.nom}
                                             </CardTitle>
                                             <Badge
@@ -191,19 +191,23 @@ export default function UnitesIndex({ unites }: { unites: Unite[] }) {
                                                 {unite.produits_count <= 1 ? 'produit' : 'produits'}
                                             </Badge>
                                         </div>
-                                        {unite.description && (
-                                            <CardDescription className="line-clamp-2 mt-1">
+                                        {unite.description ? (
+                                            <CardDescription className="line-clamp-2 mt-1 dark:text-zinc-400">
                                                 {unite.description}
+                                            </CardDescription>
+                                        ) : (
+                                            <CardDescription className="mt-1 italic opacity-40 dark:text-zinc-500">
+                                                Aucune description
                                             </CardDescription>
                                         )}
                                     </CardHeader>
                                 </Card>
-                                <div className="flex gap-2 p-2 border border-t-0 rounded-b-lg bg-white transition-colors duration-200">
+                                <div className="flex gap-2 p-2 border border-t-0 rounded-b-lg bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 transition-colors duration-200">
                                     <Link
                                         href={UniteController.show.url(unite.id)}
                                         className="flex-1"
                                     >
-                                        <Button variant="outline" size="sm" className="w-full bg-background">
+                                        <Button variant="outline" size="sm" className="w-full bg-background dark:bg-zinc-950 dark:border-zinc-800 dark:hover:bg-zinc-900">
                                             <EyeIcon className="size-4 mr-2" />
                                             Voir
                                         </Button>
@@ -214,7 +218,7 @@ export default function UnitesIndex({ unites }: { unites: Unite[] }) {
                                                 href={UniteController.edit.url(unite.id)}
                                                 className="flex-1"
                                             >
-                                                <Button variant="outline" size="sm" className="w-full bg-background">
+                                                <Button variant="outline" size="sm" className="w-full bg-background dark:bg-zinc-950 dark:border-zinc-800 dark:hover:bg-zinc-900">
                                                     <PencilIcon className="size-4 mr-2" />
                                                     Modifier
                                                 </Button>

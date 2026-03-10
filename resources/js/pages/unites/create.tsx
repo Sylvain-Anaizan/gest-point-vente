@@ -44,7 +44,7 @@ export default function UnitesCreate() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Nouvelle unité de mesure" />
 
-            <div className="max-w-2xl mx-auto space-y-6 pt-4">
+            <div className="max-w-5xl space-y-6 pt-4">
                 <div className="flex items-center gap-4">
                     <Link href={UniteController.index.url()}>
                         <Button variant="outline" size="icon" className="hover:bg-primary/5 transition-colors">

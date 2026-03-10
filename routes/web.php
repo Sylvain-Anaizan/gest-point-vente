@@ -81,3 +81,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__.'/settings.php';
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('rapport-journaliers', App\Http\Controllers\RapportJournalierController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
+});

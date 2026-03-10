@@ -26,4 +26,16 @@ class TailleUpdateRequest extends FormRequest
             'description' => ['nullable', 'string', 'max:1000'],
         ];
     }
+
+    public function messages()
+    {
+        return [
+            "nom.required" => "Le champ nom est requis",
+            "nom.string" => "Le champ nom doit être une chaîne de caractères",
+            "nom.max" => "Le champ nom ne doit pas dépasser 255 caractères",
+            "description.required" => "Le champ description est requis",
+            "description.string" => "Le champ description doit être une chaîne de caractères",
+            "description.max" => "Le champ description ne doit pas dépasser 1000 caractères",
+        ];
+    }
 }
