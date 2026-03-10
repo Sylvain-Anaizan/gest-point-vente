@@ -3,7 +3,7 @@ name: Deploy Website
 on:
   push:
     branches:
-      - main # Se déclenche quand vous pushez sur la branche main
+      - main
 
 jobs:
   web-deploy:
@@ -12,15 +12,6 @@ jobs:
     steps:
       - name: 🚚 Get latest code
         uses: actions/checkout@v4
-
-      - name: ⚡️ Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4' # Laravel 12 supporte PHP 8.2+
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql
-
-      - name: 📥 Install Composer Dependencies
-        run: composer install --no-dev --optimize-autoloader
 
       - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
@@ -38,12 +29,14 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          # Chemin vers le dossier de votre sous-domaine sur le serveur :
+          # REMPLACEZ par le chemin exact (ex: ./stock.anaizancloud.com/)
           server-dir:
-          # On exclut les fichiers inutiles en production
           exclude: |
             **/.git*
             **/.git*/**
             **/node_modules/**
+            **/vendor/**
             **/tests/**
             .env
+            README.md
+            .phpunit.result.cache
