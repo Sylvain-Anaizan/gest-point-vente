@@ -51,6 +51,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
 import { useState } from 'react';
+import Pagination from '@/components/ui/pagination-custom';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Tableau de bord', href: '/dashboard' },
@@ -58,10 +59,16 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 // ... (Interfaces et Types restent identiques) ...
+interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
 interface Client { id: number; nom: string; email: string; telephone: string | null; adresse: string | null; ville: string | null; code_postal: string | null; pays: string; date_naissance: string | null; notes: string | null; actif: boolean; created_at: string; updated_at: string; nom_complet: string; adresse_complete: string; }
 type FilterStatus = 'all' | 'actifs' | 'inactifs';
 
-export default function ClientsIndex({ clients, filters }: { clients: { data: Client[]; current_page: number; last_page: number; per_page: number; total: number; links: any[]; }; filters: { search?: string; actif?: string; sort?: string; direction?: string; }; }) {
+export default function ClientsIndex({ clients, filters }: { clients: { data: Client[]; current_page: number; last_page: number; per_page: number; total: number; links: PaginationLink[]; }; filters: { search?: string; actif?: string; sort?: string; direction?: string; }; }) {
     const { auth } = usePage().props as unknown as { auth: { user: { permissions: string[] } } };
     const canManage = auth.user.permissions.includes('manage sales');
 
@@ -250,31 +257,49 @@ export default function ClientsIndex({ clients, filters }: { clients: { data: Cl
                                     </div>
                                 </CardContent>
 
-                                <CardFooter className="pt-4 pb-4">
-                                    <div className="grid grid-cols-2 gap-2 w-full">
+                                <CardFooter className="pt-4 pb-4 border-t border-zinc-100 dark:border-zinc-800/50 mt-auto">
+                                    <div className="grid grid-cols-2 gap-3 w-full">
                                         {client.telephone ? (
-                                            <Button variant="outline" size="sm" className="w-full" asChild>
+                                            <Button variant="outline" size="default" className="w-full h-12 rounded-xl font-bold uppercase tracking-widest text-[10px]"
+                                                asChild>
                                                 <a href={`tel:${client.telephone}`}>
-                                                    <Phone className="mr-2 h-3 w-3" /> Appeler
+                                                    <Phone className="mr-2 h-4 w-4 text-green-600" /> Appeler
                                                 </a>
                                             </Button>
                                         ) : (
-                                            <Button variant="outline" size="sm" className="w-full" disabled>
-                                                <Phone className="mr-2 h-3 w-3" /> Appeler
+                                            <Button variant="outline" size="default" className="w-full h-12 rounded-xl font-bold uppercase tracking-widest text-[10px]"
+                                                disabled>
+                                                <Phone className="mr-2 h-4 w-4 opacity-50" /> Appeler
                                             </Button>
                                         )}
 
-                                        <Button variant="secondary" size="sm" className="w-full" asChild>
+                                        <Button variant="secondary" size="default" className="w-full h-12 rounded-xl font-bold uppercase tracking-widest text-[10px]"
+                                            asChild>
                                             <a href={`mailto:${client.email}`}>
-                                                <Mail className="mr-2 h-3 w-3" /> Email
+                                                <Mail className="mr-2 h-4 w-4 text-blue-600" /> Email
                                             </a>
                                         </Button>
                                     </div>
                                 </CardFooter>
                             </Card>
                         ))}
+
                     </div>
                 )}
+
+                <div className="pt-8 mt-8 border-t border-zinc-100 dark:border-zinc-800/50 flex justify-center">
+                    <Pagination
+                        links={clients.links}
+                        meta={{
+                            current_page: clients.current_page,
+                            from: clients.from,
+                            last_page: clients.last_page,
+                            per_page: clients.per_page,
+                            to: clients.to,
+                            total: clients.total
+                        }}
+                    />
+                </div>
 
                 {/* DIALOGUE DE SUPPRESSION (Reste inchangé mais stylisé) */}
                 <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

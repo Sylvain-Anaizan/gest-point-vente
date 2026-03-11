@@ -45,7 +45,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import AppLayout from '@/layouts/app-layout';
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
+import Pagination from '@/components/ui/pagination-custom';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Tableau de bord', href: '/dashboard' },
@@ -76,49 +77,45 @@ interface Produit {
 }
 
 export default function ProduitsIndex({
-    produits = [],
+    produits,
     boutiques = [],
+    stats,
+    filters
 }: {
-    produits: Produit[];
+    produits: {
+        data: Produit[];
+        links: any[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+        from: number | null;
+        to: number | null;
+    };
     boutiques: Boutique[];
+    stats: { total_produits: number; low_stock: number; total_value: number; };
+    filters: { search?: string; boutique_id?: string; };
 }) {
     const { auth } = usePage().props as unknown as { auth: { user: { permissions: string[] } } };
     const canManage = auth.user.permissions.includes('manage products');
 
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedBoutique, setSelectedBoutique] = useState<string>('all');
+    const [searchQuery, setSearchQuery] = useState(filters.search || '');
+    const [selectedBoutique, setSelectedBoutique] = useState<string>(filters.boutique_id || 'all');
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [produitToDelete, setProduitToDelete] = useState<Produit | null>(null);
 
-    // --- LOGIQUE DE FILTRAGE ET STATISTIQUES ---
+    const handleSearch = () => {
+        router.get(ProduitController.index.url(), {
+            search: searchQuery,
+            boutique_id: selectedBoutique === 'all' ? undefined : selectedBoutique
+        }, { preserveState: true, replace: true });
+    };
 
-    // Filtrer les produits selon la recherche et la boutique
-    const filteredProduits = useMemo(() => {
-        let result = produits;
-
-        if (selectedBoutique !== 'all') {
-            result = result.filter(p => p.boutique?.id.toString() === selectedBoutique);
-        }
-
-        if (searchQuery) {
-            const lowerQuery = searchQuery.toLowerCase();
-            result = result.filter(p =>
-                p.nom.toLowerCase().includes(lowerQuery) ||
-                p.category.nom.toLowerCase().includes(lowerQuery) ||
-                p.boutique?.nom.toLowerCase().includes(lowerQuery)
-            );
-        }
-
-        return result;
-    }, [produits, searchQuery, selectedBoutique]);
-
-    // Calcul des KPIs (Statistiques)
-    const stats = useMemo(() => {
-        const totalProduits = produits.length;
-        const lowStock = produits.filter(p => p.totalStock < 10).length;
-        const totalValue = produits.reduce((acc, p) => acc + (p.prixMin * p.totalStock), 0);
-        return { totalProduits, lowStock, totalValue };
-    }, [produits]);
+    const clearFilters = () => {
+        setSearchQuery('');
+        setSelectedBoutique('all');
+        router.get(ProduitController.index.url(), {}, { preserveState: true, replace: true });
+    };
 
     const handleDeleteClick = (produit: Produit) => {
         setProduitToDelete(produit);
@@ -176,9 +173,9 @@ export default function ProduitsIndex({
                 {/* --- SECTION 2: STATS --- */}
                 <div className="grid gap-4 grid-cols-2 lg:grid-cols-3">
                     {[
-                        { title: 'Total Produits', value: stats.totalProduits, icon: Package, color: 'indigo', desc: 'Références actives' },
-                        { title: 'Valeur du Stock', value: stats.totalValue.toLocaleString('fr-FR'), suffix: 'FCFA', icon: TrendingUp, color: 'blue', desc: 'Estimation à la vente' },
-                        { title: 'Stock Faible', value: stats.lowStock, icon: AlertTriangle, color: stats.lowStock > 0 ? 'rose' : 'emerald', desc: 'À réapprovisionner' }
+                        { title: 'Total Produits', value: stats.total_produits, icon: Package, color: 'indigo', desc: 'Références actives' },
+                        { title: 'Valeur du Stock', value: stats.total_value.toLocaleString('fr-FR'), suffix: 'FCFA', icon: TrendingUp, color: 'blue', desc: 'Estimation à la vente' },
+                        { title: 'Stock Faible', value: stats.low_stock, icon: AlertTriangle, color: stats.low_stock > 0 ? 'rose' : 'emerald', desc: 'À réapprovisionner' }
                     ].map((stat, i) => (
                         <Card key={i} className="group relative overflow-hidden bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 rounded-lg shadow-md hover:shadow-lg transition-all duration-500 hover:-translate-y-1">
                             <div className={`absolute -right-6 -top-6 size-32 bg-${stat.color}-500/5 rounded-full blur-3xl group-hover:bg-${stat.color}-500/10 transition-all duration-700`} />
@@ -220,10 +217,17 @@ export default function ProduitsIndex({
                                     className="pl-11 h-12 bg-gray-200 dark:bg-zinc-800/50 border-white/20 dark:border-zinc-700/50 rounded-2xl focus-visible:ring-indigo-500/30 transition-all font-medium"
                                     value={searchQuery}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                                 />
                             </div>
                             <div className="flex items-center gap-3 w-full lg:w-auto">
-                                <Select value={selectedBoutique} onValueChange={setSelectedBoutique}>
+                                <Select value={selectedBoutique} onValueChange={(val) => {
+                                    setSelectedBoutique(val);
+                                    router.get(ProduitController.index.url(), {
+                                        search: searchQuery,
+                                        boutique_id: val === 'all' ? undefined : val
+                                    }, { preserveState: true, replace: true });
+                                }}>
                                     <SelectTrigger className="w-full lg:w-[240px] h-12 bg-gray-200 dark:bg-zinc-800/50 border-white/20 dark:border-zinc-700/50 rounded-2xl">
                                         <SelectValue placeholder="Toutes les boutiques" />
                                     </SelectTrigger>
@@ -237,15 +241,18 @@ export default function ProduitsIndex({
                                     </SelectContent>
                                 </Select>
                                 <div className="hidden sm:flex h-12 px-4 items-center bg-zinc-100 dark:bg-zinc-800/50 rounded-2xl border border-white/10 text-[10px] font-black uppercase tracking-widest text-muted-foreground whitespace-nowrap">
-                                    {filteredProduits.length} RÉFÉRENCES
+                                    {produits.total} RÉFÉRENCES
                                 </div>
+                                <Button variant="outline" className="h-12 rounded-2xl hidden lg:flex" onClick={clearFilters}>
+                                    Effacer
+                                </Button>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
                 {/* --- SECTION 4: LISTE --- */}
-                {filteredProduits.length === 0 ? (
+                {produits.data.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-24 px-4 text-center bg-white/20 dark:bg-zinc-900/10 backdrop-blur-sm rounded-sm border border-dashed border-zinc-300 dark:border-zinc-800">
                         <div className="size-20 mb-6 rounded-[2rem] bg-indigo-500/10 flex items-center justify-center ring-8 ring-indigo-500/5 animate-pulse">
                             <Package className="size-10 text-indigo-500 opacity-40" />
@@ -256,97 +263,114 @@ export default function ProduitsIndex({
                         </p>
                     </div>
                 ) : (
-                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {filteredProduits.map((produit) => {
-                            const isLowStock = produit.totalStock < 10 && produit.totalStock > 0;
-                            const isOutOfStock = produit.totalStock === 0;
+                    <div className="space-y-8">
+                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                            {produits.data.map((produit) => {
+                                const isLowStock = produit.totalStock < 10 && produit.totalStock > 0;
+                                const isOutOfStock = produit.totalStock === 0;
 
-                            return (
-                                <Card key={produit.id} className="group relative flex flex-col rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 hover:-translate-y-2 overflow-hidden">
-                                    <div className="relative aspect-[4/3] overflow-hidden rounded-xl m-2 bg-zinc-100 dark:bg-zinc-900">
-                                        <img
-                                            src={produit.imageUrl || placeholderUrl}
-                                            alt={produit.nom}
-                                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                            onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl; }}
-                                        />
-                                        <div className="absolute top-3 right-3 z-30">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                                    <Button size="icon" className="size-8 rounded-xl bg-white/90 dark:bg-zinc-800/90 hover:bg-white dark:hover:bg-zinc-700 border-0 shadow-lg text-zinc-900 dark:text-zinc-50 transition-colors active:scale-95">
-                                                        <MoreVertical className="size-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl border-zinc-200 dark:border-zinc-800 shadow-2xl bg-white dark:bg-zinc-900">
-                                                    <Link href={ProduitController.show.url(produit.id)}>
-                                                        <DropdownMenuItem className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 font-bold text-xs uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
-                                                            <Eye className="size-4 text-indigo-500" />
-                                                            Détails
-                                                        </DropdownMenuItem>
-                                                    </Link>
-                                                    {canManage && (
-                                                        <>
-                                                            <Link href={ProduitController.edit.url(produit.id)}>
-                                                                <DropdownMenuItem className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 font-bold text-xs uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
-                                                                    <PencilIcon className="size-4 text-emerald-500" />
-                                                                    Modifier
-                                                                </DropdownMenuItem>
-                                                            </Link>
-                                                            <DropdownMenuItem
-                                                                className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-rose-50 dark:hover:bg-rose-500/10 font-bold text-xs uppercase tracking-widest text-rose-600 focus:bg-rose-50 focus:text-rose-600"
-                                                                onClick={() => handleDeleteClick(produit)}
-                                                            >
-                                                                <TrashIcon className="size-4" />
-                                                                Supprimer
+                                return (
+                                    <Card key={produit.id} className="group relative flex flex-col rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 hover:-translate-y-2 overflow-hidden">
+                                        <div className="relative aspect-[4/3] overflow-hidden rounded-xl m-2 bg-zinc-100 dark:bg-zinc-900">
+                                            <img
+                                                src={produit.imageUrl || placeholderUrl}
+                                                alt={produit.nom}
+                                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                onError={(e) => { (e.target as HTMLImageElement).src = placeholderUrl; }}
+                                            />
+                                            <div className="absolute top-3 right-3 z-30">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                                        <Button size="icon" className="size-8 rounded-xl bg-white/90 dark:bg-zinc-800/90 hover:bg-white dark:hover:bg-zinc-700 border-0 shadow-lg text-zinc-900 dark:text-zinc-50 transition-colors active:scale-95">
+                                                            <MoreVertical className="size-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl border-zinc-200 dark:border-zinc-800 shadow-2xl bg-white dark:bg-zinc-900">
+                                                        <Link href={ProduitController.show.url(produit.id)}>
+                                                            <DropdownMenuItem className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 font-bold text-xs uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+                                                                <Eye className="size-4 text-indigo-500" />
+                                                                Détails
                                                             </DropdownMenuItem>
-                                                        </>
-                                                    )}
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </div>
-
-                                        <div className="absolute top-3 left-3">
-                                            <Badge className="bg-white/90 dark:bg-zinc-800/90 text-zinc-900 dark:text-zinc-50 border-0 shadow-sm backdrop-blur-md px-3 py-1 rounded-xl font-black uppercase text-[9px] tracking-widest">
-                                                {produit.category.nom}
-                                            </Badge>
-                                        </div>
-                                    </div>
-
-                                    <CardHeader className="px-6 py-4 space-y-3">
-                                        <div className="space-y-1">
-                                            <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-muted-foreground opacity-60">
-                                                <Store className="size-3" />
-                                                {produit.boutique ? produit.boutique.nom : 'Stock Central'}
+                                                        </Link>
+                                                        {canManage && (
+                                                            <>
+                                                                <Link href={ProduitController.edit.url(produit.id)}>
+                                                                    <DropdownMenuItem className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 font-bold text-xs uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
+                                                                        <PencilIcon className="size-4 text-emerald-500" />
+                                                                        Modifier
+                                                                    </DropdownMenuItem>
+                                                                </Link>
+                                                                <DropdownMenuItem
+                                                                    className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-rose-50 dark:hover:bg-rose-500/10 font-bold text-xs uppercase tracking-widest text-rose-600 focus:bg-rose-50 focus:text-rose-600"
+                                                                    onClick={() => handleDeleteClick(produit)}
+                                                                >
+                                                                    <TrashIcon className="size-4" />
+                                                                    Supprimer
+                                                                </DropdownMenuItem>
+                                                            </>
+                                                        )}
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
                                             </div>
-                                            <CardTitle className="text-xl font-black tracking-tight text-zinc-900 dark:text-zinc-50 line-clamp-1 uppercase group-hover:text-indigo-500 transition-colors">
-                                                {produit.nom}
-                                            </CardTitle>
+
+                                            <div className="absolute top-3 left-3">
+                                                <Badge className="bg-white/90 dark:bg-zinc-800/90 text-zinc-900 dark:text-zinc-50 border-0 shadow-sm backdrop-blur-md px-3 py-1 rounded-xl font-black uppercase text-[9px] tracking-widest">
+                                                    {produit.category.nom}
+                                                </Badge>
+                                            </div>
                                         </div>
 
-                                        <div className="flex items-center justify-between">
-                                            <div className="space-y-0.5">
-                                                <div className="text-[9px] font-black text-muted-foreground uppercase tracking-widest opacity-40">Prix (min)</div>
-                                                <div className="text-2xl font-black tracking-tighter text-indigo-600 dark:text-indigo-400">
-                                                    {Math.round(produit.prixMin).toLocaleString('fr-FR')}
-                                                    <span className="text-xs ml-0.5 opacity-60">F</span>
+                                        <CardHeader className="px-6 py-4 space-y-3">
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-muted-foreground opacity-60">
+                                                    <Store className="size-3" />
+                                                    {produit.boutique ? produit.boutique.nom : 'Stock Central'}
+                                                </div>
+                                                <CardTitle className="text-xl font-black tracking-tight text-zinc-900 dark:text-zinc-50 line-clamp-1 uppercase group-hover:text-indigo-500 transition-colors">
+                                                    {produit.nom}
+                                                </CardTitle>
+                                            </div>
+
+                                            <div className="flex items-center justify-between">
+                                                <div className="space-y-0.5">
+                                                    <div className="text-[9px] font-black text-muted-foreground uppercase tracking-widest opacity-40">Prix (min)</div>
+                                                    <div className="text-2xl font-black tracking-tighter text-indigo-600 dark:text-indigo-400">
+                                                        {Math.round(produit.prixMin).toLocaleString('fr-FR')}
+                                                        <span className="text-xs ml-0.5 opacity-60">F</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex flex-col items-end gap-2">
+                                                    <div className={cn(
+                                                        "flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest shadow-sm transition-all duration-500 group-hover:scale-105",
+                                                        isOutOfStock ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20" :
+                                                            isLowStock ? "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20 animate-pulse" :
+                                                                "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                                                    )}>
+                                                        <Warehouse className="size-3" />
+                                                        {produit.totalStock} en stock
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div className="flex flex-col items-end gap-2">
-                                                <div className={cn(
-                                                    "flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest shadow-sm transition-all duration-500 group-hover:scale-105",
-                                                    isOutOfStock ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20" :
-                                                        isLowStock ? "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20 animate-pulse" :
-                                                            "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-                                                )}>
-                                                    <Warehouse className="size-3" />
-                                                    {produit.totalStock} en stock
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </CardHeader>
-                                </Card>
-                            );
-                        })}
+                                        </CardHeader>
+                                    </Card>
+                                );
+                            })}
+                        </div>
+
+                        {/* PAGINATION */}
+                        <div className="pt-8 border-t border-zinc-100 dark:border-zinc-800/50">
+                            <Pagination
+                                links={produits.links}
+                                meta={{
+                                    current_page: produits.current_page,
+                                    from: (produits as any).from,
+                                    last_page: produits.last_page,
+                                    per_page: (produits as any).per_page,
+                                    to: (produits as any).to,
+                                    total: produits.total
+                                }}
+                            />
+                        </div>
                     </div>
                 )}
 

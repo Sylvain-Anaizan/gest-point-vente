@@ -47,4 +47,9 @@ class Vente extends Model
     {
         return $this->belongsTo(Boutique::class);
     }
+
+    public function commande(): BelongsTo
+    {
+        return $this->belongsTo(Commande::class);
+    }
 }

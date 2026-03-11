@@ -27,6 +27,7 @@ class Produit extends Model
         'image',
         'boutique_id',
         'unite_id',
+        'est_virtuel',
     ];
 
     protected $appends = ['imageUrl', 'totalStock', 'prixMin', 'prixMax'];
@@ -39,9 +40,16 @@ class Produit extends Model
     protected function casts(): array
     {
         return [
-            // 'prix_vente' => 'float',
-            // 'quantite' => 'integer',
+            'est_virtuel' => 'boolean',
         ];
+    }
+
+    /**
+     * Scope pour les produits visibles par l'utilisateur.
+     */
+    public function scopeVisibles($query)
+    {
+        return $query->where('est_virtuel', false);
     }
 
     // Accessors for master product summary

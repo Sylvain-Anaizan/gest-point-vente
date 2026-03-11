@@ -21,7 +21,9 @@ import {
     ArrowRightLeft,
     Store,
     Target,
-    Zap
+    Zap,
+    Users,
+    Clock
 } from 'lucide-react';
 import { formatCurrency, cn } from '@/lib/utils';
 import {
@@ -89,9 +91,12 @@ interface IndexProps {
         par_mode: { mode_paiement: string; total: number; count: number; }[];
         par_boutique: { nom: string; total: number; count: number; }[];
         par_categorie: { nom: string; total: number; qte: number; }[];
+        heures_pointes: { heure: number; total_ventes: number; }[];
     };
     top_produits: TopProduit[];
+    top_clients: { nom: string; total: number; achats: number; }[];
     alertes_stock: AlerteStock[];
+    stock_dormant: { produit: string; taille: string; quantite: number; }[];
     mouvements_recents: {
         id: number;
         type: 'entrée' | 'sortie' | 'perte' | 'ajustement';
@@ -107,7 +112,9 @@ export default function RapportsIndex({
     kpis,
     charts,
     top_produits,
+    top_clients,
     alertes_stock,
+    stock_dormant,
     mouvements_recents
 }: IndexProps) {
 
@@ -322,7 +329,9 @@ export default function RapportsIndex({
                             {/* Payment Mode Distribution */}
                             <Card className="rounded-lg bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 shadow-sm">
                                 <CardHeader>
-                                    <CardTitle className="text-xl font-black uppercase tracking-widest italic">Encaissements</CardTitle>
+                                    <CardTitle className="text-xl font-black uppercase tracking-widest italic flex items-center gap-3">
+                                        <Wallet className="size-5 text-indigo-500" /> Encaissements
+                                    </CardTitle>
                                     <CardDescription className="text-xs">Répartition par mode de paiement</CardDescription>
                                 </CardHeader>
                                 <CardContent className="">
@@ -363,6 +372,64 @@ export default function RapportsIndex({
                                             </div>
                                         ))}
                                     </div>
+                                </CardContent>
+                            </Card>
+
+                            {/* Top Clients Summary */}
+                            <Card className="rounded-lg bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 shadow-sm overflow-hidden">
+                                <CardHeader className="p-8 border-b border-white/10">
+                                    <CardTitle className="text-xl font-black uppercase tracking-widest italic flex items-center gap-3">
+                                        <Users className="size-5 text-indigo-500" /> Meilleurs Clients
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-0">
+                                    {top_clients.length > 0 ? top_clients.map((client, i) => (
+                                        <div key={i} className="flex items-center justify-between p-6 hover:bg-white/40 dark:hover:bg-zinc-800/40 transition-colors border-b border-white/5 last:border-0">
+                                            <div className="flex flex-col">
+                                                <span className="text-sm font-black uppercase tracking-tight">{client.nom}</span>
+                                                <span className="text-[10px] font-bold text-muted-foreground uppercase opacity-40 tracking-widest">
+                                                    {client.achats} achats effectués
+                                                </span>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+                                                    {formatCurrency(client.total)}
+                                                </div>
+                                                <div className="text-[8px] font-black uppercase text-muted-foreground tracking-widest italic">Contribution Total</div>
+                                            </div>
+                                        </div>
+                                    )) : (
+                                        <div className="p-12 text-center text-muted-foreground italic font-bold uppercase tracking-widest opacity-20">Aucune donnée</div>
+                                    )}
+                                </CardContent>
+                            </Card>
+
+                            {/* Peak Hours Analysis */}
+                            <Card className="rounded-lg bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 shadow-sm overflow-hidden">
+                                <CardHeader className="p-8 border-b border-white/10">
+                                    <CardTitle className="text-xl font-black uppercase tracking-widest italic flex items-center gap-3">
+                                        <Clock className="size-5 text-indigo-500" /> Heures de Pointes
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-8">
+                                    <div className="h-[200px] w-full">
+                                        {charts.heures_pointes.length > 0 ? (
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <BarChart data={charts.heures_pointes}>
+                                                    <XAxis dataKey="heure" hide />
+                                                    <Tooltip
+                                                        labelFormatter={(h) => `${h}h - ${Number(h) + 1}h`}
+                                                        cursor={{ fill: 'rgba(99, 102, 241, 0.05)' }}
+                                                        contentStyle={{ borderRadius: '1rem', border: '0', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}
+                                                    />
+                                                    <Bar dataKey="total_ventes" fill="#6366f1" radius={[8, 8, 0, 0]} />
+                                                </BarChart>
+                                            </ResponsiveContainer>
+                                        ) : (
+                                            <div className="h-full flex items-center justify-center text-muted-foreground italic opacity-20">--</div>
+                                        )}
+                                    </div>
+                                    <p className="text-[10px] text-center font-black uppercase tracking-widest text-muted-foreground mt-4 italic opacity-40">Volume de transactions par heure</p>
                                 </CardContent>
                             </Card>
                         </div>
@@ -505,6 +572,38 @@ export default function RapportsIndex({
                                             </div>
                                             <div className="font-black uppercase tracking-widest text-emerald-600 italic">Rien à signaler</div>
                                             <div className="text-xs text-muted-foreground mt-1">Tous vos stocks sont optimaux.</div>
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+
+                            <Card className="rounded-lg bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 shadow-lg overflow-hidden">
+                                <CardHeader className="p-8 bg-zinc-500/5 border-b border-zinc-500/10">
+                                    <CardTitle className="text-xl font-black uppercase tracking-widest italic flex items-center gap-3">
+                                        <PackageOpen className="size-5 text-amber-500" /> Stock Dormant (30j+)
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-0">
+                                    {stock_dormant.length > 0 ? (
+                                        stock_dormant.map((stock, i) => (
+                                            <div key={i} className="p-6 flex items-center justify-between border-b border-white/5 last:border-0 hover:bg-white/40 dark:hover:bg-zinc-800/40 transition-colors">
+                                                <div>
+                                                    <div className="text-sm font-black uppercase tracking-tight">{stock.produit}</div>
+                                                    <span className="text-[10px] font-bold text-muted-foreground uppercase opacity-40 tracking-widest italic">Taille: {stock.taille}</span>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="text-sm font-black">{stock.quantite} unités</div>
+                                                    <div className="text-[8px] font-black uppercase text-muted-foreground tracking-widest italic">Actif Stocké</div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="p-20 text-center flex flex-col items-center">
+                                            <div className="size-16 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-500 mb-4">
+                                                <Zap className="size-8" />
+                                            </div>
+                                            <div className="font-black uppercase tracking-widest text-indigo-600 italic">Forte Rotation</div>
+                                            <div className="text-xs text-muted-foreground mt-1">Tous vos produits circulent bien.</div>
                                         </div>
                                     )}
                                 </CardContent>

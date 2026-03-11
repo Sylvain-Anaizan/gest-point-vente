@@ -21,28 +21,38 @@ class VenteController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = auth()->user();
-        $ventes = Vente::with(['client', 'user', 'lignes.produit', 'boutique'])
-            ->when($request->search, function ($query) use ($request) {
-                $query->where('numero', 'like', '%'.$request->search.'%')
-                    ->orWhereHas('client', function ($q) use ($request) {
-                        $q->where('nom', 'like', '%'.$request->search.'%')
+        $query = Vente::with(['client', 'user', 'lignes.produit', 'boutique'])
+            ->when($request->search, function ($q) use ($request) {
+                $q->where('numero', 'like', '%'.$request->search.'%')
+                    ->orWhereHas('client', function ($sq) use ($request) {
+                        $sq->where('nom', 'like', '%'.$request->search.'%')
                             ->orWhere('telephone', 'like', '%'.$request->search.'%');
                     });
             })
-            ->when($request->statut, function ($query) use ($request) {
-                $query->where('statut', $request->statut);
+            ->when($request->statut, function ($q) use ($request) {
+                $q->where('statut', $request->statut);
             })
-            ->when($request->date_debut, function ($query) use ($request) {
-                $query->whereDate('created_at', '>=', $request->date_debut);
+            ->when($request->date_debut, function ($q) use ($request) {
+                $q->whereDate('created_at', '>=', $request->date_debut);
             })
-            ->when($request->date_fin, function ($query) use ($request) {
-                $query->whereDate('created_at', '<=', $request->date_fin);
+            ->when($request->date_fin, function ($q) use ($request) {
+                $q->whereDate('created_at', '<=', $request->date_fin);
             })
-            ->when($user->role === 'employé', function ($query) use ($user) {
-                $query->where('boutique_id', $user->boutique_id);
-            })
-            ->orderBy('created_at', 'desc')
-            ->paginate(5);
+            ->when($user->role === 'employé', function ($q) use ($user) {
+                $q->where('boutique_id', $user->boutique_id);
+            });
+
+        // Calculer les statistiques sur la requête filtrée (AVANT pagination)
+        $stats = [
+            'total_ventes' => (clone $query)->count(),
+            'ventes_completees' => (clone $query)->where('statut', 'complétée')->count(),
+            'ventes_annulees' => (clone $query)->where('statut', 'annulée')->count(),
+            'total_revenus' => (clone $query)->where('statut', 'complétée')->sum('montant_total'),
+        ];
+
+        $ventes = $query->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->withQueryString();
 
         // S'assurer que les montants sont des nombres valides
         $ventes->getCollection()->transform(function ($vente) {
@@ -58,6 +68,7 @@ class VenteController extends Controller
 
         return Inertia::render('ventes/index', [
             'ventes' => $ventes,
+            'stats' => $stats,
             'filters' => $request->only(['search', 'statut', 'date_debut', 'date_fin']),
         ]);
     }
@@ -70,7 +81,7 @@ class VenteController extends Controller
         /** @var \App\Models\User $user */
         $user = auth()->user();
         $clients = Client::select('id', 'nom', 'telephone')->get();
-        $queryProduits = Produit::with(['variantes.taille'])
+        $queryProduits = Produit::visibles()->with(['variantes.taille'])
             ->whereHas('variantes', function ($query) {
                 $query->where('quantite', '>', 0);
             });
@@ -193,7 +204,7 @@ class VenteController extends Controller
         if ($user->role === 'employé' && $vente->boutique_id !== $user->boutique_id) {
             abort(403);
         }
-        $vente->load(['client', 'user', 'lignes.produit', 'boutique']);
+        $vente->load(['client', 'user', 'lignes.produit', 'boutique', 'commande.lignesCommande']);
 
         return Inertia::render('ventes/show', [
             'vente' => $vente,

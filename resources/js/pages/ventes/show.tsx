@@ -15,6 +15,7 @@ import {
     MoreVertical,
     CheckCircle2,
     XCircle,
+    Truck,
     Smartphone,
     Banknote,
     Printer,
@@ -58,8 +59,10 @@ interface Client { id: number; nom: string; prenom: string; telephone: string; }
 interface User { id: number; name: string; email: string; }
 interface Boutique { id: number; nom: string; }
 interface Produit { id: number; nom: string; }
-interface LigneVente { id: number; produit_id: number; quantite: number; prix_unitaire: number; sous_total: number; produit: Produit; }
-interface Vente { id: number; numero: string; client_id: number | null; user_id: number; boutique_id: number | null; montant_total: number | string; statut: 'complétée' | 'annulée'; mode_paiement: 'espèces' | 'carte' | 'virement' | 'mobile_money'; created_at: string; updated_at: string; client?: Client; user: User; boutique?: Boutique; lignes: LigneVente[]; }
+interface LigneCommande { id: number; nom: string; quantite: number; prix: number; }
+interface Commande { id: number; numero: string; lignes_commande?: LigneCommande[]; }
+interface LigneVente { id: number; produit_id: number; quantite: number; prix_unitaire: number; sous_total: number; produit: Produit; designation_originale?: string; }
+interface Vente { id: number; numero: string; client_id: number | null; commande_id: number | null; user_id: number; boutique_id: number | null; montant_total: number | string; statut: 'complétée' | 'annulée'; mode_paiement: 'espèces' | 'carte' | 'virement' | 'mobile_money'; created_at: string; updated_at: string; client?: Client; user: User; boutique?: Boutique; lignes: LigneVente[]; commande?: Commande; }
 
 export default function VentesShow({ vente }: { vente: Vente }) {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -259,6 +262,41 @@ export default function VentesShow({ vente }: { vente: Vente }) {
                             </CardContent>
                         </Card>
 
+                        {/* ORIGINE COMMANDE */}
+                        {vente.commande && (
+                            <Card className="border-l-4 border-l-amber-500">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="flex items-center gap-2 text-base">
+                                        <Truck className="h-4 w-4 text-amber-500" />
+                                        Origine de la vente
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-muted-foreground">Commande</span>
+                                        <Link
+                                            href={`/commandes/${vente.commande.id}`}
+                                            className="text-sm font-bold text-primary hover:underline flex items-center gap-1"
+                                        >
+                                            #{vente.commande.numero}
+                                        </Link>
+                                    </div>
+                                    <Separator />
+                                    <div className="space-y-2">
+                                        <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Articles commandés à l'origine</p>
+                                        <div className="space-y-1.5 text-xs">
+                                            {vente.commande.lignes_commande?.map((l, i) => (
+                                                <div key={i} className="flex justify-between items-start gap-2">
+                                                    <span className="text-muted-foreground line-clamp-1">{l.nom}</span>
+                                                    <span className="font-medium shrink-0">x{l.quantite}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+
                         {/* INFOS TECHNIQUES */}
                         <Card className="bg-muted/30">
                             <CardHeader className="pb-2">
@@ -302,9 +340,17 @@ export default function VentesShow({ vente }: { vente: Vente }) {
                                         <div key={ligne.id} className="p-4 hover:bg-muted/10 transition-colors">
                                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 
-                                                {/* Info Produit */}
                                                 <div className="flex-1 min-w-0">
-                                                    <h4 className="font-semibold text-base mb-1">{ligne.produit.nom}</h4>
+                                                    <h4 className="font-semibold text-base mb-1">
+                                                        {ligne.designation_originale || ligne.produit.nom}
+                                                        {ligne.designation_originale &&
+                                                            ligne.designation_originale !== ligne.produit.nom &&
+                                                            ligne.produit.nom !== 'Produit Commandé' && (
+                                                                <span className="ml-2 text-xs font-normal text-muted-foreground italic">
+                                                                    ({ligne.produit.nom})
+                                                                </span>
+                                                            )}
+                                                    </h4>
                                                     <div className="flex items-center gap-3 text-sm text-muted-foreground">
                                                         <Badge variant="outline" className="font-normal">
                                                             x{ligne.quantite}

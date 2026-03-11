@@ -11,6 +11,8 @@ class LigneCommande extends Model
         'quantite',
         'prix',
         'commande_id',
+        'produit_id',
+        'variante_id',
     ];
 
     protected $appends = [
@@ -23,5 +25,13 @@ class LigneCommande extends Model
 
     public function commande () {
         return $this->belongsTo(Commande::class);
+    }
+
+    public function produit () {
+        return $this->belongsTo(Produit::class);
+    }
+
+    public function variante () {
+        return $this->belongsTo(Variante::class);
     }
 }

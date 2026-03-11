@@ -3,15 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\LigneVente;
-use App\Models\Vente;
-use App\Models\Produit;
-use App\Models\Variante;
 use App\Models\MouvementStock;
+use App\Models\Variante;
+use App\Models\Vente;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class RapportController extends Controller
 {
@@ -28,7 +27,7 @@ class RapportController extends Controller
 
         // 2. Chiffres clés (KPIs) des Ventes
         $ventesQuery = Vente::whereBetween('ventes.created_at', [$startDate, $endDate])
-                            ->where('ventes.statut', '!=', 'annulée');
+            ->where('ventes.statut', '!=', 'annulée');
 
         $kpiVentes = [
             'total_ca' => (clone $ventesQuery)->sum('montant_total'),
@@ -42,7 +41,7 @@ class RapportController extends Controller
         $topProduits = LigneVente::with(['variante.produit', 'variante.taille'])
             ->whereHas('vente', function ($q) use ($startDate, $endDate) {
                 $q->whereBetween('created_at', [$startDate, $endDate])
-                  ->where('statut', '!=', 'annulée');
+                    ->where('statut', '!=', 'annulée');
             })
             ->select('variante_id', DB::raw('SUM(quantite) as total_vendu'), DB::raw('SUM(sous_total) as ca_genere'))
             ->groupBy('variante_id')
@@ -52,10 +51,11 @@ class RapportController extends Controller
             ->map(function ($ligne) {
                 $variante = $ligne->variante;
                 $produitNom = $variante && $variante->produit ? $variante->produit->nom : 'Produit inconnu';
-                $tailleNom = $variante && $variante->taille ? ' - ' . $variante->taille->nom : '';
+                $tailleNom = $variante && $variante->taille ? ' - '.$variante->taille->nom : '';
+
                 return [
                     'id' => $variante ? $variante->id : null,
-                    'nom' => $produitNom . $tailleNom,
+                    'nom' => $produitNom.$tailleNom,
                     'total_vendu' => (int) $ligne->total_vendu,
                     'ca_genere' => (float) $ligne->ca_genere,
                 ];
@@ -64,7 +64,7 @@ class RapportController extends Controller
         // 5. KPIs et Alertes de Stock (Indépendant de la période de vente)
         // Valeur globale du stock = Somme(Quantité * Prix Vente)
         $valeurGlobaleStock = Variante::sum(DB::raw('quantite * prix_vente'));
-        
+
         // Alertes: Stock < 5 (Considéré critique ou rupture)
         $alertesStock = Variante::with(['produit', 'taille'])
             ->where('quantite', '<=', 5)
@@ -105,11 +105,56 @@ class RapportController extends Controller
             ->join('categories', 'produits.categorie_id', '=', 'categories.id')
             ->whereHas('vente', function ($q) use ($startDate, $endDate) {
                 $q->whereBetween('created_at', [$startDate, $endDate])
-                  ->where('statut', '!=', 'annulée');
+                    ->where('statut', '!=', 'annulée');
             })
             ->select('categories.nom', DB::raw('SUM(ligne_ventes.sous_total) as total'), DB::raw('SUM(ligne_ventes.quantite) as qte'))
             ->groupBy('categories.id', 'categories.nom')
             ->orderByDesc('total')
+            ->get();
+
+        // 10. BI LITE: Top Clients
+        $topClients = Vente::with('client')
+            ->whereNotNull('client_id')
+            ->where('statut', '!=', 'annulée')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->select('client_id', DB::raw('SUM(montant_total) as total_depense'), DB::raw('COUNT(*) as nombre_achats'))
+            ->groupBy('client_id')
+            ->orderByDesc('total_depense')
+            ->take(10)
+            ->get()
+            ->map(fn ($v) => [
+                'nom' => $v->client->nom,
+                'total' => (float) $v->total_depense,
+                'achats' => (int) $v->nombre_achats,
+            ]);
+
+        // 11. BI LITE: Stock Dormant (Inactif depuis 30 jours)
+        $dateDormant = Carbon::now()->subDays(30);
+        $stockDormant = Variante::with(['produit', 'taille'])
+            ->where('quantite', '>', 0)
+            ->whereNotExists(function ($query) use ($dateDormant) {
+                $query->select(DB::raw(1))
+                    ->from('ligne_ventes')
+                    ->join('ventes', 'ligne_ventes.vente_id', '=', 'ventes.id')
+                    ->whereRaw('ligne_ventes.variante_id = variantes.id')
+                    ->where('ventes.created_at', '>=', $dateDormant)
+                    ->where('ventes.statut', '!=', 'annulée');
+            })
+            ->orderByDesc('quantite')
+            ->take(10)
+            ->get()
+            ->map(fn ($v) => [
+                'produit' => $v->produit->nom,
+                'taille' => $v->taille ? $v->taille->nom : 'N/A',
+                'quantite' => $v->quantite,
+            ]);
+
+        // 12. BI LITE: Heures de pointes
+        $heuresPointes = Vente::where('statut', '!=', 'annulée')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->select(DB::raw('HOUR(created_at) as heure'), DB::raw('COUNT(*) as total_ventes'))
+            ->groupBy('heure')
+            ->orderBy('heure')
             ->get();
 
         return Inertia::render('rapports/index', [
@@ -128,9 +173,12 @@ class RapportController extends Controller
                 'par_mode' => $ventesParMode,
                 'par_boutique' => $perfBoutiques,
                 'par_categorie' => $ventesParCategorie,
+                'heures_pointes' => $heuresPointes,
             ],
             'top_produits' => $topProduits,
+            'top_clients' => $topClients,
             'alertes_stock' => $alertesStock,
+            'stock_dormant' => $stockDormant,
             'mouvements_recents' => $mouvementsRecents,
         ]);
     }
@@ -141,7 +189,7 @@ class RapportController extends Controller
     private function getDateRange(string $period, Request $request): array
     {
         $now = Carbon::now();
-        
+
         switch ($period) {
             case 'today':
                 return ['start' => $now->copy()->startOfDay(), 'end' => $now->copy()->endOfDay()];
@@ -152,6 +200,7 @@ class RapportController extends Controller
             case 'custom':
                 $start = $request->input('start_date') ? Carbon::parse($request->input('start_date'))->startOfDay() : $now->copy()->startOfMonth();
                 $end = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->endOfDay() : $now->copy()->endOfDay();
+
                 return ['start' => $start, 'end' => $end];
             case 'month':
             default:
@@ -165,7 +214,7 @@ class RapportController extends Controller
     private function getSalesTrend(Carbon $startDate, Carbon $endDate, string $period): array
     {
         $diffInDays = $startDate->diffInDays($endDate);
-        
+
         $periodType = 'day';
 
         if ($period === 'year' || $diffInDays > 60) {
@@ -177,28 +226,28 @@ class RapportController extends Controller
             ->get();
 
         $groupedVentes = $ventes->groupBy(function ($vente) use ($periodType) {
-            return $periodType === 'month' 
-                ? Carbon::parse($vente->created_at)->format('Y-m') 
+            return $periodType === 'month'
+                ? Carbon::parse($vente->created_at)->format('Y-m')
                 : Carbon::parse($vente->created_at)->format('Y-m-d');
         });
 
         // Format data for chart (Recharts)
         $chartData = [];
-        
+
         // Sort keys (dates) and build the chart array
         $sortedKeys = $groupedVentes->keys()->sort();
-        
+
         foreach ($sortedKeys as $key) {
             $group = $groupedVentes[$key];
-            
-            $label = $periodType === 'month' 
+
+            $label = $periodType === 'month'
                 ? Carbon::createFromFormat('Y-m', $key)->translatedFormat('M Y')
                 : Carbon::createFromFormat('Y-m-d', $key)->translatedFormat('d M');
-                
+
             $chartData[] = [
                 'name' => $label,
                 'ca' => (float) $group->sum('montant_total'),
-                'raw_date' => $key
+                'raw_date' => $key,
             ];
         }
 

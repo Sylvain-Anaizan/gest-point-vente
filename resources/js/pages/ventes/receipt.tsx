@@ -27,6 +27,7 @@ interface LigneVente {
     prix_unitaire: number;
     sous_total: number;
     produit: Produit;
+    designation_originale?: string;
 }
 
 interface Vente {
@@ -202,7 +203,7 @@ export default function VentesReceipt({ vente }: { vente: Vente }) {
                                             }
                                         >
                                             <td className="py-3 px-2 text-gray-900">
-                                                {ligne.produit.nom}
+                                                {ligne.designation_originale || ligne.produit.nom}
                                             </td>
                                             <td className="py-3 px-2 text-center text-gray-900">
                                                 {ligne.quantite}

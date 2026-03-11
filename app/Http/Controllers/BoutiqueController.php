@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\BoutiqueStoreRequest;
 use App\Http\Requests\BoutiqueUpdateRequest;
 use App\Models\Boutique;
+use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -15,22 +16,29 @@ class BoutiqueController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
         Gate::authorize('admin');
 
+        $query = Boutique::query()
+            ->when($request->search, function ($q) use ($request) {
+                $q->where('nom', 'like', '%'.$request->search.'%')
+                    ->orWhere('adresse', 'like', '%'.$request->search.'%');
+            })
+            ->withCount('produits')
+            ->latest();
+
         return Inertia::render('boutiques/index', [
-            'boutiques' => Boutique::query()
-                ->withCount('produits')
-                ->latest()
-                ->get()
-                ->map(fn ($boutique) => [
+            'boutiques' => $query->paginate(10)
+                ->withQueryString()
+                ->through(fn ($boutique) => [
                     'id' => $boutique->id,
                     'nom' => $boutique->nom,
                     'adresse' => $boutique->adresse,
                     'telephone' => $boutique->telephone,
                     'produits_count' => $boutique->produits_count,
                 ]),
+            'filters' => $request->only(['search']),
         ]);
     }
 

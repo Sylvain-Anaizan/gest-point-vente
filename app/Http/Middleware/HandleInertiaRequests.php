@@ -51,6 +51,16 @@ class HandleInertiaRequests extends Middleware
             ],
             'cartCount' => array_sum(array_column(session()->get('cart', []), 'quantity')),
             'sidebarOpen' => !$request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'flash' => [
+                'success' => session('success'),
+                'error' => session('error'),
+                'warning' => session('warning'),
+                'info' => session('info'),
+            ],
+            'lowStockCount' => \App\Models\Produit::whereHas('variantes', function ($query) {
+                $query->select(\Illuminate\Support\Facades\DB::raw('SUM(quantite)'))
+                    ->havingRaw('SUM(quantite) < 10');
+            })->count(),
         ];
     }
 }

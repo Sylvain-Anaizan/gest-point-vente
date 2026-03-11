@@ -43,11 +43,17 @@ import {
 } from '@/components/ui/dialog';
 
 interface Client { id: number; nom: string; telephone: string | null; }
+interface Variante { id: number; taille: string; prix_vente: number; quantite: number; }
+interface Produit { id: number; nom: string; category?: string; variantes: Variante[]; }
+
 interface LigneCommande {
     id?: number;
     nom: string;
     quantite: number;
     prix: number | string;
+    produit_id?: string | number | null;
+    variante_id?: string | number | null;
+    is_manual?: boolean;
 }
 interface Commande {
     id: number;
@@ -65,7 +71,7 @@ interface Commande {
 
 interface Boutique { id: number; nom: string; }
 
-export default function CommandesEdit({ commande, clients, boutiques = [] }: { commande: Commande, clients: Client[], boutiques?: Boutique[] }) {
+export default function CommandesEdit({ commande, clients, boutiques = [], produits = [] }: { commande: Commande, clients: Client[], boutiques?: Boutique[], produits?: Produit[] }) {
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Tableau de bord', href: '/dashboard' },
@@ -83,11 +89,15 @@ export default function CommandesEdit({ commande, clients, boutiques = [] }: { c
         montant_total: commande.montant_total,
         observations: commande.observations || '',
         boutique_id: (commande as unknown as { boutique_id?: number }).boutique_id?.toString() || '',
-        lignes_commande: commande.lignes_commande || [{ nom: '', quantite: 1, prix: 0 }] as LigneCommande[],
+        mode_paiement: 'espèces',
+        lignes_commande: (commande.lignes_commande || []).map(l => ({
+            ...l,
+            is_manual: !l.produit_id
+        })) as LigneCommande[],
     });
 
     const addLine = () => {
-        setData('lignes_commande', [...data.lignes_commande, { nom: '', quantite: 1, prix: 0 }]);
+        setData('lignes_commande', [...data.lignes_commande, { nom: '', quantite: 1, prix: 0, is_manual: true }]);
     };
 
     const removeLine = (index: number) => {
@@ -99,11 +109,11 @@ export default function CommandesEdit({ commande, clients, boutiques = [] }: { c
         }
     };
 
-    const updateLine = (index: number, field: string, value: string | number) => {
+    const updateLine = (index: number, field: string, value: string | number | boolean) => {
         const newLines = [...data.lignes_commande];
         newLines[index] = { ...newLines[index], [field]: value };
         setData('lignes_commande', newLines);
-        if (field === 'quantite' || field === 'prix') {
+        if (field === 'quantite' || field === 'prix' || field === 'is_manual') {
             updateTotal(newLines);
         }
     };
@@ -126,7 +136,10 @@ export default function CommandesEdit({ commande, clients, boutiques = [] }: { c
 
     const submitForm = () => {
         patch(`/commandes/${commande.id}`, {
-            onSuccess: () => setShowConfirmDialog(false),
+            preserveScroll: true,
+            onSuccess: () => {
+                setShowConfirmDialog(false);
+            },
         });
     };
 
@@ -258,13 +271,61 @@ export default function CommandesEdit({ commande, clients, boutiques = [] }: { c
                                         {data.lignes_commande.map((line: LigneCommande, index: number) => (
                                             <div key={index} className="flex flex-col md:flex-row gap-3 p-4 bg-muted/30 rounded-lg border group relative">
                                                 <div className="flex-1 space-y-2">
-                                                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Description de l'article</Label>
-                                                    <Input
-                                                        value={line.nom}
-                                                        onChange={e => updateLine(index, 'nom', e.target.value)}
-                                                        placeholder="Ex: Basket Nike Air Max"
-                                                        required
-                                                    />
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Article</Label>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => updateLine(index, 'is_manual', !line.is_manual)}
+                                                            className="text-[10px] font-bold text-primary hover:underline"
+                                                        >
+                                                            {line.is_manual ? 'Sélectionner catalogue' : 'Saisie manuelle'}
+                                                        </button>
+                                                    </div>
+
+                                                    {line.is_manual ? (
+                                                        <Input
+                                                            value={line.nom}
+                                                            onChange={e => updateLine(index, 'nom', e.target.value)}
+                                                            placeholder="Ex: Basket Nike Air Max"
+                                                            required
+                                                        />
+                                                    ) : (
+                                                        <Select
+                                                            value={line.variante_id?.toString() || ''}
+                                                            onValueChange={(varianteId) => {
+                                                                const product = produits.find(p => p.variantes.some(v => v.id.toString() === varianteId));
+                                                                const variante = product?.variantes.find(v => v.id.toString() === varianteId);
+                                                                if (variante && product) {
+                                                                    const newLines = [...data.lignes_commande];
+                                                                    newLines[index] = {
+                                                                        ...newLines[index],
+                                                                        nom: `${product.nom} (${variante.taille})`,
+                                                                        prix: variante.prix_vente,
+                                                                        produit_id: product.id,
+                                                                        variante_id: variante.id
+                                                                    };
+                                                                    setData('lignes_commande', newLines);
+                                                                    updateTotal(newLines);
+                                                                }
+                                                            }}
+                                                        >
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Choisir un produit" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {produits.map(product => (
+                                                                    <div key={product.id}>
+                                                                        <div className="px-2 py-1.5 text-xs font-bold text-muted-foreground bg-muted/50 uppercase tracking-tighter">{product.nom}</div>
+                                                                        {product.variantes.map(v => (
+                                                                            <SelectItem key={v.id} value={v.id.toString()}>
+                                                                                Taille: {v.taille} - {v.prix_vente.toLocaleString('fr-FR')} F
+                                                                            </SelectItem>
+                                                                        ))}
+                                                                    </div>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    )}
                                                 </div>
                                                 <div className="w-full md:w-24 space-y-2">
                                                     <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Qté</Label>
@@ -272,7 +333,7 @@ export default function CommandesEdit({ commande, clients, boutiques = [] }: { c
                                                         type="number"
                                                         min="1"
                                                         value={line.quantite}
-                                                        onChange={e => updateLine(index, 'quantite', e.target.value)}
+                                                        onChange={e => updateLine(index, 'quantite', parseInt(e.target.value) || 1)}
                                                         required
                                                     />
                                                 </div>
@@ -282,8 +343,10 @@ export default function CommandesEdit({ commande, clients, boutiques = [] }: { c
                                                         type="number"
                                                         min="0"
                                                         value={line.prix}
-                                                        onChange={e => updateLine(index, 'prix', e.target.value)}
+                                                        onChange={e => updateLine(index, 'prix', parseFloat(e.target.value) || 0)}
                                                         required
+                                                        readOnly={!line.is_manual}
+                                                        className={!line.is_manual ? 'bg-muted/50' : ''}
                                                     />
                                                 </div>
                                                 <div className="w-full md:w-32 space-y-2">
@@ -463,11 +526,28 @@ export default function CommandesEdit({ commande, clients, boutiques = [] }: { c
                             </DialogTitle>
                             <DialogDescription>
                                 Cette action va marquer la commande comme <strong>Livrée</strong> et créer automatiquement une <strong>Vente</strong> pour comptabiliser les revenus.
-                                Veuillez vérifier les articles ci-dessous avant de valider.
+                                Veuillez vérifier les articles ci-dessous et choisir le mode de paiement avant de valider.
                             </DialogDescription>
                         </DialogHeader>
 
-                        <div className="mt-4 space-y-4">
+                        <div className="mt-4 space-y-6">
+                            <div className="space-y-3">
+                                <Label className="text-sm font-bold flex items-center gap-2">
+                                    <Banknote className="h-4 w-4 text-emerald-500" />
+                                    Mode de paiement du client
+                                </Label>
+                                <Select value={data.mode_paiement} onValueChange={val => setData('mode_paiement', val)}>
+                                    <SelectTrigger className="h-12 border-emerald-200 focus:ring-emerald-500">
+                                        <SelectValue placeholder="Choisir le mode de paiement" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="espèces">💰 Espèces</SelectItem>
+                                        <SelectItem value="carte">💳 Carte Bancaire</SelectItem>
+                                        <SelectItem value="virement">🏦 Virement</SelectItem>
+                                        <SelectItem value="mobile_money">📱 Mobile Money</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                             <div className="rounded-lg border bg-muted/30 overflow-hidden">
                                 <table className="w-full text-sm">
                                     <thead>

@@ -59,10 +59,11 @@ class DashboardController extends Controller
         })->count();
 
         // Nombre de produits avec stock faible (< 10 au total)
+        // Utilisation d'une jointure ou whereHas avec condition sur la somme des quantités des variantes
         $lowStockProducts = Produit::whereHas('variantes', function ($query) {
-            $query->where('quantite', '>', 0);
-        })->get()->filter(function ($p) {
-            return $p->totalStock < 10;
+            $query->select(DB::raw('SUM(quantite)'))
+                ->havingRaw('SUM(quantite) > 0')
+                ->havingRaw('SUM(quantite) < 10');
         })->count();
 
         // Ventes du jour
@@ -139,19 +140,17 @@ class DashboardController extends Controller
 
     private function getLowStockProducts()
     {
-        return Produit::with(['category', 'variantes'])
+        return Produit::with(['category'])
+            ->withSum('variantes', 'quantite')
+            ->having('variantes_sum_quantite', '>', 0)
+            ->having('variantes_sum_quantite', '<', 10)
+            ->limit(5)
             ->get()
-            ->filter(function ($p) {
-                $total = $p->totalStock;
-
-                return $total > 0 && $total < 10;
-            })
-            ->take(5)
             ->map(function ($produit) {
                 return [
                     'id' => $produit->id,
                     'nom' => $produit->nom,
-                    'quantite' => $produit->totalStock,
+                    'quantite' => (int) $produit->variantes_sum_quantite,
                     'prix_vente' => $produit->prixMin,
                     'category' => $produit->category,
                 ];

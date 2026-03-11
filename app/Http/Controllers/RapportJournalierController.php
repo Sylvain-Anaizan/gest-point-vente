@@ -17,7 +17,8 @@ class RapportJournalierController extends Controller
         }
 
         return Inertia::render('rapport-journaliers/Index', [
-            'rapports' => $query->get()
+            'rapports' => $query->paginate(10)->withQueryString(),
+            'filters' => $request->only(['search']),
         ]);
     }
 

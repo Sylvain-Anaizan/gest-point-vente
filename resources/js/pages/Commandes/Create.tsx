@@ -38,10 +38,20 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 interface Client { id: number; nom: string; telephone: string | null; }
-
 interface Boutique { id: number; nom: string; }
+interface Variante { id: number; taille: string; prix_vente: number; quantite: number; }
+interface Produit { id: number; nom: string; category?: string; variantes: Variante[]; }
 
-export default function CommandesCreate({ clients, boutiques = [] }: { clients: Client[], boutiques?: Boutique[] }) {
+interface LigneCommandeData {
+    nom: string;
+    quantite: number;
+    prix: number;
+    produit_id: string | null;
+    variante_id: string | null;
+    is_manual: boolean;
+}
+
+export default function CommandesCreate({ clients, boutiques = [], produits = [] }: { clients: Client[], boutiques?: Boutique[], produits?: Produit[] }) {
     const { data, setData, post, processing, errors } = useForm({
         client_id: '',
         nom_client: '',
@@ -52,11 +62,11 @@ export default function CommandesCreate({ clients, boutiques = [] }: { clients: 
         montant_total: 0,
         observations: '',
         boutique_id: '',
-        lignes_commande: [{ nom: '', quantite: 1, prix: 0 }],
+        lignes_commande: [{ nom: '', quantite: 1, prix: 0, produit_id: null, variante_id: null, is_manual: true }] as LigneCommandeData[],
     });
 
     const addLine = () => {
-        setData('lignes_commande', [...data.lignes_commande, { nom: '', quantite: 1, prix: 0 }]);
+        setData('lignes_commande', [...data.lignes_commande, { nom: '', quantite: 1, prix: 0, produit_id: null, variante_id: null, is_manual: true }]);
     };
 
     const removeLine = (index: number) => {
@@ -68,16 +78,16 @@ export default function CommandesCreate({ clients, boutiques = [] }: { clients: 
         }
     };
 
-    const updateLine = (index: number, field: string, value: string | number) => {
+    const updateLine = (index: number, field: string, value: string | number | boolean) => {
         const newLines = [...data.lignes_commande];
-        newLines[index] = { ...newLines[index], [field]: value };
+        newLines[index] = { ...newLines[index], [field]: value } as LigneCommandeData;
         setData('lignes_commande', newLines);
-        if (field === 'quantite' || field === 'prix') {
+        if (field === 'quantite' || field === 'prix' || field === 'is_manual') {
             updateTotal(newLines);
         }
     };
 
-    const updateTotal = (lines: { nom: string; quantite: number; prix: number }[]) => {
+    const updateTotal = (lines: LigneCommandeData[]) => {
         const total = lines.reduce((acc, line) => acc + (Number(line.prix) * Number(line.quantite)), 0);
         setData(data => ({ ...data, montant_total: total }));
     };
@@ -218,13 +228,61 @@ export default function CommandesCreate({ clients, boutiques = [] }: { clients: 
                                         {data.lignes_commande.map((line, index) => (
                                             <div key={index} className="flex flex-col md:flex-row gap-3 p-4 bg-muted/30 rounded-lg border group relative">
                                                 <div className="flex-1 space-y-2">
-                                                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Description de l'article</Label>
-                                                    <Input
-                                                        value={line.nom}
-                                                        onChange={e => updateLine(index, 'nom', e.target.value)}
-                                                        placeholder="Ex: Basket Nike Air Max"
-                                                        required
-                                                    />
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Article</Label>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => updateLine(index, 'is_manual', !line.is_manual)}
+                                                            className="text-[10px] font-bold text-primary hover:underline"
+                                                        >
+                                                            {line.is_manual ? 'Sélectionner catalogue' : 'Saisie manuelle'}
+                                                        </button>
+                                                    </div>
+
+                                                    {line.is_manual ? (
+                                                        <Input
+                                                            value={line.nom}
+                                                            onChange={e => updateLine(index, 'nom', e.target.value)}
+                                                            placeholder="Ex: Basket Nike Air Max"
+                                                            required
+                                                        />
+                                                    ) : (
+                                                        <Select
+                                                            value={line.variante_id || ''}
+                                                            onValueChange={(varianteId) => {
+                                                                const product = produits.find(p => p.variantes.some(v => v.id.toString() === varianteId));
+                                                                const variante = product?.variantes.find(v => v.id.toString() === varianteId);
+                                                                if (variante && product) {
+                                                                    const newLines = [...data.lignes_commande];
+                                                                    newLines[index] = {
+                                                                        ...newLines[index],
+                                                                        nom: `${product.nom} (${variante.taille})`,
+                                                                        prix: variante.prix_vente,
+                                                                        produit_id: product.id.toString(),
+                                                                        variante_id: variante.id.toString()
+                                                                    };
+                                                                    setData('lignes_commande', newLines);
+                                                                    updateTotal(newLines);
+                                                                }
+                                                            }}
+                                                        >
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Choisir un produit" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {produits.map(product => (
+                                                                    <div key={product.id}>
+                                                                        <div className="px-2 py-1.5 text-xs font-bold text-muted-foreground bg-muted/50 uppercase tracking-tighter">{product.nom}</div>
+                                                                        {product.variantes.map(v => (
+                                                                            <SelectItem key={v.id} value={v.id.toString()}>
+                                                                                Taille: {v.taille} - {v.prix_vente.toLocaleString('fr-FR')} F
+                                                                            </SelectItem>
+                                                                        ))}
+                                                                    </div>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    )}
                                                 </div>
                                                 <div className="w-full md:w-24 space-y-2">
                                                     <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Qté</Label>
@@ -232,7 +290,7 @@ export default function CommandesCreate({ clients, boutiques = [] }: { clients: 
                                                         type="number"
                                                         min="1"
                                                         value={line.quantite}
-                                                        onChange={e => updateLine(index, 'quantite', e.target.value)}
+                                                        onChange={e => updateLine(index, 'quantite', parseInt(e.target.value) || 1)}
                                                         required
                                                     />
                                                 </div>
@@ -242,8 +300,10 @@ export default function CommandesCreate({ clients, boutiques = [] }: { clients: 
                                                         type="number"
                                                         min="0"
                                                         value={line.prix}
-                                                        onChange={e => updateLine(index, 'prix', e.target.value)}
+                                                        onChange={e => updateLine(index, 'prix', parseFloat(e.target.value) || 0)}
                                                         required
+                                                        readOnly={!line.is_manual}
+                                                        className={!line.is_manual ? 'bg-muted/50' : ''}
                                                     />
                                                 </div>
                                                 <div className="w-full md:w-32 space-y-2">

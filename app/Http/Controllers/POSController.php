@@ -22,7 +22,7 @@ class POSController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        $queryProduits = Produit::with(['category', 'variantes.taille'])
+        $queryProduits = Produit::visibles()->with(['category', 'variantes.taille'])
             ->whereHas('variantes', function ($q) {
                 $q->where('quantite', '>', 0);
             });

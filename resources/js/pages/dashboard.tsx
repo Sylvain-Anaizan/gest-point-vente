@@ -32,6 +32,19 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import {
+    ResponsiveContainer,
+    AreaChart,
+    Area,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    PieChart,
+    Pie,
+    Cell,
+} from 'recharts';
+import { StockAlertSidebar } from '@/components/stock-alert-sidebar';
 import { cn } from '@/lib/utils';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -81,9 +94,6 @@ export default function Dashboard({
 }) {
     //const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
 
-    // Évite la division par zéro
-    const maxSalesValue = Math.max(...salesChart.map(d => d.total), 1);
-
     // Fonction pour formater les montants : pas de décimales, espaces pour les milliers
     const formatMontant = (montant: string | number | null | undefined): string => {
         // Vérifier et convertir en nombre si nécessaire
@@ -120,6 +130,15 @@ export default function Dashboard({
             default: return <Wallet className="h-4 w-4" />;
         }
     };
+
+    const CHART_COLORS = [
+        'oklch(0.627 0.265 303.9)', // Indigo
+        'oklch(0.609 0.126 221.72)', // Blue
+        'oklch(0.723 0.16 176.67)', // Emerald
+        'oklch(0.645 0.246 16.44)', // Rose
+        'oklch(0.769 0.188 70.08)', // Orange
+        'oklch(0.627 0.194 273.44)', // Purple
+    ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -307,32 +326,59 @@ export default function Dashboard({
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <ScrollArea className="w-full pb-4">
-                                <div className="h-[240px] min-w-[600px] w-full pt-8 pr-4">
-                                    {salesChart.length > 0 ? (
-                                        <div className="flex h-full items-end gap-3 px-2">
-                                            {salesChart.map((data, i) => (
-                                                <div key={i} className="group/bar relative flex h-full flex-1 flex-col justify-end">
-                                                    {/* Tooltip on hover */}
-                                                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover/bar:opacity-100 transition-all duration-300 bg-zinc-900 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-10 scale-90 group-hover/bar:scale-100">
-                                                        {formatMontant(data.total)} F
-                                                    </div>
-                                                    <div className="w-full rounded-t-lg bg-linear-to-t from-indigo-500/80 to-purple-500/80 transition-all duration-500 hover:from-indigo-500 hover:to-purple-500 group-hover/bar:scale-x-110 shadow-sm"
-                                                        style={{ height: `${(data.total / maxSalesValue) * 100}%` }}
-                                                    />
-                                                    <span className="text-[10px] font-medium text-muted-foreground text-center mt-3 truncate w-full block">
-                                                        {data.formatted_date.split(' ')[0]}
-                                                    </span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="flex h-full items-center justify-center text-muted-foreground bg-zinc-100/50 dark:bg-zinc-800/50 rounded-xl border border-dashed">
-                                            Aucune donnée disponible
-                                        </div>
-                                    )}
-                                </div>
-                            </ScrollArea>
+                            <div className="h-[300px] w-full pt-4">
+                                {salesChart.length > 0 ? (
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={salesChart} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                                            <defs>
+                                                <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="oklch(0.627 0.265 303.9)" stopOpacity={0.3} />
+                                                    <stop offset="95%" stopColor="oklch(0.627 0.265 303.9)" stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="oklch(0.922 0 0)" />
+                                            <XAxis
+                                                dataKey="formatted_date"
+                                                axisLine={false}
+                                                tickLine={false}
+                                                tick={{ fontSize: 10, fill: 'oklch(0.552 0.016 285.94)' }}
+                                                interval="preserveStartEnd"
+                                                minTickGap={30}
+                                            />
+                                            <YAxis
+                                                hide
+                                                domain={[0, 'auto']}
+                                            />
+                                            <Tooltip
+                                                content={({ active, payload }) => {
+                                                    if (active && payload && payload.length) {
+                                                        return (
+                                                            <div className="bg-zinc-950 text-white p-3 rounded-xl shadow-2xl border border-white/10 backdrop-blur-md">
+                                                                <p className="text-[10px] font-black uppercase tracking-widest opacity-50 mb-1">{payload[0].payload.date}</p>
+                                                                <p className="text-sm font-black">{formatMontant(payload[0].value)} F</p>
+                                                            </div>
+                                                        );
+                                                    }
+                                                    return null;
+                                                }}
+                                            />
+                                            <Area
+                                                type="monotone"
+                                                dataKey="total"
+                                                stroke="oklch(0.627 0.265 303.9)"
+                                                strokeWidth={4}
+                                                fillOpacity={1}
+                                                fill="url(#colorTotal)"
+                                                animationDuration={1500}
+                                            />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <div className="flex h-full items-center justify-center text-muted-foreground bg-zinc-100/50 dark:bg-zinc-800/50 rounded-xl border border-dashed">
+                                        Aucune donnée disponible
+                                    </div>
+                                )}
+                            </div>
                             <Separator className="my-4 opacity-50" />
                             <div className="flex justify-between items-center p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/10">
                                 <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Total Annuel</span>
@@ -462,26 +508,58 @@ export default function Dashboard({
                                 Performance Catégories
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="p-0 flex-1">
-                            <ScrollArea className="h-[300px]">
+                        <CardContent className="p-0 flex-1 flex flex-col">
+                            {topCategories.length > 0 && (
+                                <div className="h-[200px] w-full pt-4 shrink-0">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie
+                                                data={topCategories}
+                                                cx="50%"
+                                                cy="50%"
+                                                innerRadius={60}
+                                                outerRadius={80}
+                                                paddingAngle={5}
+                                                dataKey="total_revenus"
+                                                nameKey="nom"
+                                                animationDuration={1500}
+                                            >
+                                                {topCategories.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip
+                                                content={({ active, payload }) => {
+                                                    if (active && payload && payload.length) {
+                                                        return (
+                                                            <div className="bg-zinc-950 text-white p-3 rounded-xl shadow-2xl border border-white/10 backdrop-blur-md">
+                                                                <p className="text-[10px] font-black uppercase tracking-widest opacity-50 mb-1">{payload[0].name}</p>
+                                                                <p className="text-sm font-black">{formatMontant(payload[0].value)} F</p>
+                                                                <p className="text-[9px] text-zinc-400">{payload[0].payload.total_vendu} ventes</p>
+                                                            </div>
+                                                        );
+                                                    }
+                                                    return null;
+                                                }}
+                                            />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            )}
+                            <ScrollArea className="h-[200px] border-t border-zinc-100 dark:border-zinc-800">
                                 <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
                                     {topCategories.length > 0 ? (
                                         topCategories.map((cat, i) => (
                                             <div key={i} className="flex items-center justify-between p-4 hover:bg-purple-500/5 transition-all duration-300 group/cat">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-purple-100 text-purple-600 font-black dark:bg-zinc-800">
-                                                        {i + 1}
-                                                    </div>
+                                                    <div className="h-2 w-2 rounded-full" style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }} />
                                                     <div>
                                                         <p className="font-bold text-sm group-hover/cat:text-purple-600 transition-colors uppercase tracking-tight">{cat.nom}</p>
-                                                        <div className="h-1.5 w-32 bg-zinc-100 rounded-full mt-1 overflow-hidden dark:bg-zinc-800 shadow-inner">
-                                                            <div className="h-full bg-linear-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-1000" style={{ width: `${Math.min(100, (cat.total_vendu / 100) * 100)}%` }} />
-                                                        </div>
+                                                        <p className="text-[10px] text-muted-foreground uppercase">{cat.total_vendu} ventes</p>
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <p className="text-sm font-black">{cat.total_vendu} v.</p>
-                                                    <p className="text-[10px] font-bold text-purple-500">{formatMontant(cat.total_revenus)} F</p>
+                                                    <p className="text-sm font-black text-purple-600">{formatMontant(cat.total_revenus)} F</p>
                                                 </div>
                                             </div>
                                         ))
@@ -543,40 +621,10 @@ export default function Dashboard({
                         </CardContent>
                     </Card>
 
-                    {/* STOCK CRITIQUE */}
-                    <Card className="shadow-sm border-orange-200 dark:border-orange-900/50 hover:shadow-orange-500/10 transition-shadow duration-300 bg-gradient-to-br from-orange-50/30 to-transparent dark:from-orange-950/20">
-                        <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                            <CardTitle className="text-base flex items-center gap-2 text-orange-700 dark:text-orange-400">
-                                <AlertTriangle className="h-4 w-4" />
-                                Stock Critique
-                            </CardTitle>
-                            <Link href="/produits" className="text-xs text-orange-600 hover:underline">Inventaire</Link>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                            <ScrollArea className="h-[300px]">
-                                {lowStockProducts.length === 0 ? (
-                                    <div className="p-8 text-center text-sm text-muted-foreground">Tout va bien</div>
-                                ) : (
-                                    <div className="divide-y">
-                                        {lowStockProducts.map((product) => (
-                                            <div key={product.id} className="p-3 flex items-center justify-between hover:bg-orange-50/50">
-                                                <div className="min-w-0 pr-2">
-                                                    <p className="text-sm font-medium truncate">{product.nom}</p>
-                                                    <p className="text-[10px] text-muted-foreground">{product.category.nom}</p>
-                                                </div>
-                                                <Badge variant={product.quantite === 0 ? "destructive" : "outline"} className={cn(
-                                                    "shrink-0 text-[10px] h-5",
-                                                    product.quantite > 0 && "border-orange-200 text-orange-700 bg-orange-50"
-                                                )}>
-                                                    {product.quantite === 0 ? "0" : `${product.quantite} rest.`}
-                                                </Badge>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </ScrollArea>
-                        </CardContent>
-                    </Card>
+                    {/* STOCK CRITIQUE (New Component) */}
+                    <div className="flex flex-col gap-6">
+                        <StockAlertSidebar products={lowStockProducts} />
+                    </div>
                 </div>
 
 

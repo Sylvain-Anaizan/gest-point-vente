@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CategoryStoreRequest;
 use App\Http\Requests\CategoryUpdateRequest;
 use App\Models\Categorie;
+use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -15,20 +16,26 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
         Gate::authorize('admin');
 
+        $query = Categorie::query()
+            ->when($request->search, function ($q) use ($request) {
+                $q->where('nom', 'like', '%'.$request->search.'%');
+            })
+            ->latest();
+
         return Inertia::render('categories/index', [
-            'categories' => Categorie::query()
-                ->latest()
-                ->get()
-                ->map(fn ($category) => [
+            'categories' => $query->paginate(10)
+                ->withQueryString()
+                ->through(fn ($category) => [
                     'id' => $category->id,
                     'nom' => $category->nom,
                     'description' => $category->description,
                     'produits_count' => $category->produits()->count(),
                 ]),
+            'filters' => $request->only(['search']),
         ]);
     }
 
@@ -47,7 +54,7 @@ class CategoryController extends Controller
     {
         Categorie::create($request->validated());
 
-        return to_route('categories.index')->with('success', 'Cat?gorie cr??e avec succ?s.');
+        return to_route('categories.index')->with('success', 'Catégorie créée avec succès.');
     }
 
     /**
@@ -93,7 +100,7 @@ class CategoryController extends Controller
     {
         $category->update($request->validated());
 
-        return to_route('categories.index')->with('success', 'Cat?gorie mise ? jour avec succ?s.');
+        return to_route('categories.index')->with('success', 'Catégorie mise à jour avec succès.');
     }
 
     /**
@@ -103,6 +110,6 @@ class CategoryController extends Controller
     {
         $category->delete();
 
-        return to_route('categories.index')->with('success', 'Cat?gorie supprim?e avec succ?s.');
+        return to_route('categories.index')->with('success', 'Catégorie supprimée avec succès.');
     }
 }

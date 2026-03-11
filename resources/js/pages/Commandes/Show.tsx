@@ -163,7 +163,12 @@ export default function CommandesShow({ commande }: { commande: Commande }) {
                                             {commande.lignes_commande && commande.lignes_commande.length > 0 ? (
                                                 commande.lignes_commande.map((line) => (
                                                     <tr key={line.id} className="border-b">
-                                                        <td className="p-3 font-medium">{line.nom}</td>
+                                                        <td className="p-3 font-medium">
+                                                            <div>{line.nom}</div>
+                                                            {/* We don't have catalog product name directly here in LigneCommande data yet, 
+                                                                but we could if we loaded it. For now, the user just wants to see the ordered items list.
+                                                                Current 'nom' already contains the selected product name if selected. */}
+                                                        </td>
                                                         <td className="p-3 text-center">{line.quantite}</td>
                                                         <td className="p-3 text-right">{Number(line.prix).toLocaleString('fr-FR')} FCFA</td>
                                                         <td className="p-3 text-right font-bold text-primary">{Number(line.total).toLocaleString('fr-FR')} FCFA</td>

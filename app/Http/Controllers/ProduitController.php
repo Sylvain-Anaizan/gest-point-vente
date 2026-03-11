@@ -10,6 +10,7 @@ use App\Models\Produit;
 use App\Models\Taille;
 use App\Models\Unite;
 use App\Models\Variante;
+use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -22,19 +23,38 @@ class ProduitController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $user = auth()->user();
-        $query = Produit::query()->with(['category', 'boutique', 'variantes.taille']);
+        $query = Produit::visibles()
+            ->with(['category', 'boutique', 'variantes.taille'])
+            ->when($request->search, function ($q) use ($request) {
+                $q->where('nom', 'like', '%'.$request->search.'%')
+                    ->orWhereHas('category', function ($sq) use ($request) {
+                        $sq->where('nom', 'like', '%'.$request->search.'%');
+                    });
+            })
+            ->when($request->boutique_id, function ($q) use ($request) {
+                $q->where('boutique_id', $request->boutique_id);
+            })
+            ->when($user->role === 'employé', function ($q) use ($user) {
+                $q->where('boutique_id', $user->boutique_id);
+            });
 
-        if ($user->isEmploye()) {
-            $query->where('boutique_id', $user->boutique_id);
-        }
+        // Statistiques globales (AVANT pagination)
+        $stats = [
+            'total_produits' => (clone $query)->count(),
+            'low_stock' => (clone $query)->whereHas('variantes', function ($q) {
+                $q->where('quantite', '<', 10);
+            }, '>', 0)->count(), // Simplifié pour le compte global des produits avec au moins une variante basse
+            'total_value' => (clone $query)->get()->reduce(fn ($acc, $p) => $acc + ($p->prixMin * $p->totalStock), 0),
+        ];
 
         return Inertia::render('produits/index', [
             'produits' => $query->latest()
-                ->get()
-                ->map(fn ($produit) => [
+                ->paginate(12)
+                ->withQueryString()
+                ->through(fn ($produit) => [
                     'id' => $produit->id,
                     'nom' => $produit->nom,
                     'totalStock' => $produit->totalStock,
@@ -57,6 +77,8 @@ class ProduitController extends Controller
                         'nom' => $produit->boutique->nom,
                     ] : null,
                 ]),
+            'stats' => $stats,
+            'filters' => $request->only(['search', 'boutique_id']),
             'boutiques' => $user->isAdmin()
                 ? Boutique::all(['id', 'nom'])
                 : Boutique::where('id', $user->boutique_id)->get(['id', 'nom']),

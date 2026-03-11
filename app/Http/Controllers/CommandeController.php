@@ -65,6 +65,16 @@ class CommandeController extends Controller
         return Inertia::render('Commandes/Create', [
             'clients' => Client::actifs()->get(['id', 'nom', 'telephone']),
             'boutiques' => $boutiques,
+            'produits' => Produit::with(['variantes.taille'])->get()->map(fn ($p) => [
+                'id' => $p->id,
+                'nom' => $p->nom,
+                'variantes' => $p->variantes->map(fn ($v) => [
+                    'id' => $v->id,
+                    'taille' => $v->taille ? $v->taille->nom : 'N/A',
+                    'prix_vente' => $v->prix_vente,
+                    'quantite' => $v->quantite,
+                ]),
+            ]),
         ]);
     }
 
@@ -128,6 +138,16 @@ class CommandeController extends Controller
             'commande' => $commande,
             'clients' => Client::actifs()->get(['id', 'nom', 'telephone']),
             'boutiques' => $boutiques,
+            'produits' => Produit::with(['variantes.taille'])->get()->map(fn ($p) => [
+                'id' => $p->id,
+                'nom' => $p->nom,
+                'variantes' => $p->variantes->map(fn ($v) => [
+                    'id' => $v->id,
+                    'taille' => $v->taille ? $v->taille->nom : 'N/A',
+                    'prix_vente' => $v->prix_vente,
+                    'quantite' => $v->quantite,
+                ]),
+            ]),
         ]);
     }
 
@@ -139,7 +159,7 @@ class CommandeController extends Controller
 
         $data = $request->validated();
 
-        DB::transaction(function () use ($commande, $data, $oldStatut) {
+        DB::transaction(function () use ($commande, $data, $oldStatut, $request) {
             // The $oldStatut inside this closure would be the status *before* the transaction started,
             // but the one defined outside is the true original status of the model instance.
             // We keep the one outside for the final redirect logic.
@@ -161,6 +181,7 @@ class CommandeController extends Controller
                     [
                         'categorie_id' => $categorie->id,
                         'description' => 'Produit générique pour les lignes de commande non reliées au catalogue',
+                        'est_virtuel' => true,
                     ]
                 );
 
@@ -183,30 +204,38 @@ class CommandeController extends Controller
                     'boutique_id' => $commande->boutique_id,
                     'montant_total' => $commande->montant_total,
                     'statut' => 'complétée',
-                    'mode_paiement' => 'carte', // Default, should ideally be configurable
+                    'mode_paiement' => $request->input('mode_paiement', 'espèces'),
                     'type' => 'commande',
                 ]);
 
                 // 3. Create LigneVente for each LigneCommande
                 foreach ($commande->lignesCommande as $ligneCmd) {
+                    $produitId = $ligneCmd->produit_id ?? $produitGenerique->id;
+                    $varianteId = $ligneCmd->variante_id ?? $variante->id;
+
                     $vente->lignes()->create([
-                        'produit_id' => $produitGenerique->id,
-                        'variante_id' => $variante->id,
+                        'produit_id' => $produitId,
+                        'variante_id' => $varianteId,
                         'designation_originale' => $ligneCmd->nom,
                         'quantite' => $ligneCmd->quantite,
                         'prix_unitaire' => $ligneCmd->prix,
                         'sous_total' => $ligneCmd->quantite * $ligneCmd->prix,
                     ]);
 
-                    // Add movement stock?
+                    // Add movement stock
                     \App\Models\MouvementStock::create([
-                        'produit_id' => $produitGenerique->id,
-                        'variante_id' => $variante->id,
+                        'produit_id' => $produitId,
+                        'variante_id' => $varianteId,
                         'user_id' => auth()->id(),
                         'quantite' => -$ligneCmd->quantite,
                         'type' => 'vente',
                         'commentaire' => "Livraison commande #{$commande->numero}",
                     ]);
+
+                    // Update product stock if not generic
+                    if ($ligneCmd->variante_id) {
+                        $ligneCmd->variante->decrement('quantite', $ligneCmd->quantite);
+                    }
                 }
             }
         });
