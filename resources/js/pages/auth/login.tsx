@@ -47,7 +47,7 @@ export default function Login({
                     <div className="relative z-10">
                         <Link href="/" className="inline-flex items-center gap-3 hover:opacity-80 transition-opacity group">
                             <div className="p-2 bg-primary/10 rounded-xl border border-primary/20 group-hover:scale-105 transition-transform">
-                                <img src="/storage/anaizan.png" alt="Logo" className="h-6 w-6 object-contain" />
+                                <img src="/favicon.svg" alt="Logo" className="h-6 w-6 object-contain" />
                             </div>
                             <span className="text-lg font-black tracking-tighter text-white">GEST<span className="text-primary italic">ANAIZAN</span></span>
                         </Link>
@@ -86,13 +86,13 @@ export default function Login({
                 <div className="p-8 sm:p-12 lg:p-16 flex flex-col justify-center bg-white/[0.01]">
                     <div className="mb-10 lg:hidden text-center">
                         <div className="inline-flex p-3 bg-primary/10 rounded-2xl border border-primary/20 mb-4">
-                            <img src="/storage/anaizan.png" alt="Logo" className="h-8 w-8 object-contain" />
+                            <img src="/favicon.svg" alt="Logo" className="h-8 w-8 object-contain" />
                         </div>
                         <h2 className="text-2xl font-black text-white">Gest Anaizan</h2>
                     </div>
 
                     <div className="mb-10">
-                        <h1 className="text-3xl font-black text-white mb-2 tracking-tight">Installation du Flux</h1>
+                        <h1 className="text-3xl font-black text-white mb-2 tracking-tight">Connection</h1>
                         <p className="text-slate-500 font-medium font-sm">Saisissez vos identifiants de session.</p>
                     </div>
 
@@ -171,7 +171,7 @@ export default function Login({
                                             htmlFor="remember"
                                             className="text-xs font-bold text-slate-400 group-hover:text-slate-300 transition-colors cursor-pointer select-none"
                                         >
-                                            Maintenir la connexion
+                                            Se souvenire de moi
                                         </label>
                                     </div>
                                 </div>
@@ -185,7 +185,7 @@ export default function Login({
                                         <Loader2 className="h-5 w-5 animate-spin" />
                                     ) : (
                                         <span className="flex items-center gap-2">
-                                            Initialiser la Session <LogIn className="h-4 w-4" />
+                                            Se connecter <LogIn className="h-4 w-4" />
                                         </span>
                                     )}
                                 </Button>
