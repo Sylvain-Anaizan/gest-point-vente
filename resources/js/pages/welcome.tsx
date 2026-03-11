@@ -40,7 +40,7 @@ export default function Welcome() {
                         <div className="relative">
                             <div className="absolute -inset-2 bg-primary/20 rounded-xl blur-lg group-hover:bg-primary/30 transition-all" />
                             <div className="relative p-2.5 bg-slate-900/80 border border-white/10 rounded-xl group-hover:scale-105 transition-all duration-500 shadow-2xl">
-                                <img src="/anaizan.png" alt="Logo" className="h-7 w-7 object-contain" />
+                                <img src="/logo.svg" alt="Logo" className="h-7 w-7 object-contain" />
                             </div>
                         </div>
                         <div className="hidden sm:block">
