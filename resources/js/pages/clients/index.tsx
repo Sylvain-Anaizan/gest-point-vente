@@ -12,7 +12,6 @@ import {
     Trash2,
     Eye,
     Power,
-    User,
     Users
 } from 'lucide-react';
 
@@ -49,7 +48,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
 import { useState } from 'react';

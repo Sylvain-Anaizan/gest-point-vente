@@ -32,6 +32,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
+import { useState } from 'react';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 
 interface Client { id: number; nom: string; telephone: string | null; }
 interface LigneCommande {
@@ -57,6 +66,7 @@ interface Commande {
 interface Boutique { id: number; nom: string; }
 
 export default function CommandesEdit({ commande, clients, boutiques = [] }: { commande: Commande, clients: Client[], boutiques?: Boutique[] }) {
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Tableau de bord', href: '/dashboard' },
         { title: 'Commandes', href: '/commandes' },
@@ -105,7 +115,19 @@ export default function CommandesEdit({ commande, clients, boutiques = [] }: { c
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        patch(`/commandes/${commande.id}`);
+
+        if (data.statut === 'livrée' && commande.statut !== 'livrée') {
+            setShowConfirmDialog(true);
+            return;
+        }
+
+        submitForm();
+    };
+
+    const submitForm = () => {
+        patch(`/commandes/${commande.id}`, {
+            onSuccess: () => setShowConfirmDialog(false),
+        });
     };
 
     const handleClientChange = (clientId: string) => {
@@ -431,6 +453,65 @@ export default function CommandesEdit({ commande, clients, boutiques = [] }: { c
                         </div>
                     </div>
                 </form>
+
+                <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+                    <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2 text-emerald-600">
+                                <CheckCircle2 className="h-5 w-5" />
+                                Confirmer la livraison
+                            </DialogTitle>
+                            <DialogDescription>
+                                Cette action va marquer la commande comme <strong>Livrée</strong> et créer automatiquement une <strong>Vente</strong> pour comptabiliser les revenus.
+                                Veuillez vérifier les articles ci-dessous avant de valider.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="mt-4 space-y-4">
+                            <div className="rounded-lg border bg-muted/30 overflow-hidden">
+                                <table className="w-full text-sm">
+                                    <thead>
+                                        <tr className="border-b bg-muted/50">
+                                            <th className="p-3 text-left font-medium">Article</th>
+                                            <th className="p-3 text-center font-medium">Qté</th>
+                                            <th className="p-3 text-right font-medium">Prix</th>
+                                            <th className="p-3 text-right font-medium">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {data.lignes_commande.map((line, idx) => (
+                                            <tr key={idx} className="border-b">
+                                                <td className="p-3">{line.nom || <span className="italic text-muted-foreground">Sans nom</span>}</td>
+                                                <td className="p-3 text-center">{line.quantite}</td>
+                                                <td className="p-3 text-right">{Number(line.prix).toLocaleString('fr-FR')}</td>
+                                                <td className="p-3 text-right font-semibold">{(Number(line.prix) * line.quantite).toLocaleString('fr-FR')} FCFA</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr className="bg-muted/50 font-black">
+                                            <td colSpan={3} className="p-3 text-right uppercase text-xs tracking-wider">Total à encaisser</td>
+                                            <td className="p-3 text-right text-emerald-600">{Number(data.montant_total).toLocaleString('fr-FR')} FCFA</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+
+                        <DialogFooter className="mt-6">
+                            <Button variant="outline" onClick={() => setShowConfirmDialog(false)} disabled={processing}>
+                                Annuler
+                            </Button>
+                            <Button
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                                onClick={submitForm}
+                                disabled={processing}
+                            >
+                                {processing ? 'Enregistrement...' : 'Confirmer & Enregistrer la Vente'}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
         </AppLayout>
     );

@@ -242,7 +242,10 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
 
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Dashboard', href: '/dashboard' }, { title: 'Point de Vente (POS)', href: '#' }]}>
+        <AppLayout
+            breadcrumbs={[{ title: 'Dashboard', href: '/dashboard' }, { title: 'Point de Vente (POS)', href: '#' }]}
+            showBottomNav={false}
+        >
             <Head title="Point de Vente" />
 
             {/* Container principal avec hauteur dynamique pour mobile */}

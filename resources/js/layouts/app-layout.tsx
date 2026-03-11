@@ -6,10 +6,11 @@ import { Toaster } from 'sonner';
 interface AppLayoutProps {
     children: ReactNode;
     breadcrumbs?: BreadcrumbItem[];
+    showBottomNav?: boolean;
 }
 
-export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => (
-    <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
+export default ({ children, breadcrumbs, showBottomNav = true, ...props }: AppLayoutProps) => (
+    <AppLayoutTemplate breadcrumbs={breadcrumbs} showBottomNav={showBottomNav} {...props}>
         {children}
         <Toaster />
     </AppLayoutTemplate>

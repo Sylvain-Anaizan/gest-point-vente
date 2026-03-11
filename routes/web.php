@@ -42,6 +42,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('clients', ClientController::class)->middleware('permission:manage sales');
     Route::resource('ventes', VenteController::class)->middleware('permission:manage sales');
     Route::resource('commandes', CommandeController::class)->middleware('permission:manage sales');
+    Route::get('commandes/{commande}/receipt', [\App\Http\Controllers\CommandeReceiptController::class, 'download'])
+        ->name('commandes.receipt')
+        ->middleware('permission:manage sales');
     Route::resource('employes', EmployeController::class)->middleware('permission:manage users');
     Route::resource('roles', RoleController::class)->middleware('permission:manage roles');
     Route::get('ventes/{vente}/receipt', [VenteController::class, 'receipt'])

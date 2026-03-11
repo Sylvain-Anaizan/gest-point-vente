@@ -192,7 +192,7 @@ export default function VentesCreate({ clients, produits, boutiques }: { clients
     }
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppLayout breadcrumbs={breadcrumbs} showBottomNav={false}>
             <Head title="Nouvelle Vente" />
 
             {/* Container principal avec padding-bottom pour éviter que le contenu soit caché par la barre fixe mobile */}

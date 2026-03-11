@@ -2,15 +2,19 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Vente extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'numero',
         'client_id',
+        'commande_id',
         'user_id',
         'montant_total',
         'statut',

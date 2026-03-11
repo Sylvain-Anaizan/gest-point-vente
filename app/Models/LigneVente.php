@@ -2,15 +2,19 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LigneVente extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'vente_id',
         'produit_id',
         'variante_id',
+        'designation_originale',
         'quantite',
         'prix_unitaire',
         'sous_total',

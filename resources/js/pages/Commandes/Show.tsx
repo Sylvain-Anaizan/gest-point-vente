@@ -1,4 +1,5 @@
 import { type BreadcrumbItem } from '@/types';
+import { receipt } from '@/routes/commandes';
 import { Head, Link, router } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -14,7 +15,8 @@ import {
     Package,
     CheckCircle2,
     XCircle,
-    Building2
+    Building2,
+    Download
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -115,6 +117,11 @@ export default function CommandesShow({ commande }: { commande: Commande }) {
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
+                        <a href={receipt.url(commande.id)} target="_blank" rel="noopener noreferrer">
+                            <Button variant="outline" className="text-indigo-600 border-indigo-200 hover:bg-indigo-50">
+                                <Download className="mr-2 h-4 w-4" /> Reçu PDF
+                            </Button>
+                        </a>
                         <Link href={`/commandes/${commande.id}/edit`}>
                             <Button variant="outline">
                                 <Pencil className="mr-2 h-4 w-4" /> Modifier

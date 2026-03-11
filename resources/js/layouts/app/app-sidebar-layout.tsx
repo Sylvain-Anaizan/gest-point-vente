@@ -9,15 +9,16 @@ import { type PropsWithChildren } from 'react';
 export default function AppSidebarLayout({
     children,
     breadcrumbs = [],
-}: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[] }>) {
+    showBottomNav = true,
+}: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[]; showBottomNav?: boolean }>) {
     return (
         <AppShell variant="sidebar">
             <AppSidebar />
-            <AppContent variant="sidebar" className="overflow-x-hidden p-2 pb-24 md:p-6 md:pb-6">
+            <AppContent variant="sidebar" className={`overflow-x-hidden p-2 md:p-6 md:pb-6 ${showBottomNav ? 'pb-24' : 'pb-6'}`}>
                 <AppSidebarHeader breadcrumbs={breadcrumbs} />
                 {children}
             </AppContent>
-            <AppBottomNav />
+            {showBottomNav && <AppBottomNav />}
         </AppShell>
     );
 }

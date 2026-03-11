@@ -1,4 +1,5 @@
 import { type BreadcrumbItem } from '@/types';
+import { receipt } from '@/routes/commandes';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     Plus,
@@ -14,7 +15,7 @@ import {
     Eye,
     MapPin,
     Calendar,
-
+    Download
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -239,6 +240,11 @@ export default function CommandesIndex({ commandes, filters }: {
                                                         <Link href={`/commandes/${commande.id}`} className="cursor-pointer">
                                                             <Eye className="mr-2 h-4 w-4" /> Détails
                                                         </Link>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem asChild>
+                                                        <a href={receipt.url(commande.id)} target="_blank" rel="noopener noreferrer" className="flex items-center w-full px-2 py-1.5 text-sm cursor-pointer hover:bg-muted">
+                                                            <Download className="mr-2 h-4 w-4" /> Reçu PDF
+                                                        </a>
                                                     </DropdownMenuItem>
                                                     {canManage && (
                                                         <>
