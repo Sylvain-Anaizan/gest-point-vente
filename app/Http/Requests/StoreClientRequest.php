@@ -22,16 +22,12 @@ class StoreClientRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'boutique_id' => ['required', 'exists:boutiques,id'],
             'nom' => ['required', 'string', 'max:255'],
             'prenom' => ['nullable', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:clients,email'],
+            'email' => ['nullable', 'email', 'unique:clients,email'],
             'telephone' => ['nullable', 'string', 'max:20', 'regex:/^[\+]?[0-9\s\-\(\)]+$/'],
             'adresse' => ['nullable', 'string', 'max:500'],
-            'ville' => ['nullable', 'string', 'max:255'],
-            'code_postal' => ['nullable', 'string', 'max:10'],
-            'pays' => ['nullable', 'string', 'max:100'],
-            'date_naissance' => ['nullable', 'date', 'before:today'],
-            'notes' => ['nullable', 'string', 'max:1000'],
             'actif' => ['boolean'],
         ];
     }
@@ -42,12 +38,12 @@ class StoreClientRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'boutique_id.required' => 'La boutique est obligatoire.',
+            'boutique_id.exists' => 'La boutique sélectionnée est invalide.',
             'nom.required' => 'Le nom est obligatoire.',
-            'email.required' => 'L\'email est obligatoire.',
             'email.email' => 'L\'email doit être une adresse email valide.',
             'email.unique' => 'Cet email est déjà utilisé.',
             'telephone.regex' => 'Le format du téléphone n\'est pas valide.',
-            'date_naissance.before' => 'La date de naissance doit être dans le passé.',
         ];
     }
 
@@ -57,16 +53,12 @@ class StoreClientRequest extends FormRequest
     public function attributes(): array
     {
         return [
+            'boutique_id' => 'boutique',
             'nom' => 'nom',
             'prenom' => 'prénom',
             'email' => 'email',
             'telephone' => 'téléphone',
             'adresse' => 'adresse',
-            'ville' => 'ville',
-            'code_postal' => 'code postal',
-            'pays' => 'pays',
-            'date_naissance' => 'date de naissance',
-            'notes' => 'notes',
             'actif' => 'statut actif',
         ];
     }

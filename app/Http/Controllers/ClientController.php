@@ -4,18 +4,40 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
+use App\Models\Boutique;
 use App\Models\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class ClientController extends Controller
 {
     /**
+     * Retourne la boutique de l'utilisateur connecté (null si admin).
+     */
+    private function userBoutique(): ?int
+    {
+        $user = Auth::user();
+
+        if ($user->isAdmin()) {
+            return null;
+        }
+
+        return $user->boutique_id;
+    }
+
+    /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $query = Client::query();
+        $query = Client::query()->with('boutique');
+
+        // Un employé ne voit que les clients de sa boutique
+        $boutiqueId = $this->userBoutique();
+        if ($boutiqueId !== null) {
+            $query->where('boutique_id', $boutiqueId);
+        }
 
         // Recherche
         if ($request->filled('search')) {
@@ -50,7 +72,21 @@ class ClientController extends Controller
      */
     public function create()
     {
-        return Inertia::render('clients/create');
+        $user = Auth::user();
+
+        // Un admin peut choisir n'importe quelle boutique ; un employé est limité à la sienne
+        if ($user->isAdmin()) {
+            $boutiques = Boutique::orderBy('nom')->get(['id', 'nom']);
+            $boutiqueId = null;
+        } else {
+            $boutiques = Boutique::where('id', $user->boutique_id)->get(['id', 'nom']);
+            $boutiqueId = $user->boutique_id;
+        }
+
+        return Inertia::render('clients/create', [
+            'boutiques' => $boutiques,
+            'boutique_id' => $boutiqueId,
+        ]);
     }
 
     /**
@@ -58,7 +94,15 @@ class ClientController extends Controller
      */
     public function store(StoreClientRequest $request)
     {
-        $client = Client::create($request->validated());
+        $data = $request->validated();
+
+        // Forcer la boutique de l'employé — un non-admin ne peut créer que dans sa boutique
+        $user = Auth::user();
+        if (! $user->isAdmin()) {
+            $data['boutique_id'] = $user->boutique_id;
+        }
+
+        Client::create($data);
 
         return redirect()->route('clients.index')
             ->with('success', 'Client créé avec succès.');
@@ -69,6 +113,10 @@ class ClientController extends Controller
      */
     public function show(Client $client, Request $request)
     {
+        $this->authorizeClientAccess($client);
+
+        $client->load('boutique');
+
         // Charger les ventes du client avec pagination
         $ventes = $client->ventes()
             ->with(['user', 'lignes.produit'])
@@ -98,8 +146,19 @@ class ClientController extends Controller
      */
     public function edit(Client $client)
     {
+        $this->authorizeClientAccess($client);
+
+        $user = Auth::user();
+
+        if ($user->isAdmin()) {
+            $boutiques = Boutique::orderBy('nom')->get(['id', 'nom']);
+        } else {
+            $boutiques = Boutique::where('id', $user->boutique_id)->get(['id', 'nom']);
+        }
+
         return Inertia::render('clients/edit', [
             'client' => $client,
+            'boutiques' => $boutiques,
         ]);
     }
 
@@ -108,7 +167,17 @@ class ClientController extends Controller
      */
     public function update(UpdateClientRequest $request, Client $client)
     {
-        $client->update($request->validated());
+        $this->authorizeClientAccess($client);
+
+        $data = $request->validated();
+
+        // Forcer la boutique de l'employé
+        $user = Auth::user();
+        if (! $user->isAdmin()) {
+            $data['boutique_id'] = $user->boutique_id;
+        }
+
+        $client->update($data);
 
         return redirect()->route('clients.edit', $client)
             ->with('success', 'Client mis à jour avec succès.');
@@ -119,6 +188,8 @@ class ClientController extends Controller
      */
     public function destroy(Client $client)
     {
+        $this->authorizeClientAccess($client);
+
         $client->delete();
 
         return redirect()->route('clients.index')
@@ -130,6 +201,8 @@ class ClientController extends Controller
      */
     public function toggleStatus(Client $client)
     {
+        $this->authorizeClientAccess($client);
+
         $client->update([
             'actif' => ! $client->actif,
         ]);
@@ -138,5 +211,17 @@ class ClientController extends Controller
 
         return redirect()->back()
             ->with('success', $message);
+    }
+
+    /**
+     * Vérifie qu'un employé n'accède qu'aux clients de sa boutique.
+     */
+    private function authorizeClientAccess(Client $client): void
+    {
+        $user = Auth::user();
+
+        if (! $user->isAdmin() && $client->boutique_id !== $user->boutique_id) {
+            abort(403, 'Vous n\'avez pas accès à ce client.');
+        }
     }
 }

@@ -9,8 +9,7 @@ import {
     Phone,
     MapPin,
     Building2,
-    CheckCircle2,
-    XCircle
+    Store,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -20,13 +19,19 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-    CardFooter
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch'; // J'utilise Switch au lieu de Checkbox, c'est plus moderne pour un statut
+import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -44,8 +49,19 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function ClientsCreate() {
+interface Boutique {
+    id: number;
+    nom: string;
+}
+
+interface Props {
+    boutiques: Boutique[];
+    boutique_id: number | null;
+}
+
+export default function ClientsCreate({ boutiques, boutique_id }: Props) {
     const { data, setData, post, processing, errors } = useForm({
+        boutique_id: boutique_id ? String(boutique_id) : '',
         nom: '',
         email: '',
         telephone: '',
@@ -58,19 +74,22 @@ export default function ClientsCreate() {
         post(ClientController.store.url());
     };
 
+    // Si une seule boutique disponible, le sélecteur est en lecture seule
+    const isBoutiqueReadOnly = boutiques.length === 1;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Création Client - Gest Anaizan" />
 
             <div className="mx-auto max-w-6xl space-y-8 py-4">
-                {/* EN-TÊTE DE PAGE */}
+                {/* EN-TÊTE */}
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight text-foreground">
                             Nouveau Client
                         </h1>
                         <p className="text-muted-foreground mt-1">
-                            Remplissez les informations ci-dessous pour ajouter un partenaire.
+                            Remplissez les informations ci-dessous pour ajouter un client.
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -80,7 +99,6 @@ export default function ClientsCreate() {
                                 Annuler
                             </Button>
                         </Link>
-                        {/* Bouton de sauvegarde visible sur mobile uniquement ici, sinon dans la sidebar */}
                         <Button onClick={handleSubmit} disabled={processing} className="md:hidden">
                             Sauvegarder
                         </Button>
@@ -92,7 +110,7 @@ export default function ClientsCreate() {
                 <form onSubmit={handleSubmit}>
                     <div className="grid gap-6 lg:grid-cols-3">
 
-                        {/* COLONNE GAUCHE : INFO PRINCIPALES (prend 2/3 de l'espace) */}
+                        {/* COLONNE GAUCHE */}
                         <div className="lg:col-span-2 space-y-6">
                             <Card className="border-t-4 border-t-primary shadow-md">
                                 <CardHeader>
@@ -107,6 +125,35 @@ export default function ClientsCreate() {
                                     </div>
                                 </CardHeader>
                                 <CardContent className="grid gap-6">
+                                    {/* Boutique */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="boutique_id">
+                                            Boutique <span className="text-red-500">*</span>
+                                        </Label>
+                                        <div className="relative">
+                                            <Store className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
+                                            <Select
+                                                value={data.boutique_id}
+                                                onValueChange={(value) => setData('boutique_id', value)}
+                                                disabled={isBoutiqueReadOnly}
+                                            >
+                                                <SelectTrigger className="pl-9 h-11 bg-muted/30 focus:bg-background">
+                                                    <SelectValue placeholder="Sélectionner une boutique" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {boutiques.map((boutique) => (
+                                                        <SelectItem key={boutique.id} value={String(boutique.id)}>
+                                                            {boutique.nom}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        {errors.boutique_id && (
+                                            <p className="text-sm text-red-500 font-medium">{errors.boutique_id}</p>
+                                        )}
+                                    </div>
+
                                     {/* Nom */}
                                     <div className="space-y-2">
                                         <Label htmlFor="nom">Nom complet / Raison sociale <span className="text-red-500">*</span></Label>
@@ -144,7 +191,7 @@ export default function ClientsCreate() {
 
                                         {/* Téléphone */}
                                         <div className="space-y-2">
-                                            <Label htmlFor="telephone">Téléphone <span className="text-red-500">*</span></Label>
+                                            <Label htmlFor="telephone">Téléphone</Label>
                                             <div className="relative">
                                                 <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                                 <Input
@@ -153,7 +200,6 @@ export default function ClientsCreate() {
                                                     value={data.telephone}
                                                     onChange={(e) => setData('telephone', e.target.value)}
                                                     placeholder="01 23 45 67 89"
-                                                    required
                                                 />
                                             </div>
                                             {errors.telephone && <p className="text-sm text-red-500 font-medium">{errors.telephone}</p>}
@@ -162,7 +208,7 @@ export default function ClientsCreate() {
 
                                     {/* Adresse */}
                                     <div className="space-y-2">
-                                        <Label htmlFor="adresse">Adresse postale <span className="text-red-500">*</span></Label>
+                                        <Label htmlFor="adresse">Adresse postale</Label>
                                         <div className="relative">
                                             <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                             <Textarea
@@ -171,7 +217,6 @@ export default function ClientsCreate() {
                                                 value={data.adresse}
                                                 onChange={(e) => setData('adresse', e.target.value)}
                                                 placeholder="Numéro, Rue, Code Postal, Ville..."
-                                                required
                                             />
                                         </div>
                                         {errors.adresse && <p className="text-sm text-red-500 font-medium">{errors.adresse}</p>}
@@ -180,9 +225,8 @@ export default function ClientsCreate() {
                             </Card>
                         </div>
 
-                        {/* COLONNE DROITE : STATUT & ACTIONS (prend 1/3 de l'espace) */}
+                        {/* COLONNE DROITE */}
                         <div className="space-y-6">
-
                             {/* Carte de Statut */}
                             <Card className="shadow-sm">
                                 <CardHeader>
@@ -209,24 +253,24 @@ export default function ClientsCreate() {
                                 </CardContent>
                             </Card>
 
-                            {/* Carte de Résumé / Aide (Optionnel mais joli) */}
+                            {/* Aide */}
                             <Card className="bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900 border-dashed">
                                 <CardContent className="pt-6">
                                     <h4 className="font-semibold text-blue-900 dark:text-blue-200 mb-2 text-sm">Conseil Gest Anaizan</h4>
                                     <p className="text-xs text-blue-700 dark:text-blue-300">
-                                        Assurez-vous que le numéro de téléphone est au format international si vous prévoyez d'envoyer des notifications SMS automatiques.
+                                        Un client est rattaché à une boutique spécifique. Les employés ne gèrent que leurs propres clients.
                                     </p>
                                 </CardContent>
                             </Card>
 
-                            {/* Actions Principales (Sticky Desktop) */}
+                            {/* Actions */}
                             <Card className="shadow-md border-0 bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900">
                                 <CardContent className="pt-6">
                                     <Button
                                         type="submit"
                                         className="w-full font-bold"
                                         size="lg"
-                                        variant="secondary" // Contraste avec le fond noir de la card
+                                        variant="secondary"
                                         disabled={processing}
                                     >
                                         {processing ? (
