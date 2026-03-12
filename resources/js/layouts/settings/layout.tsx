@@ -7,33 +7,40 @@ import { edit } from '@/routes/profile';
 import { show } from '@/routes/two-factor';
 import { edit as editPassword } from '@/routes/user-password';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
-
-const sidebarNavItems: NavItem[] = [
-    {
-        title: 'Profile',
-        href: edit(),
-        icon: null,
-    },
-    {
-        title: 'Mot de passe',
-        href: editPassword(),
-        icon: null,
-    },
-    {
-        title: 'Authentification à deux facteurs',
-        href: show(),
-        icon: null,
-    },
-    {
-        title: 'Apparence',
-        href: editAppearance(),
-        icon: null,
-    },
-];
+import { type SharedData } from '@/types';
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
+    const { auth } = usePage<SharedData>().props;
+    const isAdmin = auth.user.role === 'admin';
+
+    const sidebarNavItems: NavItem[] = [
+        {
+            title: 'Profil',
+            href: edit(),
+            icon: null,
+        },
+        ...(isAdmin ? [
+            {
+                title: 'Mot de passe',
+                href: editPassword(),
+                icon: null,
+            },
+            {
+                title: 'Authentification à deux facteurs',
+                href: show(),
+                icon: null,
+            }
+        ] : []),
+        {
+            title: 'Apparence',
+            href: editAppearance(),
+            icon: null,
+        },
+    ];
+
+    // When server-side rendering, we only render the layout on the client...
     // When server-side rendering, we only render the layout on the client...
     if (typeof window === 'undefined') {
         return null;

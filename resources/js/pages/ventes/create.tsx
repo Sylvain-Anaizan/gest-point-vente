@@ -220,6 +220,38 @@ export default function VentesCreate({ clients, produits, boutiques }: { clients
                         {/* On utilise order-2 sur mobile pour mettre les produits après le client, ou order-1 si on veut d'abord ajouter les produits */}
                         <div className="order-2 lg:order-2 lg:col-span-2 space-y-6">
 
+                            {/* BOUTIQUE CARD */}
+                            <Card>
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="flex items-center text-base">
+                                        <Store className="h-5 w-5 mr-2 text-muted-foreground" />
+                                        Point de Vente
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="boutique" className="text-xs uppercase text-muted-foreground font-semibold">Sélectionner la boutique</Label>
+                                        <Select
+                                            value={selectedBoutiqueId || 'none'}
+                                            onValueChange={setSelectedBoutiqueId}
+                                            disabled={userRole !== 'admin' && boutiques.length === 1}
+                                        >
+                                            <SelectTrigger className="h-11">
+                                                <SelectValue placeholder="Stock Général / Non spécifié" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {userRole === 'admin' && <SelectItem value="none">Stock Général</SelectItem>}
+                                                {boutiques.map((boutique) => (
+                                                    <SelectItem key={boutique.id} value={boutique.id?.toString()}>
+                                                        {boutique.nom}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
                             {/* AJOUT PRODUIT */}
                             <Card className="border-primary/20 shadow-sm">
                                 <CardHeader className="pb-3">
@@ -262,37 +294,7 @@ export default function VentesCreate({ clients, produits, boutiques }: { clients
                                 </CardContent>
                             </Card>
 
-                            {/* BOUTIQUE CARD */}
-                            <Card>
-                                <CardHeader className="pb-3">
-                                    <CardTitle className="flex items-center text-base">
-                                        <Store className="h-5 w-5 mr-2 text-muted-foreground" />
-                                        Point de Vente
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-1.5">
-                                        <Label htmlFor="boutique" className="text-xs uppercase text-muted-foreground font-semibold">Sélectionner la boutique</Label>
-                                        <Select
-                                            value={selectedBoutiqueId || 'none'}
-                                            onValueChange={setSelectedBoutiqueId}
-                                            disabled={userRole !== 'admin' && boutiques.length === 1}
-                                        >
-                                            <SelectTrigger className="h-11">
-                                                <SelectValue placeholder="Stock Général / Non spécifié" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {userRole === 'admin' && <SelectItem value="none">Stock Général</SelectItem>}
-                                                {boutiques.map((boutique) => (
-                                                    <SelectItem key={boutique.id} value={boutique.id?.toString()}>
-                                                        {boutique.nom}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </CardContent>
-                            </Card>
+
 
                             {/* LISTE PRODUITS */}
                             <div className="space-y-3">
