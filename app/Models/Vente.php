@@ -52,4 +52,35 @@ class Vente extends Model
     {
         return $this->belongsTo(Commande::class);
     }
+
+    public function paiements(): HasMany
+    {
+        return $this->hasMany(Paiement::class);
+    }
+
+    public function getMontantPayeAttribute(): float
+    {
+        return (float) $this->paiements()->sum('montant');
+    }
+
+    public function getResteAPayerAttribute(): float
+    {
+        return (float) $this->montant_total - $this->montant_paye;
+    }
+
+    public function updateStatutPaiement(): void
+    {
+        $paye = $this->montant_paye;
+        $total = (float) $this->montant_total;
+
+        if ($paye <= 0) {
+            $this->statut = 'Impayée';
+        } elseif ($paye < $total) {
+            $this->statut = 'Partiellement payée';
+        } else {
+            $this->statut = 'Payée';
+        }
+
+        $this->save();
+    }
 }

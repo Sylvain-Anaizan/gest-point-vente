@@ -20,6 +20,7 @@ import {
     Banknote,
     Printer,
     StoreIcon,
+    Plus,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -62,7 +63,17 @@ interface Produit { id: number; nom: string; }
 interface LigneCommande { id: number; nom: string; quantite: number; prix: number; }
 interface Commande { id: number; numero: string; lignes_commande?: LigneCommande[]; }
 interface LigneVente { id: number; produit_id: number; quantite: number; prix_unitaire: number; sous_total: number; produit: Produit; designation_originale?: string; }
-interface Vente { id: number; numero: string; client_id: number | null; commande_id: number | null; user_id: number; boutique_id: number | null; montant_total: number | string; statut: 'complétée' | 'annulée'; mode_paiement: 'espèces' | 'carte' | 'virement' | 'mobile_money'; created_at: string; updated_at: string; client?: Client; user: User; boutique?: Boutique; lignes: LigneVente[]; commande?: Commande; }
+interface PaiementUser { id: number; name: string; }
+interface Paiement {
+    id: number;
+    montant: number | string;
+    mode_paiement: string;
+    reference: string | null;
+    date_paiement: string;
+    commentaire: string | null;
+    user?: PaiementUser;
+}
+interface Vente { id: number; numero: string; client_id: number | null; commande_id: number | null; user_id: number; boutique_id: number | null; montant_total: number | string; statut: 'complétée' | 'annulée'; mode_paiement: 'espèces' | 'carte' | 'virement' | 'mobile_money'; created_at: string; updated_at: string; client?: Client; user: User; boutique?: Boutique; lignes: LigneVente[]; commande?: Commande; paiements?: Paiement[]; }
 
 export default function VentesShow({ vente }: { vente: Vente }) {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -258,6 +269,87 @@ export default function VentesShow({ vente }: { vente: Vente }) {
                                     </div>
                                 ) : (
                                     <p className="text-sm text-muted-foreground italic">Client de passage (Anonyme)</p>
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        {/* PAIEMENTS */}
+                        <Card className="border-l-4 border-l-emerald-500 shadow-sm">
+                            <CardHeader className="pb-3">
+                                <CardTitle className="flex items-center justify-between text-base">
+                                    <div className="flex items-center gap-2">
+                                        <CreditCard className="h-4 w-4 text-emerald-500" />
+                                        Paiements
+                                    </div>
+                                    <Link href={`/paiements/create?vente_id=${vente.id}`}>
+                                        <Button variant="outline" size="sm" className="h-7 text-xs border-emerald-200 hover:bg-emerald-50 text-emerald-600">
+                                            <Plus className="mr-1 h-3 w-3" /> Ajouter
+                                        </Button>
+                                    </Link>
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                {vente.paiements && vente.paiements.length > 0 ? (
+                                    <>
+                                        <div className="space-y-2">
+                                            {vente.paiements.map((p) => {
+                                                const modeIcon = (() => {
+                                                    switch (p.mode_paiement) {
+                                                        case 'espèces': return <Banknote className="h-3.5 w-3.5" />;
+                                                        case 'carte': return <CreditCard className="h-3.5 w-3.5" />;
+                                                        case 'mobile_money': return <Smartphone className="h-3.5 w-3.5" />;
+                                                        case 'virement': return <Receipt className="h-3.5 w-3.5" />;
+                                                        default: return <Banknote className="h-3.5 w-3.5" />;
+                                                    }
+                                                })();
+                                                return (
+                                                    <Link key={p.id} href={`/paiements/${p.id}`} className="block">
+                                                        <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 transition-colors">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="h-8 w-8 rounded-full bg-emerald-100 dark:bg-emerald-950/30 flex items-center justify-center text-emerald-600">
+                                                                    {modeIcon}
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-sm font-medium capitalize">{p.mode_paiement.replace('_', ' ')}</p>
+                                                                    <p className="text-xs text-muted-foreground">
+                                                                        {new Date(p.date_paiement).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                                        {p.reference && <> · {p.reference}</>}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <span className="font-bold text-sm text-emerald-700 dark:text-emerald-400">
+                                                                {Number(p.montant).toLocaleString('fr-FR')} F
+                                                            </span>
+                                                        </div>
+                                                    </Link>
+                                                );
+                                            })}
+                                        </div>
+                                        <div className="flex items-center justify-between pt-2 border-t text-sm">
+                                            <span className="text-muted-foreground">Total payé</span>
+                                            <span className="font-bold text-emerald-700 dark:text-emerald-400">
+                                                {vente.paiements.reduce((sum, p) => sum + Number(p.montant), 0).toLocaleString('fr-FR')} FCFA
+                                            </span>
+                                        </div>
+                                        {(() => {
+                                            const totalPaye = vente.paiements!.reduce((sum, p) => sum + Number(p.montant), 0);
+                                            const reste = Number(vente.montant_total) - totalPaye;
+                                            if (reste > 0) {
+                                                return (
+                                                    <div className="flex items-center justify-between text-sm">
+                                                        <span className="text-muted-foreground">Reste à payer</span>
+                                                        <span className="font-bold text-amber-600">{reste.toLocaleString('fr-FR')} FCFA</span>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        })()}
+                                    </>
+                                ) : (
+                                    <div className="py-4 text-center">
+                                        <CreditCard className="mx-auto h-8 w-8 text-muted-foreground/30 mb-2" />
+                                        <p className="text-sm text-muted-foreground italic">Aucun paiement enregistré.</p>
+                                    </div>
                                 )}
                             </CardContent>
                         </Card>

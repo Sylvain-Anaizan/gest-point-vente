@@ -117,7 +117,7 @@ class CommandeController extends Controller
     public function show(Commande $commande): Response
     {
         $this->authorizeBoutique($commande);
-        $commande->load(['client', 'lignesCommande', 'boutique']);
+        $commande->load(['client', 'lignesCommande', 'boutique', 'paiements.user']);
 
         return Inertia::render('Commandes/Show', [
             'commande' => $commande,

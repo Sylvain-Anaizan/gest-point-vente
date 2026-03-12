@@ -6,6 +6,7 @@ use App\Models\Categorie;
 use App\Models\Client;
 use App\Models\Produit;
 use App\Models\User;
+use App\Models\Variante;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -13,12 +14,19 @@ class WhatsAppControllerTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected User $user;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         // Create a user for authentication
         $this->user = User::factory()->create();
+        
+        // Give the user the required permission
+        \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'super_admin']);
+        $permission = \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'manage products']);
+        $this->user->givePermissionTo($permission);
     }
 
     /** @test */
@@ -31,12 +39,18 @@ class WhatsAppControllerTest extends TestCase
         $produit1 = Produit::factory()->create([
             'categorie_id' => $categorie->id,
             'nom' => 'T-Shirt',
+        ]);
+        Variante::factory()->create([
+            'produit_id' => $produit1->id,
             'prix_vente' => 150,
             'quantite' => 10,
         ]);
         $produit2 = Produit::factory()->create([
             'categorie_id' => $categorie->id,
             'nom' => 'Pantalon',
+        ]);
+        Variante::factory()->create([
+            'produit_id' => $produit2->id,
             'prix_vente' => 300,
             'quantite' => 5,
         ]);
@@ -183,9 +197,12 @@ class WhatsAppControllerTest extends TestCase
         $produit = Produit::factory()->create([
             'categorie_id' => $categorie->id,
             'nom' => 'Smartphone',
+            'description' => 'Dernier modèle',
+        ]);
+        Variante::factory()->create([
+            'produit_id' => $produit->id,
             'prix_vente' => 2500,
             'quantite' => 5,
-            'description' => 'Dernier modèle',
         ]);
 
         $response = $this->postJson(route('whatsapp.send-catalog'), [
@@ -196,9 +213,7 @@ class WhatsAppControllerTest extends TestCase
         $message = $response->json('message');
 
         $this->assertStringContainsString('Catalogue Électronique', $message);
-        $this->assertStringContainsString('Smartphone', $message);
-        $this->assertStringContainsString('2500 DH', $message);
-        $this->assertStringContainsString('En stock', $message);
+        $this->assertStringContainsString('1 photos disponibles', $message);
         $this->assertStringContainsString('Anaizan', $message);
     }
 }

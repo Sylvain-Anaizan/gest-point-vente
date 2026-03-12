@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\MouvementStockController;
+use App\Http\Controllers\PaiementController;
 use App\Http\Controllers\POSController;
 use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\RapportController;
@@ -53,6 +54,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('clients', ClientController::class)->middleware('permission:manage sales');
     Route::resource('ventes', VenteController::class)->middleware('permission:manage sales');
     Route::resource('commandes', CommandeController::class)->middleware('permission:manage sales');
+    Route::resource('paiements', PaiementController::class)->except(['edit', 'update'])->middleware('permission:manage sales');
     Route::get('commandes/{commande}/receipt', [\App\Http\Controllers\CommandeReceiptController::class, 'download'])
         ->name('commandes.receipt')
         ->middleware('permission:manage sales');

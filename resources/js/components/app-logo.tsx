@@ -1,4 +1,3 @@
-import AppLogoIcon from './app-logo-icon';
 //import AppLogo from '/storage/anaizan.png';
 
 export default function AppLogo() {

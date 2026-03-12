@@ -13,6 +13,8 @@ class POSControllerTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected User $user;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -47,7 +49,7 @@ class POSControllerTest extends TestCase
                     'id' => $produit->id,
                     'quantite' => 2,
                     'prix_vente' => 1000,
-                ]
+                ],
             ],
             'mode_paiement' => 'espèces',
             'montant_recu' => 2500,
@@ -88,7 +90,7 @@ class POSControllerTest extends TestCase
                     'id' => 999, // ID qui n'existe pas, pour provoquer une erreur de validation
                     'quantite' => 1,
                     'prix_vente' => 1000,
-                ]
+                ],
             ],
             'mode_paiement' => 'espèces',
             'montant_recu' => 1000,

@@ -13,6 +13,8 @@ class VenteTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected User $user;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -30,12 +32,12 @@ class VenteTest extends TestCase
 
         for ($i = 0; $i < 3; $i++) {
             $vente = Vente::create([
-                'numero' => 'V-' . date('Ymd') . '-' . strtoupper(uniqid()),
+                'numero' => 'V-'.date('Ymd').'-'.strtoupper(uniqid()),
                 'client_id' => $client->id,
                 'user_id' => $this->user->id,
                 'montant_total' => 1000,
                 'mode_paiement' => 'espèces',
-                'statut' => 'complétée'
+                'statut' => 'complétée',
             ]);
 
             $vente->lignes()->create([
@@ -49,10 +51,10 @@ class VenteTest extends TestCase
         $response = $this->get(route('ventes.index'));
 
         $response->assertStatus(200)
-                ->assertInertia(fn ($page) => $page
-                    ->component('Ventes/Index')
-                    ->has('ventes.data', 3)
-                );
+            ->assertInertia(fn ($page) => $page
+                ->component('Ventes/Index')
+                ->has('ventes.data', 3)
+            );
     }
 
     public function test_user_can_create_vente()
@@ -68,8 +70,8 @@ class VenteTest extends TestCase
                     'produit_id' => $produit->id,
                     'quantite' => 2,
                     'prix_unitaire' => $produit->prix_vente,
-                ]
-            ]
+                ],
+            ],
         ];
 
         $response = $this->post(route('ventes.store'), $venteData);
@@ -79,7 +81,7 @@ class VenteTest extends TestCase
             'client_id' => $client->id,
             'user_id' => $this->user->id,
             'mode_paiement' => 'espèces',
-            'statut' => 'complétée'
+            'statut' => 'complétée',
         ]);
         $this->assertDatabaseHas('ligne_ventes', [
             'produit_id' => $produit->id,
@@ -97,12 +99,12 @@ class VenteTest extends TestCase
         $produit = Produit::factory()->create(['quantite' => 10]);
 
         $vente = Vente::create([
-            'numero' => 'V-' . date('Ymd') . '-' . strtoupper(uniqid()),
+            'numero' => 'V-'.date('Ymd').'-'.strtoupper(uniqid()),
             'client_id' => $client->id,
             'user_id' => $this->user->id,
             'montant_total' => 1000,
             'mode_paiement' => 'espèces',
-            'statut' => 'complétée'
+            'statut' => 'complétée',
         ]);
 
         $vente->lignes()->create([
@@ -115,10 +117,10 @@ class VenteTest extends TestCase
         $response = $this->get(route('ventes.show', $vente));
 
         $response->assertStatus(200)
-                ->assertInertia(fn ($page) => $page
-                    ->component('Ventes/Show')
-                    ->has('vente')
-                );
+            ->assertInertia(fn ($page) => $page
+                ->component('Ventes/Show')
+                ->has('vente')
+            );
     }
 
     public function test_user_can_update_vente()
@@ -127,12 +129,12 @@ class VenteTest extends TestCase
         $produit = Produit::factory()->create(['quantite' => 10]);
 
         $vente = Vente::create([
-            'numero' => 'V-' . date('Ymd') . '-' . strtoupper(uniqid()),
+            'numero' => 'V-'.date('Ymd').'-'.strtoupper(uniqid()),
             'client_id' => $client->id,
             'user_id' => $this->user->id,
             'montant_total' => 2000,
             'mode_paiement' => 'espèces',
-            'statut' => 'complétée'
+            'statut' => 'complétée',
         ]);
 
         // Créer une ligne de vente
@@ -155,8 +157,8 @@ class VenteTest extends TestCase
                     'produit_id' => $produit->id,
                     'quantite' => 3,
                     'prix_unitaire' => 1000,
-                ]
-            ]
+                ],
+            ],
         ];
 
         $response = $this->put(route('ventes.update', $vente), $updateData);
@@ -177,12 +179,12 @@ class VenteTest extends TestCase
         $produit = Produit::factory()->create(['quantite' => 10]);
 
         $vente = Vente::create([
-            'numero' => 'V-' . date('Ymd') . '-' . strtoupper(uniqid()),
+            'numero' => 'V-'.date('Ymd').'-'.strtoupper(uniqid()),
             'client_id' => $client->id,
             'user_id' => $this->user->id,
             'montant_total' => 2000,
             'mode_paiement' => 'espèces',
-            'statut' => 'complétée'
+            'statut' => 'complétée',
         ]);
 
         // Créer une ligne de vente
@@ -217,8 +219,8 @@ class VenteTest extends TestCase
                     'produit_id' => $produit->id,
                     'quantite' => 5, // Plus que le stock disponible
                     'prix_unitaire' => $produit->prix_vente,
-                ]
-            ]
+                ],
+            ],
         ];
 
         $response = $this->post(route('ventes.store'), $venteData);

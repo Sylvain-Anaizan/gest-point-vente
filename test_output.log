@@ -1,0 +1,1154 @@
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ClientTest::it_can_display_clients_index_page(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ClientTest::it_can_create_a_client(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ClientTest::it_validates_required_fields_when_creating_client(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ClientTest::it_validates_email_uniqueness_when_creating_client(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ClientTest::it_can_show_a_client(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ClientTest::it_can_update_a_client(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ClientTest::it_validates_email_uniqueness_when_updating_client(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ClientTest::it_can_delete_a_client(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ClientTest::it_can_toggle_client_status(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ClientTest::it_can_search_clients(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ClientTest::it_can_filter_active_clients(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ClientTest::it_can_filter_inactive_clients(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ClientTest::it_can_paginate_clients(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ClientTest::it_returns_correct_client_full_name(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ClientTest::it_returns_correct_client_full_address(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ClientTest::it_can_scope_active_clients(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\ClientTest::it_can_scope_search_clients(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\WhatsAppControllerTest::it_can_generate_whatsapp_catalog_link(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\WhatsAppControllerTest::it_formats_phone_number_correctly(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\WhatsAppControllerTest::it_can_use_client_phone_number(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\WhatsAppControllerTest::it_validates_required_fields(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\WhatsAppControllerTest::it_requires_phone_or_client(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\WhatsAppControllerTest::it_can_get_categories_with_products(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\WhatsAppControllerTest::it_can_get_category_products(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\WhatsAppControllerTest::it_generates_correct_message_format(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   PASS  Tests\Unit\ExampleTest
+  ✓ that true is true                                                    0.36s  
+
+   PASS  Tests\Feature\Auth\AuthenticationTest
+  ✓ login screen can be rendered                                         0.06s  
+  ✓ users can authenticate using the login screen                        0.05s  
+  ✓ users with two factor enabled are redirected to two factor challeng… 0.02s  
+  ✓ users can not authenticate with invalid password                     0.03s  
+  ✓ users can logout                                                     0.03s  
+  ✓ users are rate limited                                               0.02s  
+
+   PASS  Tests\Feature\Auth\EmailVerificationTest
+  ✓ email verification screen can be rendered                            0.03s  
+  ✓ email can be verified                                                0.03s  
+  ✓ email is not verified with invalid hash                              0.03s  
+  ✓ email is not verified with invalid user id                           0.03s  
+  ✓ verified user is redirected to dashboard from verification prompt    0.02s  
+  ✓ already verified user visiting verification link is redirected with… 0.03s  
+
+   PASS  Tests\Feature\Auth\PasswordConfirmationTest
+  ✓ confirm password screen can be rendered                              0.03s  
+  ✓ password confirmation requires authentication                        0.02s  
+
+   PASS  Tests\Feature\Auth\PasswordResetTest
+  ✓ reset password link screen can be rendered                           0.03s  
+  ✓ reset password link can be requested                                 0.24s  
+  ✓ reset password screen can be rendered                                0.24s  
+  ✓ password can be reset with valid token                               0.24s  
+  ✓ password cannot be reset with invalid token                          0.23s  
+
+   FAIL  Tests\Feature\Auth\RegistrationTest
+  ⨯ registration screen can be rendered                                  0.03s  
+  ⨯ new users can register                                               0.02s  
+
+   PASS  Tests\Feature\Auth\TwoFactorChallengeTest
+  ✓ two factor challenge redirects to login when not authenticated       0.02s  
+  ✓ two factor challenge can be rendered                                 0.03s  
+
+   PASS  Tests\Feature\Auth\VerificationNotificationTest
+  ✓ sends verification notification                                      0.02s  
+  ✓ does not send verification notification if email is verified         0.02s  
+
+   FAIL  Tests\Feature\ClientTest
+  ⨯ it can display clients index page                                    0.04s  
+  ⨯ it can create a client                                               0.02s  
+  ⨯ it validates required fields when creating client                    0.02s  
+  ⨯ it validates email uniqueness when creating client                   0.03s  
+  ⨯ it can show a client                                                 0.03s  
+  ⨯ it can update a client                                               0.03s  
+  ⨯ it validates email uniqueness when updating client                   0.03s  
+  ⨯ it can delete a client                                               0.03s  
+  ⨯ it can toggle client status                                          0.03s  
+  ⨯ it can search clients                                                0.02s  
+  ⨯ it can filter active clients                                         0.03s  
+  ⨯ it can filter inactive clients                                       0.03s  
+  ⨯ it can paginate clients                                              0.03s  
+  ⨯ it returns correct client full name                                  0.02s  
+  ⨯ it returns correct client full address                               0.02s  
+  ✓ it can scope active clients                                          0.02s  
+  ✓ it can scope search clients                                          0.02s  
+
+   FAIL  Tests\Feature\CommandeTest
+  ⨯ can list commandes                                                   0.05s  
+  ⨯ can filter commandes by search                                       0.03s  
+  ⨯ can filter commandes by status                                       0.03s  
+  ⨯ can search by client name                                            0.03s  
+
+   PASS  Tests\Feature\CommandeVenteConversionTest
+  ✓ delivering a commande creates a vente                                0.05s  
+  ✓ updating already delivered order does not create duplicate sale      0.03s  
+  ✓ can download order receipt                                           0.11s  
+
+   FAIL  Tests\Feature\DashboardTest
+  ✓ guests are redirected to the login page                              0.02s  
+  ⨯ authenticated users can visit the dashboard                          0.66s  
+
+   FAIL  Tests\Feature\MouvementStockTest
+  ⨯ can view mouvements index                                            0.03s  
+  ⨯ can view mouvements create                                           0.03s  
+  ⨯ can store entree mouvement and increase stock                        0.03s  
+  ⨯ can store sortie mouvement and decrease stock                        0.04s  
+  ⨯ cannot store sortie with insufficient stock                          0.03s  
+
+   FAIL  Tests\Feature\POSControllerTest
+  ⨯ pos page loads                                                       0.03s  
+  ⨯ can create sale                                                      0.03s  
+  ⨯ data is received by controller                                       0.02s  
+
+   PASS  Tests\Feature\PaiementTest
+  ✓ can list paiements                                                   0.04s  
+  ✓ can filter paiements by mode                                         0.04s  
+  ✓ can view create form                                                 0.03s  
+  ✓ can store paiement for vente                                         0.03s  
+  ✓ can store paiement for commande                                      0.03s  
+  ✓ store validates required fields                                      0.03s  
+  ✓ store validates invalid mode                                         0.03s  
+  ✓ can show paiement                                                    0.03s  
+  ✓ cannot view paiement from other boutique                             0.03s  
+  ✓ can delete paiement                                                  0.03s  
+  ✓ cannot delete paiement from other boutique                           0.03s  
+
+   FAIL  Tests\Feature\RapportTest
+  ⨯ can view rapports index                                              0.04s  
+  ⨯ it calculates kpi correctly for current month                        0.03s  
+  ⨯ it filters by custom dates correctly                                 0.03s  
+
+   PASS  Tests\Feature\Settings\PasswordUpdateTest
+  ✓ password update page is displayed                                    0.03s  
+  ✓ password can be updated                                              0.03s  
+  ✓ correct password must be provided to update password                 0.02s  
+
+   PASS  Tests\Feature\Settings\ProfileUpdateTest
+  ✓ profile page is displayed                                            0.03s  
+  ✓ profile information can be updated                                   0.03s  
+  ✓ email verification status is unchanged when the email address is un… 0.03s  
+  ✓ user can delete their account                                        0.03s  
+  ✓ correct password must be provided to delete account                  0.03s  
+
+   PASS  Tests\Feature\Settings\TwoFactorAuthenticationTest
+  ✓ two factor settings page can be rendered                             0.03s  
+  ✓ two factor settings page requires password confirmation when enable… 0.02s  
+  ✓ two factor settings page does not requires password confirmation wh… 0.02s  
+  ✓ two factor settings page returns forbidden response when two factor… 0.02s  
+
+   PASS  Tests\Feature\VenteClientFilterTest
+  ✓ employee sees only clients from their boutique on vente create       0.06s  
+  ✓ admin sees empty client list on vente create                         0.05s  
+  ✓ par boutique endpoint returns filtered clients                       0.05s  
+
+   FAIL  Tests\Feature\VenteTest
+  ⨯ user can view ventes index                                           0.02s  
+  ⨯ user can create vente                                                0.02s  
+  ⨯ user can view vente details                                          0.02s  
+  ⨯ user can update vente                                                0.02s  
+  ⨯ user can delete vente                                                0.02s  
+  ⨯ cannot create vente with insufficient stock                          0.02s  
+
+   FAIL  Tests\Feature\WhatsAppControllerTest
+  ⨯ it can generate whatsapp catalog link                                0.03s  
+  ⨯ it formats phone number correctly                                    0.03s  
+  ⨯ it can use client phone number                                       0.03s  
+  ⨯ it validates required fields                                         0.03s  
+  ⨯ it requires phone or client                                          0.03s  
+  ⨯ it can get categories with products                                  0.03s  
+  ⨯ it can get category products                                         0.03s  
+  ⨯ it generates correct message format                                  0.02s  
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Auth\RegistrationTest > reg…  RouteNotFoundException   
+  Route [register] not defined.
+
+  at vendor/laravel/framework/src/Illuminate/Routing/UrlGenerator.php:526
+    522▕             ! is_null($url = call_user_func($this->missingNamedRouteResolver, $name, $parameters, $absolute))) {
+    523▕             return $url;
+    524▕         }
+    525▕ 
+  ➜ 526▕         throw new RouteNotFoundException("Route [{$name}] not defined.");
+    527▕     }
+    528▕ 
+    529▕     /**
+    530▕      * Get the URL for a given route instance.
+
+      [2m+2 vendor frames [22m
+  3   tests/Feature/Auth/RegistrationTest.php:14
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Auth\RegistrationTest > new…  RouteNotFoundException   
+  Route [register.store] not defined.
+
+  at vendor/laravel/framework/src/Illuminate/Routing/UrlGenerator.php:526
+    522▕             ! is_null($url = call_user_func($this->missingNamedRouteResolver, $name, $parameters, $absolute))) {
+    523▕             return $url;
+    524▕         }
+    525▕ 
+  ➜ 526▕         throw new RouteNotFoundException("Route [{$name}] not defined.");
+    527▕     }
+    528▕ 
+    529▕     /**
+    530▕      * Get the URL for a given route instance.
+
+      [2m+2 vendor frames [22m
+  3   tests/Feature/Auth/RegistrationTest.php:21
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it can display clients index page         
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+
+  at tests/Feature/ClientTest.php:31
+     27▕         Client::factory()->count(3)->create();
+     28▕ 
+     29▕         $response = $this->get(route('clients.index'));
+     30▕ 
+  ➜  31▕         $response->assertStatus(200)
+     32▕             ->assertInertia(fn ($page) => $page
+     33▕                 ->component('Clients/Index')
+     34▕                 ->has('clients.data', 3)
+     35▕             );
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it can create a client                    
+  Expected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.
+
+  at tests/Feature/ClientTest.php:57
+     53▕         ];
+     54▕ 
+     55▕         $response = $this->post(route('clients.store'), $clientData);
+     56▕ 
+  ➜  57▕         $response->assertRedirect(route('clients.index'));
+     58▕         $this->assertDatabaseHas('clients', $clientData);
+     59▕     }
+     60▕ 
+     61▕     /** @test */
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it validates required fields when crea…   
+  Session is missing expected key [errors].
+Failed asserting that false is true.
+
+  at tests/Feature/ClientTest.php:66
+     62▕     public function it_validates_required_fields_when_creating_client()
+     63▕     {
+     64▕         $response = $this->post(route('clients.store'), []);
+     65▕ 
+  ➜  66▕         $response->assertSessionHasErrors(['nom', 'email']);
+     67▕     }
+     68▕ 
+     69▕     /** @test */
+     70▕     public function it_validates_email_uniqueness_when_creating_client()
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it validates email uniqueness when cre…   
+  Session is missing expected key [errors].
+Failed asserting that false is true.
+
+  at tests/Feature/ClientTest.php:79
+     75▕             'nom' => 'Dupont',
+     76▕             'email' => 'existing@example.com',
+     77▕         ]);
+     78▕ 
+  ➜  79▕         $response->assertSessionHasErrors(['email']);
+     80▕     }
+     81▕ 
+     82▕     /** @test */
+     83▕     public function it_can_show_a_client()
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it can show a client                      
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+
+  at tests/Feature/ClientTest.php:89
+     85▕         $client = Client::factory()->create();
+     86▕ 
+     87▕         $response = $this->get(route('clients.show', $client));
+     88▕ 
+  ➜  89▕         $response->assertStatus(200)
+     90▕             ->assertInertia(fn ($page) => $page
+     91▕                 ->component('Clients/Show')
+     92▕                 ->has('client')
+     93▕                 ->where('client.id', $client->id)
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it can update a client                    
+  Expected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.
+
+  at tests/Feature/ClientTest.php:121
+    117▕         ];
+    118▕ 
+    119▕         $response = $this->patch(route('clients.update', $client), $updateData);
+    120▕ 
+  ➜ 121▕         $response->assertRedirect(route('clients.edit', $client));
+    122▕         $this->assertDatabaseHas('clients', array_merge(['id' => $client->id], $updateData));
+    123▕     }
+    124▕ 
+    125▕     /** @test */
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it validates email uniqueness when upd…   
+  Session is missing expected key [errors].
+Failed asserting that false is true.
+
+  at tests/Feature/ClientTest.php:136
+    132▕             'nom' => 'Dupont',
+    133▕             'email' => 'client2@example.com', // Email déjà utilisé
+    134▕         ]);
+    135▕ 
+  ➜ 136▕         $response->assertSessionHasErrors(['email']);
+    137▕     }
+    138▕ 
+    139▕     /** @test */
+    140▕     public function it_can_delete_a_client()
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it can delete a client                    
+  Expected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.
+
+  at tests/Feature/ClientTest.php:146
+    142▕         $client = Client::factory()->create();
+    143▕ 
+    144▕         $response = $this->delete(route('clients.destroy', $client));
+    145▕ 
+  ➜ 146▕         $response->assertRedirect(route('clients.index'));
+    147▕         $this->assertDatabaseMissing('clients', ['id' => $client->id]);
+    148▕     }
+    149▕ 
+    150▕     /** @test */
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it can toggle client status               
+  Expected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.
+
+  at tests/Feature/ClientTest.php:157
+    153▕         $client = Client::factory()->create(['actif' => true]);
+    154▕ 
+    155▕         $response = $this->patch(route('clients.toggle-status', $client));
+    156▕ 
+  ➜ 157▕         $response->assertRedirect();
+    158▕         $this->assertFalse($client->fresh()->actif);
+    159▕ 
+    160▕         // Toggle again
+    161▕         $response = $this->patch(route('clients.toggle-status', $client));
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it can search clients    QueryException   
+  SQLSTATE[HY000]: General error: 1 table clients has no column named prenom (Connection: sqlite, SQL: insert into "clients" ("nom", "email", "telephone", "adresse", "actif", "prenom", "updated_at", "created_at") values (Durand, jean.durand@example.com, (325) 973-2882, 85492 Anika Fields
+North Gradyside, NM 06150, 1, Jean, 2026-03-12 19:18:53, 2026-03-12 19:18:53))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:824
+    820▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    821▕                 );
+    822▕             }
+    823▕ 
+  ➜ 824▕             throw new QueryException(
+    825▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕             );
+    827▕         }
+    828▕     }
+
+      [2m+18 vendor frames [22m
+  19  tests/Feature/ClientTest.php:172
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it can filter active clients              
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+
+  at tests/Feature/ClientTest.php:192
+    188▕         Client::factory()->count(2)->create(['actif' => false]);
+    189▕ 
+    190▕         $response = $this->get(route('clients.index', ['actif' => 'actifs']));
+    191▕ 
+  ➜ 192▕         $response->assertStatus(200)
+    193▕             ->assertInertia(fn ($page) => $page
+    194▕                 ->component('Clients/Index')
+    195▕                 ->has('clients.data', 3)
+    196▕             );
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it can filter inactive clients            
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+
+  at tests/Feature/ClientTest.php:207
+    203▕         Client::factory()->count(2)->create(['actif' => false]);
+    204▕ 
+    205▕         $response = $this->get(route('clients.index', ['actif' => 'inactifs']));
+    206▕ 
+  ➜ 207▕         $response->assertStatus(200)
+    208▕             ->assertInertia(fn ($page) => $page
+    209▕                 ->component('Clients/Index')
+    210▕                 ->has('clients.data', 2)
+    211▕             );
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it can paginate clients                   
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+
+  at tests/Feature/ClientTest.php:221
+    217▕         Client::factory()->count(20)->create();
+    218▕ 
+    219▕         $response = $this->get(route('clients.index', ['per_page' => 10]));
+    220▕ 
+  ➜ 221▕         $response->assertStatus(200)
+    222▕             ->assertInertia(fn ($page) => $page
+    223▕                 ->component('Clients/Index')
+    224▕                 ->has('clients.data', 10)
+    225▕                 ->where('clients.total', 20)
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it returns correct cli…  QueryException   
+  SQLSTATE[HY000]: General error: 1 table clients has no column named prenom (Connection: sqlite, SQL: insert into "clients" ("nom", "email", "telephone", "adresse", "actif", "prenom", "updated_at", "created_at") values (Dupont, margarete01@example.org, 845-275-0839, 277 Gardner Branch
+Lake Keshawn, LA 21477-2529, 1, Jean, 2026-03-12 19:18:53, 2026-03-12 19:18:53))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:824
+    820▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    821▕                 );
+    822▕             }
+    823▕ 
+  ➜ 824▕             throw new QueryException(
+    825▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕             );
+    827▕         }
+    828▕     }
+
+      [2m+18 vendor frames [22m
+  19  tests/Feature/ClientTest.php:232
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it returns correct cli…  QueryException   
+  SQLSTATE[HY000]: General error: 1 table clients has no column named ville (Connection: sqlite, SQL: insert into "clients" ("nom", "email", "telephone", "adresse", "actif", "ville", "code_postal", "pays", "updated_at", "created_at") values (Eulalia Purdy, schroeder.kurt@example.org, 773-661-1548, 123 rue de la Paix, 1, Paris, 75001, France, 2026-03-12 19:18:53, 2026-03-12 19:18:53))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:824
+    820▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    821▕                 );
+    822▕             }
+    823▕ 
+  ➜ 824▕             throw new QueryException(
+    825▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕             );
+    827▕         }
+    828▕     }
+
+      [2m+18 vendor frames [22m
+  19  tests/Feature/ClientTest.php:243
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\CommandeTest > can list commandes                      
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+
+  at tests/Feature/CommandeTest.php:38
+     34▕ 
+     35▕         $response = $this->actingAs($this->user)
+     36▕             ->get(route('commandes.index'));
+     37▕ 
+  ➜  38▕         $response->assertStatus(200);
+     39▕         $response->assertInertia(fn ($page) => $page
+     40▕             ->component('Commandes/Index')
+     41▕             ->has('commandes.data', 5)
+     42▕         );
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\CommandeTest > can filter commandes by search          
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+
+  at tests/Feature/CommandeTest.php:60
+     56▕ 
+     57▕         $response = $this->actingAs($this->user)
+     58▕             ->get(route('commandes.index', ['search' => 'SEARCH-1']));
+     59▕ 
+  ➜  60▕         $response->assertStatus(200);
+     61▕         $response->assertInertia(fn ($page) => $page
+     62▕             ->component('Commandes/Index')
+     63▕             ->has('commandes.data', 1)
+     64▕             ->where('commandes.data.0.numero', 'CMD-SEARCH-1')
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\CommandeTest > can filter commandes by status          
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+
+  at tests/Feature/CommandeTest.php:83
+     79▕ 
+     80▕         $response = $this->actingAs($this->user)
+     81▕             ->get(route('commandes.index', ['statut' => 'livrée']));
+     82▕ 
+  ➜  83▕         $response->assertStatus(200);
+     84▕         $response->assertInertia(fn ($page) => $page
+     85▕             ->component('Commandes/Index')
+     86▕             ->has('commandes.data', 1)
+     87▕             ->where('commandes.data.0.statut', 'livrée')
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\CommandeTest > can search by client name               
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+
+  at tests/Feature/CommandeTest.php:105
+    101▕ 
+    102▕         $response = $this->actingAs($this->user)
+    103▕             ->get(route('commandes.index', ['search' => 'John']));
+    104▕ 
+  ➜ 105▕         $response->assertStatus(200);
+    106▕         $response->assertInertia(fn ($page) => $page
+    107▕             ->component('Commandes/Index')
+    108▕             ->has('commandes.data', 1)
+    109▕         );
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\DashboardTest > authenticated users can visit the d…   
+  Expected response status code [200] but received 500.
+Failed asserting that 500 is identical to 200.
+
+The following exception occurred during the last request:
+
+PDOException: SQLSTATE[HY000]: General error: 1 HAVING clause on a non-aggregate query in /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Database/Connection.php:406
+Stack trace:
+#0 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Database/Connection.php(406): PDO->prepare('select "produit...')
+#1 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Database/Connection.php(811): Illuminate\Database\Connection->{closure:Illuminate\Database\Connection::select():397}('select "produit...', Array)
+#2 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Database/Connection.php(778): Illuminate\Database\Connection->runQueryCallback('select "produit...', Array, Object(Closure))
+#3 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Database/Connection.php(397): Illuminate\Database\Connection->run('select "produit...', Array, Object(Closure))
+#4 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3188): Illuminate\Database\Connection->select('select "produit...', Array, true)
+#5 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3173): Illuminate\Database\Query\Builder->runSelect()
+#6 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3763): Illuminate\Database\Query\Builder->{closure:Illuminate\Database\Query\Builder::get():3172}()
+#7 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3172): Illuminate\Database\Query\Builder->onceWithColumns(Array, Object(Closure))
+#8 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php(902): Illuminate\Database\Query\Builder->get(Array)
+#9 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php(884): Illuminate\Database\Eloquent\Builder->getModels(Array)
+#10 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/app/Http/Controllers/DashboardController.php(148): Illuminate\Database\Eloquent\Builder->get()
+#11 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/app/Http/Controllers/DashboardController.php(22): App\Http\Controllers\DashboardController->getLowStockProducts()
+#12 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(46): App\Http\Controllers\DashboardController->index()
+#13 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Routing/Route.php(265): Illuminate\Routing\ControllerDispatcher->dispatch(Object(Illuminate\Routing\Route), Object(App\Http\Controllers\DashboardController), 'index')
+#14 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Routing/Route.php(211): Illuminate\Routing\Route->runController()
+#15 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Routing/Router.php(822): Illuminate\Routing\Route->run()
+#16 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(180): Illuminate\Routing\Router->{closure:Illuminate\Routing\Router::runRouteWithinStack():821}(Object(Illuminate\Http\Request))
+#17 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Auth/Middleware/EnsureEmailIsVerified.php(41): Illuminate\Pipeline\Pipeline->{closure:Illuminate\Pipeline\Pipeline::prepareDestination():178}(Object(Illuminate\Http\Request))
+#18 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Auth\Middleware\EnsureEmailIsVerified->handle(Object(Illuminate\Http\Request), Object(Closure))
+#19 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Http/Middleware/AddLinkHeadersForPreloadedAssets.php(32): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#20 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets->handle(Object(Illuminate\Http\Request), Object(Closure))
+#21 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/inertiajs/inertia-laravel/src/Middleware.php(96): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#22 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Inertia\Middleware->handle(Object(Illuminate\Http\Request), Object(Closure))
+#23 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/app/Http/Middleware/HandleAppearance.php(21): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#24 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): App\Http\Middleware\HandleAppearance->handle(Object(Illuminate\Http\Request), Object(Closure))
+#25 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#26 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Routing\Middleware\SubstituteBindings->handle(Object(Illuminate\Http\Request), Object(Closure))
+#27 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php(63): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#28 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Auth\Middleware\Authenticate->handle(Object(Illuminate\Http\Request), Object(Closure))
+#29 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php(87): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#30 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Foundation\Http\Middleware\VerifyCsrfToken->handle(Object(Illuminate\Http\Request), Object(Closure))
+#31 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/View/Middleware/ShareErrorsFromSession.php(48): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#32 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\View\Middleware\ShareErrorsFromSession->handle(Object(Illuminate\Http\Request), Object(Closure))
+#33 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(120): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#34 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(63): Illuminate\Session\Middleware\StartSession->handleStatefulRequest(Object(Illuminate\Http\Request), Object(Illuminate\Session\Store), Object(Closure))
+#35 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Session\Middleware\StartSession->handle(Object(Illuminate\Http\Request), Object(Closure))
+#36 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php(36): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#37 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse->handle(Object(Illuminate\Http\Request), Object(Closure))
+#38 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php(74): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#39 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Cookie\Middleware\EncryptCookies->handle(Object(Illuminate\Http\Request), Object(Closure))
+#40 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(137): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#41 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Routing/Router.php(821): Illuminate\Pipeline\Pipeline->then(Object(Closure))
+#42 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Routing/Router.php(800): Illuminate\Routing\Router->runRouteWithinStack(Object(Illuminate\Routing\Route), Object(Illuminate\Http\Request))
+#43 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Routing/Router.php(764): Illuminate\Routing\Router->runRoute(Object(Illuminate\Http\Request), Object(Illuminate\Routing\Route))
+#44 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Routing/Router.php(753): Illuminate\Routing\Router->dispatchToRoute(Object(Illuminate\Http\Request))
+#45 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\Routing\Router->dispatch(Object(Illuminate\Http\Request))
+#46 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(180): Illuminate\Foundation\Http\Kernel->{closure:Illuminate\Foundation\Http\Kernel::dispatchToRouter():197}(Object(Illuminate\Http\Request))
+#47 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\Pipeline\Pipeline->{closure:Illuminate\Pipeline\Pipeline::prepareDestination():178}(Object(Illuminate\Http\Request))
+#48 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\Foundation\Http\Middleware\TransformsRequest->handle(Object(Illuminate\Http\Request), Object(Closure))
+#49 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull->handle(Object(Illuminate\Http\Request), Object(Closure))
+#50 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#51 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\Foundation\Http\Middleware\TransformsRequest->handle(Object(Illuminate\Http\Request), Object(Closure))
+#52 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Foundation\Http\Middleware\TrimStrings->handle(Object(Illuminate\Http\Request), Object(Closure))
+#53 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#54 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Http\Middleware\ValidatePostSize->handle(Object(Illuminate\Http\Request), Object(Closure))
+#55 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#56 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance->handle(Object(Illuminate\Http\Request), Object(Closure))
+#57 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(48): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#58 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Http\Middleware\HandleCors->handle(Object(Illuminate\Http\Request), Object(Closure))
+#59 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#60 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Http\Middleware\TrustProxies->handle(Object(Illuminate\Http\Request), Object(Closure))
+#61 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#62 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks->handle(Object(Illuminate\Http\Request), Object(Closure))
+#63 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#64 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Http\Middleware\ValidatePathEncoding->handle(Object(Illuminate\Http\Request), Object(Closure))
+#65 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(137): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#66 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\Pipeline\Pipeline->then(Object(Closure))
+#67 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\Foundation\Http\Kernel->sendRequestThroughRouter(Object(Illuminate\Http\Request))
+#68 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Testing/Concerns/MakesHttpRequests.php(607): Illuminate\Foundation\Http\Kernel->handle(Object(Illuminate\Http\Request))
+#69 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Testing/Concerns/MakesHttpRequests.php(368): Illuminate\Foundation\Testing\TestCase->call('GET', 'http://localhos...', Array, Array, Array, Array)
+#70 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/tests/Feature/DashboardTest.php(22): Illuminate\Foundation\Testing\TestCase->get('http://localhos...')
+#71 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/phpunit/phpunit/src/Framework/TestCase.php(1657): Tests\Feature\DashboardTest->test_authenticated_users_can_visit_the_dashboard()
+#72 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/phpunit/phpunit/src/Framework/TestCase.php(515): PHPUnit\Framework\TestCase->runTest()
+#73 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/phpunit/phpunit/src/Framework/TestRunner/TestRunner.php(87): PHPUnit\Framework\TestCase->runBare()
+#74 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/phpunit/phpunit/src/Framework/TestCase.php(361): PHPUnit\Framework\TestRunner->run(Object(Tests\Feature\DashboardTest))
+#75 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/phpunit/phpunit/src/Framework/TestSuite.php(369): PHPUnit\Framework\TestCase->run()
+#76 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/phpunit/phpunit/src/Framework/TestSuite.php(369): PHPUnit\Framework\TestSuite->run()
+#77 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/phpunit/phpunit/src/Framework/TestSuite.php(369): PHPUnit\Framework\TestSuite->run()
+#78 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/phpunit/phpunit/src/TextUI/TestRunner.php(64): PHPUnit\Framework\TestSuite->run()
+#79 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/phpunit/phpunit/src/TextUI/Application.php(211): PHPUnit\TextUI\TestRunner->run(Object(PHPUnit\TextUI\Configuration\Configuration), Object(PHPUnit\Runner\ResultCache\DefaultResultCache), Object(PHPUnit\Framework\TestSuite))
+#80 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/phpunit/phpunit/phpunit(104): PHPUnit\TextUI\Application->run(Array)
+#81 {main}
+
+Next Illuminate\Database\QueryException: SQLSTATE[HY000]: General error: 1 HAVING clause on a non-aggregate query (Connection: sqlite, SQL: select "produits".*, (select sum("variantes"."quantite") from "variantes" where "produits"."id" = "variantes"."produit_id") as "variantes_sum_quantite" from "produits" having "variantes_sum_quantite" > 0 and "variantes_sum_quantite" < 10 limit 5) in /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Database/Connection.php:824
+Stack trace:
+#0 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Database/Connection.php(778): Illuminate\Database\Connection->runQueryCallback('select "produit...', Array, Object(Closure))
+#1 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Database/Connection.php(397): Illuminate\Database\Connection->run('select "produit...', Array, Object(Closure))
+#2 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3188): Illuminate\Database\Connection->select('select "produit...', Array, true)
+#3 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3173): Illuminate\Database\Query\Builder->runSelect()
+#4 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3763): Illuminate\Database\Query\Builder->{closure:Illuminate\Database\Query\Builder::get():3172}()
+#5 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3172): Illuminate\Database\Query\Builder->onceWithColumns(Array, Object(Closure))
+#6 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php(902): Illuminate\Database\Query\Builder->get(Array)
+#7 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Database/Eloquent/Builder.php(884): Illuminate\Database\Eloquent\Builder->getModels(Array)
+#8 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/app/Http/Controllers/DashboardController.php(148): Illuminate\Database\Eloquent\Builder->get()
+#9 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/app/Http/Controllers/DashboardController.php(22): App\Http\Controllers\DashboardController->getLowStockProducts()
+#10 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(46): App\Http\Controllers\DashboardController->index()
+#11 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Routing/Route.php(265): Illuminate\Routing\ControllerDispatcher->dispatch(Object(Illuminate\Routing\Route), Object(App\Http\Controllers\DashboardController), 'index')
+#12 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Routing/Route.php(211): Illuminate\Routing\Route->runController()
+#13 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Routing/Router.php(822): Illuminate\Routing\Route->run()
+#14 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(180): Illuminate\Routing\Router->{closure:Illuminate\Routing\Router::runRouteWithinStack():821}(Object(Illuminate\Http\Request))
+#15 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Auth/Middleware/EnsureEmailIsVerified.php(41): Illuminate\Pipeline\Pipeline->{closure:Illuminate\Pipeline\Pipeline::prepareDestination():178}(Object(Illuminate\Http\Request))
+#16 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Auth\Middleware\EnsureEmailIsVerified->handle(Object(Illuminate\Http\Request), Object(Closure))
+#17 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Http/Middleware/AddLinkHeadersForPreloadedAssets.php(32): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#18 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets->handle(Object(Illuminate\Http\Request), Object(Closure))
+#19 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/inertiajs/inertia-laravel/src/Middleware.php(96): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#20 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Inertia\Middleware->handle(Object(Illuminate\Http\Request), Object(Closure))
+#21 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/app/Http/Middleware/HandleAppearance.php(21): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#22 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): App\Http\Middleware\HandleAppearance->handle(Object(Illuminate\Http\Request), Object(Closure))
+#23 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#24 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Routing\Middleware\SubstituteBindings->handle(Object(Illuminate\Http\Request), Object(Closure))
+#25 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php(63): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#26 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Auth\Middleware\Authenticate->handle(Object(Illuminate\Http\Request), Object(Closure))
+#27 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php(87): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#28 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Foundation\Http\Middleware\VerifyCsrfToken->handle(Object(Illuminate\Http\Request), Object(Closure))
+#29 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/View/Middleware/ShareErrorsFromSession.php(48): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#30 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\View\Middleware\ShareErrorsFromSession->handle(Object(Illuminate\Http\Request), Object(Closure))
+#31 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(120): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#32 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php(63): Illuminate\Session\Middleware\StartSession->handleStatefulRequest(Object(Illuminate\Http\Request), Object(Illuminate\Session\Store), Object(Closure))
+#33 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Session\Middleware\StartSession->handle(Object(Illuminate\Http\Request), Object(Closure))
+#34 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php(36): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#35 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse->handle(Object(Illuminate\Http\Request), Object(Closure))
+#36 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php(74): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#37 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Cookie\Middleware\EncryptCookies->handle(Object(Illuminate\Http\Request), Object(Closure))
+#38 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(137): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#39 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Routing/Router.php(821): Illuminate\Pipeline\Pipeline->then(Object(Closure))
+#40 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Routing/Router.php(800): Illuminate\Routing\Router->runRouteWithinStack(Object(Illuminate\Routing\Route), Object(Illuminate\Http\Request))
+#41 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Routing/Router.php(764): Illuminate\Routing\Router->runRoute(Object(Illuminate\Http\Request), Object(Illuminate\Routing\Route))
+#42 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Routing/Router.php(753): Illuminate\Routing\Router->dispatchToRoute(Object(Illuminate\Http\Request))
+#43 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\Routing\Router->dispatch(Object(Illuminate\Http\Request))
+#44 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(180): Illuminate\Foundation\Http\Kernel->{closure:Illuminate\Foundation\Http\Kernel::dispatchToRouter():197}(Object(Illuminate\Http\Request))
+#45 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\Pipeline\Pipeline->{closure:Illuminate\Pipeline\Pipeline::prepareDestination():178}(Object(Illuminate\Http\Request))
+#46 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\Foundation\Http\Middleware\TransformsRequest->handle(Object(Illuminate\Http\Request), Object(Closure))
+#47 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull->handle(Object(Illuminate\Http\Request), Object(Closure))
+#48 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#49 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\Foundation\Http\Middleware\TransformsRequest->handle(Object(Illuminate\Http\Request), Object(Closure))
+#50 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Foundation\Http\Middleware\TrimStrings->handle(Object(Illuminate\Http\Request), Object(Closure))
+#51 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#52 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Http\Middleware\ValidatePostSize->handle(Object(Illuminate\Http\Request), Object(Closure))
+#53 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(109): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#54 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance->handle(Object(Illuminate\Http\Request), Object(Closure))
+#55 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(48): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#56 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Http\Middleware\HandleCors->handle(Object(Illuminate\Http\Request), Object(Closure))
+#57 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#58 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Http\Middleware\TrustProxies->handle(Object(Illuminate\Http\Request), Object(Closure))
+#59 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#60 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks->handle(Object(Illuminate\Http\Request), Object(Closure))
+#61 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePathEncoding.php(26): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#62 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Illuminate\Http\Middleware\ValidatePathEncoding->handle(Object(Illuminate\Http\Request), Object(Closure))
+#63 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(137): Illuminate\Pipeline\Pipeline->{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#64 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\Pipeline\Pipeline->then(Object(Closure))
+#65 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\Foundation\Http\Kernel->sendRequestThroughRouter(Object(Illuminate\Http\Request))
+#66 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Testing/Concerns/MakesHttpRequests.php(607): Illuminate\Foundation\Http\Kernel->handle(Object(Illuminate\Http\Request))
+#67 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/laravel/framework/src/Illuminate/Foundation/Testing/Concerns/MakesHttpRequests.php(368): Illuminate\Foundation\Testing\TestCase->call('GET', 'http://localhos...', Array, Array, Array, Array)
+#68 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/tests/Feature/DashboardTest.php(22): Illuminate\Foundation\Testing\TestCase->get('http://localhos...')
+#69 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/phpunit/phpunit/src/Framework/TestCase.php(1657): Tests\Feature\DashboardTest->test_authenticated_users_can_visit_the_dashboard()
+#70 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/phpunit/phpunit/src/Framework/TestCase.php(515): PHPUnit\Framework\TestCase->runTest()
+#71 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/phpunit/phpunit/src/Framework/TestRunner/TestRunner.php(87): PHPUnit\Framework\TestCase->runBare()
+#72 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/phpunit/phpunit/src/Framework/TestCase.php(361): PHPUnit\Framework\TestRunner->run(Object(Tests\Feature\DashboardTest))
+#73 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/phpunit/phpunit/src/Framework/TestSuite.php(369): PHPUnit\Framework\TestCase->run()
+#74 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/phpunit/phpunit/src/Framework/TestSuite.php(369): PHPUnit\Framework\TestSuite->run()
+#75 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/phpunit/phpunit/src/Framework/TestSuite.php(369): PHPUnit\Framework\TestSuite->run()
+#76 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/phpunit/phpunit/src/TextUI/TestRunner.php(64): PHPUnit\Framework\TestSuite->run()
+#77 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/phpunit/phpunit/src/TextUI/Application.php(211): PHPUnit\TextUI\TestRunner->run(Object(PHPUnit\TextUI\Configuration\Configuration), Object(PHPUnit\Runner\ResultCache\DefaultResultCache), Object(PHPUnit\Framework\TestSuite))
+#78 /Users/cbc/Desktop/gest-anaizan/gest-anaizan/vendor/phpunit/phpunit/phpunit(104): PHPUnit\TextUI\Application->run(Array)
+#79 {main}
+
+----------------------------------------------------------------------------------
+
+SQLSTATE[HY000]: General error: 1 HAVING clause on a non-aggregate query (Connection: sqlite, SQL: select "produits".*, (select sum("variantes"."quantite") from "variantes" where "produits"."id" = "variantes"."produit_id") as "variantes_sum_quantite" from "produits" having "variantes_sum_quantite" > 0 and "variantes_sum_quantite" < 10 limit 5)
+
+  at tests/Feature/DashboardTest.php:22
+     18▕     public function test_authenticated_users_can_visit_the_dashboard()
+     19▕     {
+     20▕         $this->actingAs($user = User::factory()->create());
+     21▕ 
+  ➜  22▕         $this->get(route('dashboard'))->assertOk();
+     23▕     }
+     24▕ }
+     25▕
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\MouvementStockTest > can view mouvements index         
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+
+  at tests/Feature/MouvementStockTest.php:47
+     43▕     {
+     44▕         $response = $this->actingAs($this->admin)
+     45▕             ->get(route('mouvements-stock.index'));
+     46▕ 
+  ➜  47▕         $response->assertStatus(200);
+     48▕     }
+     49▕ 
+     50▕     public function test_can_view_mouvements_create()
+     51▕     {
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\MouvementStockTest > can view mouvements create        
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+
+  at tests/Feature/MouvementStockTest.php:55
+     51▕     {
+     52▕         $response = $this->actingAs($this->admin)
+     53▕             ->get(route('mouvements-stock.create'));
+     54▕ 
+  ➜  55▕         $response->assertStatus(200);
+     56▕     }
+     57▕ 
+     58▕     public function test_can_store_entree_mouvement_and_increase_stock()
+     59▕     {
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\MouvementStockTest > can store entree mouvement and…   
+  Expected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.
+
+  at tests/Feature/MouvementStockTest.php:71
+     67▕                 'type' => 'entrée',
+     68▕                 'commentaire' => 'Test entrée',
+     69▕             ]);
+     70▕ 
+  ➜  71▕         $response->assertRedirect(route('mouvements-stock.index'));
+     72▕         $response->assertSessionHas('success');
+     73▕ 
+     74▕         $this->assertDatabaseHas('mouvement_stocks', [
+     75▕             'variante_id' => $this->variante->id,
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\MouvementStockTest > can store sortie mouvement and…   
+  Expected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.
+
+  at tests/Feature/MouvementStockTest.php:95
+     91▕                 'quantite' => 3,
+     92▕                 'type' => 'sortie',
+     93▕             ]);
+     94▕ 
+  ➜  95▕         $response->assertRedirect(route('mouvements-stock.index'));
+     96▕         
+     97▕         $this->assertEquals($initialStock - 3, $this->variante->fresh()->quantite);
+     98▕     }
+     99▕
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\MouvementStockTest > cannot store sortie with insuf…   
+  Session is missing expected key [error].
+Failed asserting that false is true.
+
+  at tests/Feature/MouvementStockTest.php:112
+    108▕                 'quantite' => 15, // Plus que le stock dispo
+    109▕                 'type' => 'sortie',
+    110▕             ]);
+    111▕ 
+  ➜ 112▕         $response->assertSessionHas('error');
+    113▕         
+    114▕         // Use fresh() to get the actual column value from db.
+    115▕         $this->assertEquals($initialStock, $this->variante->fresh()->quantite);
+    116▕     }
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\POSControllerTest > pos page loads                     
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+
+  at tests/Feature/POSControllerTest.php:30
+     26▕     public function test_pos_page_loads()
+     27▕     {
+     28▕         $response = $this->actingAs($this->user)->get('/pos');
+     29▕ 
+  ➜  30▕         $response->assertStatus(200);
+     31▕     }
+     32▕ 
+     33▕     public function test_can_create_sale()
+     34▕     {
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\POSControllerTest > can create sale                    
+  Expected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.
+
+  at tests/Feature/POSControllerTest.php:60
+     56▕         ];
+     57▕ 
+     58▕         $response = $this->actingAs($this->user)->post('/pos/store', $saleData);
+     59▕ 
+  ➜  60▕         $response->assertRedirect();
+     61▕         $response->assertSessionHas('success');
+     62▕ 
+     63▕         // Vérifier que la vente a été créée
+     64▕         $this->assertDatabaseHas('ventes', [
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\POSControllerTest > data is received by controller     
+  Session is missing expected key [errors].
+Failed asserting that false is true.
+
+  at tests/Feature/POSControllerTest.php:102
+     98▕ 
+     99▕         $response = $this->actingAs($this->user)->post('/pos/store', $saleData);
+    100▕ 
+    101▕         // Si les données arrivent, on devrait avoir une erreur de validation sur l'ID du produit
+  ➜ 102▕         $response->assertSessionHasErrors('panier.0.id');
+    103▕     }
+    104▕ }
+    105▕
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\RapportTest > can view rapports index                  
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+
+  at tests/Feature/RapportTest.php:57
+     53▕     public function test_can_view_rapports_index()
+     54▕     {
+     55▕         $response = $this->actingAs($this->admin)->get(route('rapports.index'));
+     56▕ 
+  ➜  57▕         $response->assertStatus(200);
+     58▕         $response->assertInertia(fn ($page) => $page
+     59▕             ->component('rapports/index')
+     60▕             ->has('kpis.ventes')
+     61▕             ->has('kpis.stock_valeur')
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\RapportTest > it calculates kpi correctly for curre…   
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+
+  at tests/Feature/RapportTest.php:98
+     94▕         ]);
+     95▕ 
+     96▕         $response = $this->actingAs($this->admin)->get(route('rapports.index', ['period' => 'month']));
+     97▕ 
+  ➜  98▕         $response->assertStatus(200);
+     99▕         $response->assertInertia(fn ($page) => $page
+    100▕             ->where('kpis.ventes.total_ca', 30000)
+    101▕             ->where('kpis.ventes.nombre_ventes', 1) // sans l'annulée
+    102▕             ->has('alertes_stock', 1)
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\RapportTest > it filters by custom dates correctly     
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+
+  at tests/Feature/RapportTest.php:135
+    131▕             'start_date' => $start,
+    132▕             'end_date' => $end
+    133▕         ]));
+    134▕ 
+  ➜ 135▕         $response->assertStatus(200);
+    136▕         
+    137▕         // This validates if the aggregate sums match the exact date filtered boundary
+    138▕         $response->assertInertia(fn ($page) => $page
+    139▕             ->where('kpis.ventes.total_ca', 10000)
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\VenteTest > user can view ventes in…  QueryException   
+  SQLSTATE[HY000]: General error: 1 table produits has no column named quantite (Connection: sqlite, SQL: insert into "produits" ("nom", "categorie_id", "description", "image", "quantite", "updated_at", "created_at") values (aperiam perferendis, 1, Veniam aut unde dolor harum asperiores ut., ?, 10, 2026-03-12 19:18:56, 2026-03-12 19:18:56))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:824
+    820▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    821▕                 );
+    822▕             }
+    823▕ 
+  ➜ 824▕             throw new QueryException(
+    825▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕             );
+    827▕         }
+    828▕     }
+
+      [2m+18 vendor frames [22m
+  19  tests/Feature/VenteTest.php:31
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\VenteTest > user can create vente     QueryException   
+  SQLSTATE[HY000]: General error: 1 table produits has no column named quantite (Connection: sqlite, SQL: insert into "produits" ("nom", "categorie_id", "description", "image", "quantite", "updated_at", "created_at") values (laudantium praesentium, 1, ?, ?, 10, 2026-03-12 19:18:56, 2026-03-12 19:18:56))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:824
+    820▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    821▕                 );
+    822▕             }
+    823▕ 
+  ➜ 824▕             throw new QueryException(
+    825▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕             );
+    827▕         }
+    828▕     }
+
+      [2m+18 vendor frames [22m
+  19  tests/Feature/VenteTest.php:63
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\VenteTest > user can view vente det…  QueryException   
+  SQLSTATE[HY000]: General error: 1 table produits has no column named quantite (Connection: sqlite, SQL: insert into "produits" ("nom", "categorie_id", "description", "image", "quantite", "updated_at", "created_at") values (eum voluptatem, 1, Nemo et maxime velit saepe et aut quia architecto., ?, 10, 2026-03-12 19:18:56, 2026-03-12 19:18:56))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:824
+    820▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    821▕                 );
+    822▕             }
+    823▕ 
+  ➜ 824▕             throw new QueryException(
+    825▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕             );
+    827▕         }
+    828▕     }
+
+      [2m+18 vendor frames [22m
+  19  tests/Feature/VenteTest.php:99
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\VenteTest > user can update vente     QueryException   
+  SQLSTATE[HY000]: General error: 1 table produits has no column named quantite (Connection: sqlite, SQL: insert into "produits" ("nom", "categorie_id", "description", "image", "quantite", "updated_at", "created_at") values (quasi est, 1, ?, ?, 10, 2026-03-12 19:18:56, 2026-03-12 19:18:56))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:824
+    820▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    821▕                 );
+    822▕             }
+    823▕ 
+  ➜ 824▕             throw new QueryException(
+    825▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕             );
+    827▕         }
+    828▕     }
+
+      [2m+18 vendor frames [22m
+  19  tests/Feature/VenteTest.php:129
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\VenteTest > user can delete vente     QueryException   
+  SQLSTATE[HY000]: General error: 1 table produits has no column named quantite (Connection: sqlite, SQL: insert into "produits" ("nom", "categorie_id", "description", "image", "quantite", "updated_at", "created_at") values (at sed, 1, Inventore occaecati architecto exercitationem perferendis distinctio., ?, 10, 2026-03-12 19:18:56, 2026-03-12 19:18:56))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:824
+    820▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    821▕                 );
+    822▕             }
+    823▕ 
+  ➜ 824▕             throw new QueryException(
+    825▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕             );
+    827▕         }
+    828▕     }
+
+      [2m+18 vendor frames [22m
+  19  tests/Feature/VenteTest.php:179
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\VenteTest > cannot create vente wit…  QueryException   
+  SQLSTATE[HY000]: General error: 1 table produits has no column named quantite (Connection: sqlite, SQL: insert into "produits" ("nom", "categorie_id", "description", "image", "quantite", "updated_at", "created_at") values (amet distinctio, 1, ?, ?, 1, 2026-03-12 19:18:56, 2026-03-12 19:18:56))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:824
+    820▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    821▕                 );
+    822▕             }
+    823▕ 
+  ➜ 824▕             throw new QueryException(
+    825▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕             );
+    827▕         }
+    828▕     }
+
+      [2m+18 vendor frames [22m
+  19  tests/Feature/VenteTest.php:213
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\WhatsAppControllerTest > it can gen…  QueryException   
+  SQLSTATE[HY000]: General error: 1 table produits has no column named prix_vente (Connection: sqlite, SQL: insert into "produits" ("nom", "categorie_id", "description", "image", "prix_vente", "quantite", "updated_at", "created_at") values (T-Shirt, 1, ?, ?, 150, 10, 2026-03-12 19:18:56, 2026-03-12 19:18:56))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:824
+    820▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    821▕                 );
+    822▕             }
+    823▕ 
+  ➜ 824▕             throw new QueryException(
+    825▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕             );
+    827▕         }
+    828▕     }
+
+      [2m+18 vendor frames [22m
+  19  tests/Feature/WhatsAppControllerTest.php:33
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\WhatsAppControllerTest > it formats phon…  TypeError   
+  PHPUnit\Framework\Assert::assertStringContainsString(): Argument #2 ($haystack) must be of type string, null given, called in /Users/cbc/Desktop/gest-anaizan/gest-anaizan/tests/Feature/WhatsAppControllerTest.php on line 81
+
+  at tests/Feature/WhatsAppControllerTest.php:81
+     77▕             'categorie_id' => $categorie->id,
+     78▕             'telephone' => '0612345678',
+     79▕         ]);
+     80▕ 
+  ➜  81▕         $this->assertStringContainsString('212612345678', $response->json('whatsapp_link'));
+     82▕ 
+     83▕         // Test with international format
+     84▕         $response = $this->postJson(route('whatsapp.send-catalog'), [
+     85▕             'categorie_id' => $categorie->id,
+
+  1   tests/Feature/WhatsAppControllerTest.php:81
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\WhatsAppControllerTest > it can use client phone nu…   
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+
+  at tests/Feature/WhatsAppControllerTest.php:106
+    102▕             'categorie_id' => $categorie->id,
+    103▕             'client_id' => $client->id,
+    104▕         ]);
+    105▕ 
+  ➜ 106▕         $response->assertOk();
+    107▕         $this->assertStringContainsString('212698765432', $response->json('whatsapp_link'));
+    108▕     }
+    109▕ 
+    110▕     /** @test */
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\WhatsAppControllerTest > it validates required fiel…   
+  Expected response status code [422] but received 403.
+Failed asserting that 403 is identical to 422.
+
+  at tests/Feature/WhatsAppControllerTest.php:117
+    113▕         $this->actingAs($this->user);
+    114▕ 
+    115▕         $response = $this->postJson(route('whatsapp.send-catalog'), []);
+    116▕ 
+  ➜ 117▕         $response->assertStatus(422)
+    118▕             ->assertJsonValidationErrors(['categorie_id']);
+    119▕     }
+    120▕ 
+    121▕     /** @test */
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\WhatsAppControllerTest > it requires phone or clien…   
+  Expected response status code [422] but received 403.
+Failed asserting that 403 is identical to 422.
+
+  at tests/Feature/WhatsAppControllerTest.php:132
+    128▕         $response = $this->postJson(route('whatsapp.send-catalog'), [
+    129▕             'categorie_id' => $categorie->id,
+    130▕         ]);
+    131▕ 
+  ➜ 132▕         $response->assertStatus(422);
+    133▕     }
+    134▕ 
+    135▕     /** @test */
+    136▕     public function it_can_get_categories_with_products()
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\WhatsAppControllerTest > it can get categories with…   
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+
+  at tests/Feature/WhatsAppControllerTest.php:149
+    145▕         Produit::factory()->count(2)->create(['categorie_id' => $categorie2->id]);
+    146▕ 
+    147▕         $response = $this->getJson(route('whatsapp.categories'));
+    148▕ 
+  ➜ 149▕         $response->assertOk();
+    150▕         $data = $response->json();
+    151▕ 
+    152▕         $this->assertCount(2, $data); // Only categories with products
+    153▕         $this->assertEquals(3, $data[0]['produits_count']);
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\WhatsAppControllerTest > it can get category produc…   
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+
+  at tests/Feature/WhatsAppControllerTest.php:169
+    165▕         $response = $this->getJson(route('whatsapp.category-products', [
+    166▕             'categorie_id' => $categorie->id,
+    167▕         ]));
+    168▕ 
+  ➜ 169▕         $response->assertOk();
+    170▕         $data = $response->json();
+    171▕ 
+    172▕         $this->assertCount(2, $data);
+    173▕         $this->assertArrayHasKey('imageUrl', $data[0]);
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\WhatsAppControllerTest > it generat…  QueryException   
+  SQLSTATE[HY000]: General error: 1 table produits has no column named prix_vente (Connection: sqlite, SQL: insert into "produits" ("nom", "categorie_id", "description", "image", "prix_vente", "quantite", "updated_at", "created_at") values (Smartphone, 1, Dernier modèle, ?, 2500, 5, 2026-03-12 19:18:56, 2026-03-12 19:18:56))
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:824
+    820▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    821▕                 );
+    822▕             }
+    823▕ 
+  ➜ 824▕             throw new QueryException(
+    825▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕             );
+    827▕         }
+    828▕     }
+
+      [2m+18 vendor frames [22m
+  19  tests/Feature/WhatsAppControllerTest.php:185
+
+
+  Tests:    47 failed, 56 passed (248 assertions)
+  Duration: 5.06s
+

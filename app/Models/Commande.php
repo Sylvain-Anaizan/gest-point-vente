@@ -39,8 +39,39 @@ class Commande extends Model
         return $this->belongsTo(Boutique::class);
     }
 
-    public function lignesCommande (): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function lignesCommande(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(LigneCommande::class);
+    }
+
+    public function paiements(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Paiement::class);
+    }
+
+    public function getMontantPayeAttribute(): float
+    {
+        return (float) $this->paiements()->sum('montant');
+    }
+
+    public function getResteAPayerAttribute(): float
+    {
+        return (float) $this->montant_total - $this->montant_paye;
+    }
+
+    public function updateStatutPaiement(): void
+    {
+        $paye = $this->montant_paye;
+        $total = (float) $this->montant_total;
+
+        if ($paye <= 0) {
+            $this->statut = 'Nouvelle'; // Or 'En attente'
+        } elseif ($paye < $total) {
+            $this->statut = 'Partiellement payée';
+        } else {
+            $this->statut = 'Payée';
+        }
+
+        $this->save();
     }
 }

@@ -10,6 +10,8 @@ class ClientTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected \App\Models\User $user;
+
     protected function setUp(): void
     {
         parent::setUp();

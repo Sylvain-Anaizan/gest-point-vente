@@ -215,7 +215,7 @@ class VenteController extends Controller
         if ($user->role === 'employé' && $vente->boutique_id !== $user->boutique_id) {
             abort(403);
         }
-        $vente->load(['client', 'user', 'lignes.produit', 'boutique', 'commande.lignesCommande']);
+        $vente->load(['client', 'user', 'lignes.produit', 'boutique', 'commande.lignesCommande', 'paiements.user']);
 
         return Inertia::render('ventes/show', [
             'vente' => $vente,

@@ -1,0 +1,333 @@
+  ✓ password cannot be reset with invalid token                          0.23s  
+
+   FAIL  Tests\Feature\Auth\RegistrationTest
+  ⨯ registration screen can be rendered                                  0.03s  
+  ⨯ new users can register                                               0.02s  
+--
+  ✓ does not send verification notification if email is verified         0.02s  
+
+   FAIL  Tests\Feature\ClientTest
+  ⨯ it can display clients index page                                    0.04s  
+  ⨯ it can create a client                                               0.02s  
+--
+  ✓ it can scope search clients                                          0.02s  
+
+   FAIL  Tests\Feature\CommandeTest
+  ⨯ can list commandes                                                   0.05s  
+  ⨯ can filter commandes by search                                       0.03s  
+--
+  ✓ can download order receipt                                           0.11s  
+
+   FAIL  Tests\Feature\DashboardTest
+  ✓ guests are redirected to the login page                              0.02s  
+  ⨯ authenticated users can visit the dashboard                          0.66s  
+
+   FAIL  Tests\Feature\MouvementStockTest
+  ⨯ can view mouvements index                                            0.03s  
+  ⨯ can view mouvements create                                           0.03s  
+--
+  ⨯ cannot store sortie with insufficient stock                          0.03s  
+
+   FAIL  Tests\Feature\POSControllerTest
+  ⨯ pos page loads                                                       0.03s  
+  ⨯ can create sale                                                      0.03s  
+--
+  ✓ cannot delete paiement from other boutique                           0.03s  
+
+   FAIL  Tests\Feature\RapportTest
+  ⨯ can view rapports index                                              0.04s  
+  ⨯ it calculates kpi correctly for current month                        0.03s  
+--
+  ✓ par boutique endpoint returns filtered clients                       0.05s  
+
+   FAIL  Tests\Feature\VenteTest
+  ⨯ user can view ventes index                                           0.02s  
+  ⨯ user can create vente                                                0.02s  
+--
+  ⨯ cannot create vente with insufficient stock                          0.02s  
+
+   FAIL  Tests\Feature\WhatsAppControllerTest
+  ⨯ it can generate whatsapp catalog link                                0.03s  
+  ⨯ it formats phone number correctly                                    0.03s  
+--
+  ⨯ it generates correct message format                                  0.02s  
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Auth\RegistrationTest > reg…  RouteNotFoundException   
+  Route [register] not defined.
+
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\Auth\RegistrationTest > new…  RouteNotFoundException   
+  Route [register.store] not defined.
+
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it can display clients index page         
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it can create a client                    
+  Expected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it validates required fields when crea…   
+  Session is missing expected key [errors].
+Failed asserting that false is true.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it validates email uniqueness when cre…   
+  Session is missing expected key [errors].
+Failed asserting that false is true.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it can show a client                      
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it can update a client                    
+  Expected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it validates email uniqueness when upd…   
+  Session is missing expected key [errors].
+Failed asserting that false is true.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it can delete a client                    
+  Expected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it can toggle client status               
+  Expected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it can search clients    QueryException   
+  SQLSTATE[HY000]: General error: 1 table clients has no column named prenom (Connection: sqlite, SQL: insert into "clients" ("nom", "email", "telephone", "adresse", "actif", "prenom", "updated_at", "created_at") values (Durand, jean.durand@example.com, (325) 973-2882, 85492 Anika Fields
+North Gradyside, NM 06150, 1, Jean, 2026-03-12 19:18:53, 2026-03-12 19:18:53))
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it can filter active clients              
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it can filter inactive clients            
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it can paginate clients                   
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it returns correct cli…  QueryException   
+  SQLSTATE[HY000]: General error: 1 table clients has no column named prenom (Connection: sqlite, SQL: insert into "clients" ("nom", "email", "telephone", "adresse", "actif", "prenom", "updated_at", "created_at") values (Dupont, margarete01@example.org, 845-275-0839, 277 Gardner Branch
+Lake Keshawn, LA 21477-2529, 1, Jean, 2026-03-12 19:18:53, 2026-03-12 19:18:53))
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ClientTest > it returns correct cli…  QueryException   
+  SQLSTATE[HY000]: General error: 1 table clients has no column named ville (Connection: sqlite, SQL: insert into "clients" ("nom", "email", "telephone", "adresse", "actif", "ville", "code_postal", "pays", "updated_at", "created_at") values (Eulalia Purdy, schroeder.kurt@example.org, 773-661-1548, 123 rue de la Paix, 1, Paris, 75001, France, 2026-03-12 19:18:53, 2026-03-12 19:18:53))
+
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\CommandeTest > can list commandes                      
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\CommandeTest > can filter commandes by search          
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\CommandeTest > can filter commandes by status          
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\CommandeTest > can search by client name               
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\DashboardTest > authenticated users can visit the d…   
+  Expected response status code [200] but received 500.
+Failed asserting that 500 is identical to 200.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\MouvementStockTest > can view mouvements index         
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\MouvementStockTest > can view mouvements create        
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\MouvementStockTest > can store entree mouvement and…   
+  Expected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\MouvementStockTest > can store sortie mouvement and…   
+  Expected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\MouvementStockTest > cannot store sortie with insuf…   
+  Session is missing expected key [error].
+Failed asserting that false is true.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\POSControllerTest > pos page loads                     
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\POSControllerTest > can create sale                    
+  Expected response status code [201, 301, 302, 303, 307, 308] but received 403.
+Failed asserting that false is true.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\POSControllerTest > data is received by controller     
+  Session is missing expected key [errors].
+Failed asserting that false is true.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\RapportTest > can view rapports index                  
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\RapportTest > it calculates kpi correctly for curre…   
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\RapportTest > it filters by custom dates correctly     
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\VenteTest > user can view ventes in…  QueryException   
+  SQLSTATE[HY000]: General error: 1 table produits has no column named quantite (Connection: sqlite, SQL: insert into "produits" ("nom", "categorie_id", "description", "image", "quantite", "updated_at", "created_at") values (aperiam perferendis, 1, Veniam aut unde dolor harum asperiores ut., ?, 10, 2026-03-12 19:18:56, 2026-03-12 19:18:56))
+
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\VenteTest > user can create vente     QueryException   
+  SQLSTATE[HY000]: General error: 1 table produits has no column named quantite (Connection: sqlite, SQL: insert into "produits" ("nom", "categorie_id", "description", "image", "quantite", "updated_at", "created_at") values (laudantium praesentium, 1, ?, ?, 10, 2026-03-12 19:18:56, 2026-03-12 19:18:56))
+
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\VenteTest > user can view vente det…  QueryException   
+  SQLSTATE[HY000]: General error: 1 table produits has no column named quantite (Connection: sqlite, SQL: insert into "produits" ("nom", "categorie_id", "description", "image", "quantite", "updated_at", "created_at") values (eum voluptatem, 1, Nemo et maxime velit saepe et aut quia architecto., ?, 10, 2026-03-12 19:18:56, 2026-03-12 19:18:56))
+
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\VenteTest > user can update vente     QueryException   
+  SQLSTATE[HY000]: General error: 1 table produits has no column named quantite (Connection: sqlite, SQL: insert into "produits" ("nom", "categorie_id", "description", "image", "quantite", "updated_at", "created_at") values (quasi est, 1, ?, ?, 10, 2026-03-12 19:18:56, 2026-03-12 19:18:56))
+
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\VenteTest > user can delete vente     QueryException   
+  SQLSTATE[HY000]: General error: 1 table produits has no column named quantite (Connection: sqlite, SQL: insert into "produits" ("nom", "categorie_id", "description", "image", "quantite", "updated_at", "created_at") values (at sed, 1, Inventore occaecati architecto exercitationem perferendis distinctio., ?, 10, 2026-03-12 19:18:56, 2026-03-12 19:18:56))
+
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\VenteTest > cannot create vente wit…  QueryException   
+  SQLSTATE[HY000]: General error: 1 table produits has no column named quantite (Connection: sqlite, SQL: insert into "produits" ("nom", "categorie_id", "description", "image", "quantite", "updated_at", "created_at") values (amet distinctio, 1, ?, ?, 1, 2026-03-12 19:18:56, 2026-03-12 19:18:56))
+
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\WhatsAppControllerTest > it can gen…  QueryException   
+  SQLSTATE[HY000]: General error: 1 table produits has no column named prix_vente (Connection: sqlite, SQL: insert into "produits" ("nom", "categorie_id", "description", "image", "prix_vente", "quantite", "updated_at", "created_at") values (T-Shirt, 1, ?, ?, 150, 10, 2026-03-12 19:18:56, 2026-03-12 19:18:56))
+
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\WhatsAppControllerTest > it formats phon…  TypeError   
+  PHPUnit\Framework\Assert::assertStringContainsString(): Argument #2 ($haystack) must be of type string, null given, called in /Users/cbc/Desktop/gest-anaizan/gest-anaizan/tests/Feature/WhatsAppControllerTest.php on line 81
+
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\WhatsAppControllerTest > it can use client phone nu…   
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\WhatsAppControllerTest > it validates required fiel…   
+  Expected response status code [422] but received 403.
+Failed asserting that 403 is identical to 422.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\WhatsAppControllerTest > it requires phone or clien…   
+  Expected response status code [422] but received 403.
+Failed asserting that 403 is identical to 422.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\WhatsAppControllerTest > it can get categories with…   
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\WhatsAppControllerTest > it can get category produc…   
+  Expected response status code [200] but received 403.
+Failed asserting that 403 is identical to 200.
+--
+
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\WhatsAppControllerTest > it generat…  QueryException   
+  SQLSTATE[HY000]: General error: 1 table produits has no column named prix_vente (Connection: sqlite, SQL: insert into "produits" ("nom", "categorie_id", "description", "image", "prix_vente", "quantite", "updated_at", "created_at") values (Smartphone, 1, Dernier modèle, ?, 2500, 5, 2026-03-12 19:18:56, 2026-03-12 19:18:56))
+
