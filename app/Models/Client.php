@@ -22,12 +22,30 @@ class Client extends Model
         'actif' => 'boolean',
     ];
 
+    protected $appends = ['nom_complet', 'adresse_complete'];
+
     /**
      * Scope to filter active clients.
      */
     public function scopeActifs($query)
     {
         return $query->where('actif', true);
+    }
+
+    /**
+     * Accesseur : nom complet (on garde le champ 'nom' seul pour l'instant).
+     */
+    public function getNomCompletAttribute(): string
+    {
+        return $this->nom;
+    }
+
+    /**
+     * Accesseur : adresse complète (champ 'adresse').
+     */
+    public function getAdresseCompleteAttribute(): ?string
+    {
+        return $this->adresse;
     }
 
     /**
@@ -40,6 +58,11 @@ class Client extends Model
                 ->orWhere('email', 'like', "%{$search}%")
                 ->orWhere('telephone', 'like', "%{$search}%");
         });
+    }
+
+    public function boutique()
+    {
+        return $this->belongsTo(Boutique::class);
     }
 
     public function ventes()

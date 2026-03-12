@@ -11,10 +11,14 @@ import {
     SmartphoneIcon,
     CalculatorIcon,
     StoreIcon,
+    UserPlus,
+    X,
+    Loader2,
 } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -80,6 +84,7 @@ interface Client {
     nom: string;
     email: string | null;
     telephone: string;
+    boutique_id: number | null;
 }
 
 interface PanierItem {
@@ -92,6 +97,141 @@ interface PanierItem {
     stockDisponible: number;
 }
 interface Boutique { id: number; nom: string; }
+
+// ─────────────────────────────────────────────
+// Modal : Création rapide de client (POS)
+// ─────────────────────────────────────────────
+interface QuickClientModalProps {
+    boutiqueId: string;
+    onClose: () => void;
+    onCreated: (client: Client) => void;
+}
+
+function QuickClientModal({ boutiqueId, onClose, onCreated }: QuickClientModalProps) {
+    const [nom, setNom] = useState('');
+    const [telephone, setTelephone] = useState('');
+    const [email, setEmail] = useState('');
+    const [adresse, setAdresse] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setErrors({});
+        if (!nom.trim()) { setErrors({ nom: 'Le nom est requis' }); return; }
+        setLoading(true);
+
+        try {
+            const xsrfToken = decodeURIComponent(
+                document.cookie.split('; ').find(c => c.startsWith('XSRF-TOKEN='))?.split('=')[1] ?? ''
+            );
+            const body: Record<string, string> = { nom: nom.trim() };
+            if (telephone) body.telephone = telephone.trim();
+            if (email) body.email = email.trim();
+            if (adresse) body.adresse = adresse.trim();
+            if (boutiqueId && boutiqueId !== 'all') body.boutique_id = boutiqueId;
+
+            const response = await fetch('/clients/creation-rapide', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-XSRF-TOKEN': xsrfToken,
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify(body),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                if (data.errors) {
+                    const mapped: Record<string, string> = {};
+                    Object.entries(data.errors as Record<string, string[]>).forEach(([k, v]) => { mapped[k] = v[0]; });
+                    setErrors(mapped);
+                } else {
+                    setErrors({ nom: data.message ?? 'Erreur lors de la création' });
+                }
+                return;
+            }
+
+            onCreated(data as Client);
+            toast.success(`Client "${data.nom}" créé`);
+        } catch {
+            setErrors({ nom: 'Erreur réseau' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-background rounded-xl shadow-2xl w-full max-w-md border">
+                <div className="flex items-center justify-between p-5 border-b">
+                    <div className="flex items-center gap-2">
+                        <UserPlus className="h-5 w-5 text-primary" />
+                        <h2 className="font-semibold text-lg">Nouveau client</h2>
+                    </div>
+                    <button onClick={onClose} className="rounded-md p-1 hover:bg-muted transition-colors">
+                        <X className="h-5 w-5" />
+                    </button>
+                </div>
+                <form onSubmit={handleSubmit} className="p-5 space-y-4">
+                    <div className="space-y-1.5">
+                        <Label htmlFor="qc-nom">Nom <span className="text-destructive">*</span></Label>
+                        <Input
+                            id="qc-nom"
+                            value={nom}
+                            onChange={e => setNom(e.target.value)}
+                            placeholder="Nom du client"
+                            className={errors.nom ? 'border-destructive' : ''}
+                            autoFocus
+                        />
+                        {errors.nom && <p className="text-xs text-destructive">{errors.nom}</p>}
+                    </div>
+                    <div className="space-y-1.5">
+                        <Label htmlFor="qc-tel">Téléphone</Label>
+                        <Input
+                            id="qc-tel"
+                            value={telephone}
+                            onChange={e => setTelephone(e.target.value)}
+                            placeholder="Ex : 06 12 34 56 78"
+                        />
+                    </div>
+                    <div className="space-y-1.5">
+                        <Label htmlFor="qc-email">Email</Label>
+                        <Input
+                            id="qc-email"
+                            type="email"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                            placeholder="client@exemple.com"
+                            className={errors.email ? 'border-destructive' : ''}
+                        />
+                        {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+                    </div>
+                    <div className="space-y-1.5">
+                        <Label htmlFor="qc-adresse">Adresse</Label>
+                        <Input
+                            id="qc-adresse"
+                            value={adresse}
+                            onChange={e => setAdresse(e.target.value)}
+                            placeholder="Adresse du client"
+                        />
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                        <Button type="button" variant="outline" className="flex-1" onClick={onClose} disabled={loading}>
+                            Annuler
+                        </Button>
+                        <Button type="submit" className="flex-1" disabled={loading}>
+                            {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <UserPlus className="h-4 w-4 mr-2" />}
+                            Créer le client
+                        </Button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
 
 export default function POSIndex({ produits, clients, boutiques }: { produits: Produit[]; clients: Client[]; boutiques: Boutique[] }) {
     const { auth } = usePage().props as unknown as { auth: { user: { role: string; permissions: string[] } } };
@@ -110,6 +250,8 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
     const [selectedProduitForVariant, setSelectedProduitForVariant] = useState<Produit | null>(null);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [openCombobox, setOpenCombobox] = useState(false);
+    const [showQuickClientModal, setShowQuickClientModal] = useState(false);
+    const [clientsList, setClientsList] = useState<Client[]>(clients);
 
     const { data, setData, post, processing, reset, errors } = useForm({
         client_id: null as number | null,
@@ -122,9 +264,18 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
     const handleBoutiqueChange = (value: string) => {
         setSelectedBoutiqueId(value);
         setPanier([]);
+        setSelectedClient('anonymous');
+        setData('client_id', null);
         const boutiqueId = value === 'all' ? null : parseInt(value);
         setData('boutique_id', boutiqueId);
     };
+
+    // --- Clients filtrés par boutique ---
+    const filteredClients = useMemo(() => {
+        if (selectedBoutiqueId === 'all') return clientsList;
+        const boutiqueId = parseInt(selectedBoutiqueId);
+        return clientsList.filter(c => c.boutique_id === boutiqueId || c.boutique_id === null);
+    }, [clientsList, selectedBoutiqueId]);
 
     // --- Calculs ---
     const categories = useMemo(() => {
@@ -393,7 +544,7 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                                                 <div className={cn("size-2 rounded-full", selectedClient === 'anonymous' ? "bg-zinc-300" : "bg-indigo-500")} />
                                                 {selectedClient === 'anonymous'
                                                     ? "Client Anonyme"
-                                                    : clients.find((client) => client.id.toString() === selectedClient)?.nom || "Sélectionner un client..."}
+                                                    : filteredClients.find((client) => client.id.toString() === selectedClient)?.nom || "Sélectionner un client..."}
                                             </div>
                                             <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                         </Button>
@@ -427,7 +578,7 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                                                         />
                                                         <span className="font-bold">Client Anonyme</span>
                                                     </CommandItem>
-                                                    {clients.map((client) => (
+                                                    {filteredClients.map((client) => (
                                                         <CommandItem
                                                             key={client.id}
                                                             value={`${client.nom} ${client.telephone || ''} ${client.id}`}
@@ -459,6 +610,15 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                                         </Command>
                                     </PopoverContent>
                                 </Popover>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="mt-2 w-full gap-1.5"
+                                    onClick={() => setShowQuickClientModal(true)}
+                                >
+                                    <UserPlus className="h-4 w-4" /> Nouveau client
+                                </Button>
                                 {errors.client_id && <p className="text-sm text-destructive mt-1">{errors.client_id}</p>}
                             </div>
 
@@ -573,7 +733,7 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                                                         <div className={cn("size-2 rounded-full shadow-sm", selectedClient === 'anonymous' ? "bg-zinc-300" : "bg-indigo-500")} />
                                                         {selectedClient === 'anonymous'
                                                             ? "Client Anonyme"
-                                                            : clients.find((client) => client.id.toString() === selectedClient)?.nom || "Sélectionner un client..."}
+                                                            : filteredClients.find((client) => client.id.toString() === selectedClient)?.nom || "Sélectionner un client..."}
                                                     </div>
                                                     <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                 </Button>
@@ -607,7 +767,7 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                                                                 />
                                                                 <span className="font-black uppercase tracking-tight text-sm">Client Anonyme</span>
                                                             </CommandItem>
-                                                            {clients.map((client) => (
+                                                            {filteredClients.map((client) => (
                                                                 <CommandItem
                                                                     key={client.id}
                                                                     value={`${client.nom} ${client.telephone || ''} ${client.id}`}
@@ -638,6 +798,15 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                                                 </Command>
                                             </PopoverContent>
                                         </Popover>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            className="mt-2 w-full gap-1.5"
+                                            onClick={() => setShowQuickClientModal(true)}
+                                        >
+                                            <UserPlus className="h-4 w-4" /> Nouveau client
+                                        </Button>
                                         {errors.client_id && <p className="text-sm text-destructive mt-1">{errors.client_id}</p>}
                                     </div>
 
@@ -756,7 +925,7 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                                     key={mode.id}
                                     variant={data.mode_paiement === mode.id ? 'default' : 'outline'}
                                     onClick={() => setData('mode_paiement', mode.id)}
-                                    className={cn("flex flex-col h-20 gap-2 hover:bg-muted/50 transition-colors", data.mode_paiement === mode.id && "ring-2 ring-primary ring-offset-2")}
+                                    className={cn("flex flex-col h-20 gap-2 transition-colors", data.mode_paiement === mode.id && "ring-2 ring-primary ring-offset-2")}
                                 >
                                     <mode.icon className="h-6 w-6" />
                                     {mode.label}
@@ -841,6 +1010,20 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                     </div>
                 </DialogContent>
             </Dialog >
+
+            {/* Modal Création rapide client */}
+            {showQuickClientModal && (
+                <QuickClientModal
+                    boutiqueId={selectedBoutiqueId}
+                    onClose={() => setShowQuickClientModal(false)}
+                    onCreated={(newClient) => {
+                        setClientsList(prev => [newClient, ...prev]);
+                        setSelectedClient(newClient.id.toString());
+                        setData('client_id', newClient.id);
+                        setShowQuickClientModal(false);
+                    }}
+                />
+            )}
         </AppLayout>
     );
 }

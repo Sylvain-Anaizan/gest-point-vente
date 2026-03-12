@@ -224,4 +224,65 @@ class ClientController extends Controller
             abort(403, 'Vous n\'avez pas accès à ce client.');
         }
     }
+
+    /**
+     * API JSON : retourne les clients d'une boutique (pour le POS).
+     * GET /clients/par-boutique?boutique_id=X  (admin)
+     * Un employé ne voit que ses clients de boutique.
+     */
+    public function parBoutique(Request $request): \Illuminate\Http\JsonResponse
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        $query = Client::select('id', 'nom', 'telephone', 'boutique_id')
+            ->where('actif', true)
+            ->orderBy('nom');
+
+        if ($user->isAdmin()) {
+            $boutiqueId = $request->query('boutique_id');
+            if ($boutiqueId) {
+                $query->where('boutique_id', $boutiqueId);
+            }
+        } else {
+            $query->where('boutique_id', $user->boutique_id);
+        }
+
+        return response()->json($query->get());
+    }
+
+    /**
+     * Création rapide d'un client depuis le POS (retour JSON).
+     * POST /clients/creation-rapide
+     */
+    public function storeRapide(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $validated = $request->validate([
+            'nom' => 'required|string|max:255',
+            'telephone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|unique:clients,email|max:255',
+            'adresse' => 'nullable|string|max:500',
+            'boutique_id' => 'nullable|exists:boutiques,id',
+        ]);
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        // Un employé crée toujours dans sa boutique
+        if (! $user->isAdmin()) {
+            $validated['boutique_id'] = $user->boutique_id;
+        }
+
+        $validated['actif'] = true;
+
+        $client = Client::create($validated);
+
+        return response()->json([
+            'id' => $client->id,
+            'nom' => $client->nom,
+            'telephone' => $client->telephone,
+            'email' => $client->email,
+            'boutique_id' => $client->boutique_id,
+        ], 201);
+    }
 }

@@ -80,7 +80,18 @@ class VenteController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = auth()->user();
-        $clients = Client::select('id', 'nom', 'telephone')->get();
+        $clientsQuery = Client::select('id', 'nom', 'telephone')
+            ->where('actif', true)
+            ->orderBy('nom');
+
+        if ($user->role === 'employé') {
+            $clientsQuery->where('boutique_id', $user->boutique_id);
+        } else {
+            // Admin : liste vide au départ — remplie dynamiquement via /clients/par-boutique
+            $clientsQuery->whereRaw('0 = 1');
+        }
+
+        $clients = $clientsQuery->get();
         $queryProduits = Produit::visibles()->with(['variantes.taille'])
             ->whereHas('variantes', function ($query) {
                 $query->where('quantite', '>', 0);

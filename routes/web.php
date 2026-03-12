@@ -39,6 +39,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('unites', \App\Http\Controllers\UniteController::class)->middleware('permission:manage units');
     Route::resource('boutiques', BoutiqueController::class)->middleware('permission:manage boutiques');
     Route::resource('produits', ProduitController::class)->middleware('permission:manage products');
+
+    // Routes clients explicites AVANT le resource (sinon clients/{client} les intercepte)
+    Route::get('clients/par-boutique', [ClientController::class, 'parBoutique'])
+        ->name('clients.par-boutique')
+        ->middleware('permission:manage sales');
+    Route::post('clients/creation-rapide', [ClientController::class, 'storeRapide'])
+        ->name('clients.store-rapide')
+        ->middleware('permission:manage sales');
+    Route::patch('clients/{client}/toggle-status', [ClientController::class, 'toggleStatus'])
+        ->name('clients.toggle-status')
+        ->middleware('permission:manage sales');
     Route::resource('clients', ClientController::class)->middleware('permission:manage sales');
     Route::resource('ventes', VenteController::class)->middleware('permission:manage sales');
     Route::resource('commandes', CommandeController::class)->middleware('permission:manage sales');
@@ -57,11 +68,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/rapports', [RapportController::class, 'index'])
         ->name('rapports.index')
         ->middleware('permission:manage reports');
-
-    // Route supplémentaire pour activer/désactiver un client
-    Route::patch('clients/{client}/toggle-status', [ClientController::class, 'toggleStatus'])
-        ->name('clients.toggle-status')
-        ->middleware('permission:manage sales');
 
     // Routes POS
     Route::get('/pos', [POSController::class, 'index'])
