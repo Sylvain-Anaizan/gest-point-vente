@@ -221,29 +221,42 @@ class ProduitController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ProduitUpdateRequest $request, Produit $produit): RedirectResponse
+public function update(ProduitUpdateRequest $request, Produit $produit): RedirectResponse
     {
         Gate::authorize('update', $produit);
         $user = auth()->user();
         $data = $request->validated();
-        $variantesData = $data['variantes'];
+        
+        // On récupère les variantes (avec un fallback au cas où c'est vide)
+        $variantesData = $data['variantes'] ?? [];
         unset($data['variantes']);
 
         if ($user->isEmploye()) {
             $data['boutique_id'] = $user->boutique_id;
         }
 
+        // --- GESTION DE L'IMAGE ---
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $filename = time().'_'.uniqid().'.'.$image->getClientOriginalExtension();
+            
+            // On supprime l'ancienne image du serveur si elle existe
             if ($produit->image && Storage::disk('public')->exists('images/produits/'.$produit->image)) {
                 Storage::disk('public')->delete('images/produits/'.$produit->image);
             }
+            
             $image->storeAs('images/produits', $filename, 'public');
             $data['image'] = $filename;
+        } else {
+            // LA CORRECTION EST ICI :
+            // S'il n'y a pas de nouvelle image, on retire la clé 'image' de $data.
+            // Cela évite d'écraser l'image existante avec 'null' dans la base de données.
+            unset($data['image']);
         }
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($produit, $data, $variantesData) {
+        // --- TRANSACTION BASE DE DONNÉES ---
+        DB::transaction(function () use ($produit, $data, $variantesData) {
+            // L'image restera intacte si on a fait le unset()
             $produit->update($data);
 
             $existingIds = $produit->variantes->pluck('id')->toArray();
@@ -251,14 +264,16 @@ class ProduitController extends Controller
 
             // Variantes à supprimer
             $toDelete = array_diff($existingIds, $newIds);
-            Variante::whereIn('id', $toDelete)->delete();
+            if (!empty($toDelete)) {
+                Variante::whereIn('id', $toDelete)->delete();
+            }
 
             // Variantes à mettre à jour ou créer
             foreach ($variantesData as $vData) {
                 if (isset($vData['id']) && in_array($vData['id'], $existingIds)) {
                     Variante::where('id', $vData['id'])->update($vData);
                 } else {
-                    unset($vData['id']);
+                    unset($vData['id']); // Sécurité
                     $produit->variantes()->create($vData);
                 }
             }
@@ -267,7 +282,6 @@ class ProduitController extends Controller
         return to_route('produits.index')
             ->with('success', 'Produit et variantes mis à jour avec succès.');
     }
-
     /**
      * Remove the specified resource from storage.
      */

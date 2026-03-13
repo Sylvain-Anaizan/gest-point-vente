@@ -196,7 +196,7 @@ export default function ProduitsCreate({
                                             id="image"
                                             name="image"
                                             type="file"
-                                            accept="image/png, image/jpeg"
+                                            //accept="image/png, image/jpeg"
                                             onChange={handleImageChange}
                                         />
                                         <InputError message={errors.image} />
@@ -328,7 +328,7 @@ export default function ProduitsCreate({
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectItem value="none">
-                                                        Stock général
+                                                        Selectionner votre boutique
                                                     </SelectItem>
                                                     {boutiques.map((boutique) => (
                                                         <SelectItem

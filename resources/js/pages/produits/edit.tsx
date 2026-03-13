@@ -168,7 +168,6 @@ export default function ProduitsEdit({
 
     const placeholderUrl = 'https://placehold.co/600x600/eeeeee/333333?text=PRODUIT+IMAGE';
 
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Modifier : ${produit.nom}`} />
@@ -209,7 +208,7 @@ export default function ProduitsEdit({
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="p-6 space-y-4">
-                                    {/* Aperçu de l'image */}
+                                    {/* Aperçu de l'image CORRIGÉ ICI */}
                                     <div className="flex items-center justify-center h-48 w-full border border-dashed rounded-lg bg-muted/50 overflow-hidden">
                                         {imagePreview ? (
                                             <img
@@ -228,17 +227,6 @@ export default function ProduitsEdit({
                                                 <p className="text-sm">Aucune image définie</p>
                                             </div>
                                         )}
-
-                                        {produit.imageUrl && <img
-                                            src={produit.imageUrl}
-                                            alt="Aperçu de l'image"
-                                            className="object-cover h-full w-full"
-                                            onError={(e) => {
-                                                const target = e.target as HTMLImageElement;
-                                                target.onerror = null;
-                                                target.src = placeholderUrl;
-                                            }}
-                                        />}
                                     </div>
 
                                     {/* Champ de fichier */}
