@@ -75,8 +75,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('inventaire', [InventaireController::class, 'index'])
         ->name('inventaire.index')
         ->middleware('permission:manage inventory');
+    Route::get('inventaire/export', [InventaireController::class, 'export'])
+        ->name('inventaire.export')
+        ->middleware('permission:manage inventory');
     Route::patch('inventaire/{variante}/seuil', [InventaireController::class, 'updateSeuil'])
         ->name('inventaire.seuil')
+        ->middleware('permission:manage inventory');
+    Route::post('inventaire/{variante}/adjust', [InventaireController::class, 'adjustStock'])
+        ->name('inventaire.adjust')
+        ->middleware('permission:manage inventory');
+    Route::get('inventaire/{variante}/mouvements', [InventaireController::class, 'mouvements'])
+        ->name('inventaire.mouvements')
         ->middleware('permission:manage inventory');
 
     // Routes POS
