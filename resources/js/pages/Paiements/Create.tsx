@@ -60,36 +60,40 @@ export default function PaiementsCreate({ ventes, commandes, boutiques, preselec
                                 <CardContent className="space-y-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="vente_id">Vente</Label>
-                                        <select
-                                            id="vente_id"
+                                        <Select
                                             name="vente_id"
-                                            defaultValue={preselectedVenteId || ''}
-                                            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                            defaultValue={preselectedVenteId ? String(preselectedVenteId) : undefined}
                                         >
-                                            <option value="">-- Aucune vente --</option>
-                                            {ventes.map((v) => (
-                                                <option key={v.id} value={v.id}>
-                                                    #{v.numero} — {Number(v.montant_total).toLocaleString('fr-FR')} FCFA
-                                                </option>
-                                            ))}
-                                        </select>
+                                            <SelectTrigger className="w-full h-9">
+                                                <SelectValue placeholder="-- Aucune vente --" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {ventes.map((v) => (
+                                                    <SelectItem key={v.id} value={String(v.id)}>
+                                                        #{v.numero} — {Number(v.montant_total).toLocaleString('fr-FR')} FCFA
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                         {errors.vente_id && <p className="text-sm text-red-600">{errors.vente_id}</p>}
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="commande_id">Commande</Label>
-                                        <select
-                                            id="commande_id"
+                                        <Select
                                             name="commande_id"
-                                            defaultValue={preselectedCommandeId || ''}
-                                            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                            defaultValue={preselectedCommandeId ? String(preselectedCommandeId) : undefined}
                                         >
-                                            <option value="">-- Aucune commande --</option>
-                                            {commandes.map((c) => (
-                                                <option key={c.id} value={c.id}>
-                                                    #{c.numero} — {Number(c.montant_total).toLocaleString('fr-FR')} FCFA
-                                                </option>
-                                            ))}
-                                        </select>
+                                            <SelectTrigger className="w-full h-9">
+                                                <SelectValue placeholder="-- Aucune commande --" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {commandes.map((c) => (
+                                                    <SelectItem key={c.id} value={String(c.id)}>
+                                                        #{c.numero} — {Number(c.montant_total).toLocaleString('fr-FR')} FCFA
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                         {errors.commande_id && <p className="text-sm text-red-600">{errors.commande_id}</p>}
                                     </div>
                                 </CardContent>
@@ -108,20 +112,21 @@ export default function PaiementsCreate({ ventes, commandes, boutiques, preselec
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="mode_paiement">Mode de paiement *</Label>
-                                            <select
-                                                id="mode_paiement"
+                                            <Select
                                                 name="mode_paiement"
                                                 required
-                                                defaultValue=""
-                                                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                                             >
-                                                <option value="" disabled>Choisir...</option>
-                                                <option value="espèces">Espèces</option>
-                                                <option value="carte">Carte</option>
-                                                <option value="virement">Virement</option>
-                                                <option value="mobile_money">Mobile Money</option>
-                                                <option value="chèque">Chèque</option>
-                                            </select>
+                                                <SelectTrigger className="w-full h-9">
+                                                    <SelectValue placeholder="Choisir..." />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="espèces">Espèces</SelectItem>
+                                                    <SelectItem value="carte">Carte</SelectItem>
+                                                    <SelectItem value="virement">Virement</SelectItem>
+                                                    <SelectItem value="mobile_money">Mobile Money</SelectItem>
+                                                    <SelectItem value="chèque">Chèque</SelectItem>
+                                                </SelectContent>
+                                            </Select>
                                             {errors.mode_paiement && <p className="text-sm text-red-600">{errors.mode_paiement}</p>}
                                         </div>
                                     </div>
@@ -145,16 +150,18 @@ export default function PaiementsCreate({ ventes, commandes, boutiques, preselec
                                     {boutiques.length > 0 && (
                                         <div className="space-y-2">
                                             <Label htmlFor="boutique_id">Boutique</Label>
-                                            <select
-                                                id="boutique_id"
+                                            <Select
                                                 name="boutique_id"
-                                                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                                             >
-                                                <option value="">-- Auto-détection --</option>
-                                                {boutiques.map((b) => (
-                                                    <option key={b.id} value={b.id}>{b.nom}</option>
-                                                ))}
-                                            </select>
+                                                <SelectTrigger className="w-full h-9">
+                                                    <SelectValue placeholder="-- Auto-détection --" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {boutiques.map((b) => (
+                                                        <SelectItem key={b.id} value={String(b.id)}>{b.nom}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
                                         </div>
                                     )}
                                 </CardContent>

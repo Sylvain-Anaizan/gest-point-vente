@@ -7,6 +7,7 @@ use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeController;
 use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\InventaireController;
 use App\Http\Controllers\MouvementStockController;
 use App\Http\Controllers\PaiementController;
 use App\Http\Controllers\POSController;
@@ -54,7 +55,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('clients', ClientController::class)->middleware('permission:manage sales');
     Route::resource('ventes', VenteController::class)->middleware('permission:manage sales');
     Route::resource('commandes', CommandeController::class)->middleware('permission:manage sales');
-    Route::resource('paiements', PaiementController::class)->except(['edit', 'update'])->middleware('permission:manage sales');
+    Route::resource('paiements', PaiementController::class)->except(['edit', 'update'])->middleware('permission:manage payments');
     Route::get('commandes/{commande}/receipt', [\App\Http\Controllers\CommandeReceiptController::class, 'download'])
         ->name('commandes.receipt')
         ->middleware('permission:manage sales');
@@ -70,6 +71,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/rapports', [RapportController::class, 'index'])
         ->name('rapports.index')
         ->middleware('permission:manage reports');
+
+    Route::get('inventaire', [InventaireController::class, 'index'])
+        ->name('inventaire.index')
+        ->middleware('permission:manage inventory');
+    Route::patch('inventaire/{variante}/seuil', [InventaireController::class, 'updateSeuil'])
+        ->name('inventaire.seuil')
+        ->middleware('permission:manage inventory');
 
     // Routes POS
     Route::get('/pos', [POSController::class, 'index'])

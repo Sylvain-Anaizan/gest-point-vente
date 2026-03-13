@@ -22,6 +22,7 @@ class Commande extends Model
         'date_commande',
         'observations',
         'boutique_id',
+        'statut_paiement',
     ];
 
     protected $casts = [
@@ -65,11 +66,11 @@ class Commande extends Model
         $total = (float) $this->montant_total;
 
         if ($paye <= 0) {
-            $this->statut = 'Nouvelle'; // Or 'En attente'
+            $this->statut_paiement = 'Non payée';
         } elseif ($paye < $total) {
-            $this->statut = 'Partiellement payée';
+            $this->statut_paiement = 'Partiellement payée';
         } else {
-            $this->statut = 'Payée';
+            $this->statut_paiement = 'Payée';
         }
 
         $this->save();

@@ -30,6 +30,11 @@ import {
     UserCheck,
     Settings2,
     Truck,
+    ArrowLeftRight,
+    PieChart,
+    ShieldPlus,
+    ClipboardList,
+    Wallet,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 import POSController from '@/actions/App/Http/Controllers/POSController';
@@ -37,8 +42,11 @@ import VenteController from '@/actions/App/Http/Controllers/VenteController';
 import EmployeController from '@/actions/App/Http/Controllers/EmployeController';
 import RapportController from '@/actions/App/Http/Controllers/RapportController';
 import MouvementStockController from '@/actions/App/Http/Controllers/MouvementStockController';
+import PaiementController from '@/actions/App/Http/Controllers/PaiementController';
 import RoleController from '@/actions/App/Http/Controllers/RoleController';
-import { ArrowLeftRight, PieChart, ShieldPlus } from 'lucide-react';
+import InventaireController from '@/actions/App/Http/Controllers/InventaireController';
+import RapportJournalierController from '@/actions/App/Http/Controllers/RapportJournalierController';
+import CommandeController from '@/actions/App/Http/Controllers/CommandeController';
 import { type NavGroup } from '@/types';
 
 const navigationGroups: NavGroup[] = [
@@ -48,7 +56,7 @@ const navigationGroups: NavGroup[] = [
             { title: 'Vue d\'ensemble', href: dashboard(), icon: LayoutGrid, permission: 'view dashboard' },
             { title: 'Point de Vente (POS)', href: POSController.index.url(), icon: ShoppingBag, permission: 'manage sales' },
             { title: 'Rapports & Analyses', href: RapportController.index.url(), icon: PieChart, permission: 'manage reports' },
-            { title: 'Rapports Journaliers', href: '/rapport-journaliers', icon: ReceiptText },
+            { title: 'Rapports Journaliers', href: RapportJournalierController.index.url(), icon: ReceiptText, permission: 'manage reports' },
         ]
     },
     {
@@ -56,9 +64,11 @@ const navigationGroups: NavGroup[] = [
         items: [
             { title: 'Ventes & Factures', href: VenteController.index.url(), icon: ReceiptText, permission: 'manage sales' },
             { title: 'Produits & Stocks', href: ProduitController.index.url(), icon: PackageSearch, permission: 'manage products' },
+            { title: 'Inventaire', href: InventaireController.index.url(), icon: ClipboardList, permission: 'manage inventory' },
             { title: 'Mouvements stock', href: MouvementStockController.index.url(), icon: ArrowLeftRight, permission: 'manage products' },
+            { title: 'Paiements', href: PaiementController.index.url(), icon: Wallet, permission: 'manage payments' },
             { title: 'Clients', href: ClientController.index.url(), icon: Users, permission: 'manage sales' },
-            { title: 'Suivi Commandes', href: '/commandes', icon: Truck, permission: 'manage sales' },
+            { title: 'Suivi Commandes', href: CommandeController.index.url(), icon: Truck, permission: 'manage sales' },
         ]
     },
     {

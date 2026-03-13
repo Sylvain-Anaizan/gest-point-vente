@@ -31,6 +31,7 @@ class RoleAndPermissionSeeder extends Seeder
             'manage roles',
             'manage payments',
             'manage settings',
+            'manage inventory',
         ];
 
         foreach ($permissions as $permission) {
@@ -46,13 +47,15 @@ class RoleAndPermissionSeeder extends Seeder
             'view dashboard',
             'manage products',
             'manage sales',
+            'manage payments',
+            'manage inventory',
         ]);
 
         // Assign roles to existing users based on their current 'role' column
         User::all()->each(function (User $user) {
-            if ($user->role === 'admin' && !$user->hasRole('admin')) {
+            if ($user->role === 'admin' && ! $user->hasRole('admin')) {
                 $user->assignRole('admin');
-            } elseif (($user->role === 'employé' || $user->role === 'vendeur') && !$user->hasRole('employé')) {
+            } elseif (($user->role === 'employé' || $user->role === 'vendeur') && ! $user->hasRole('employé')) {
                 $user->assignRole('employé');
             }
         });

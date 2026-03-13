@@ -22,6 +22,7 @@ class Vente extends Model
         'type',
         'delivery_address',
         'boutique_id',
+        'statut_paiement',
     ];
 
     protected $casts = [
@@ -70,15 +71,15 @@ class Vente extends Model
 
     public function updateStatutPaiement(): void
     {
-        $paye = $this->montant_paye;
         $total = (float) $this->montant_total;
+        $paye = (float) $this->paiements()->sum('montant');
 
         if ($paye <= 0) {
-            $this->statut = 'Impayée';
+            $this->statut_paiement = 'Impayée';
         } elseif ($paye < $total) {
-            $this->statut = 'Partiellement payée';
+            $this->statut_paiement = 'Partiellement payée';
         } else {
-            $this->statut = 'Payée';
+            $this->statut_paiement = 'Payée';
         }
 
         $this->save();

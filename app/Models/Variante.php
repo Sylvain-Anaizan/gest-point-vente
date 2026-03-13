@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Variante extends Model
 {
@@ -16,11 +16,13 @@ class Variante extends Model
         'taille_id',
         'prix_vente',
         'quantite',
+        'seuil_alerte',
     ];
 
     protected $casts = [
         'prix_vente' => 'float',
         'quantite' => 'integer',
+        'seuil_alerte' => 'integer',
     ];
 
     /**
