@@ -24,6 +24,7 @@ class CommandeTest extends TestCase
         $this->user = User::factory()->create([
             'boutique_id' => $this->boutique->id,
         ]);
+        $this->actingAs($this->user);
     }
 
     public function test_can_list_commandes(): void

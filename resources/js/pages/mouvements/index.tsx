@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { ArrowDownLeft, ArrowUpRight, History, Plus, Search, Scale, Users, Calendar } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, History, Plus, Search, Scale, Users, Calendar, Store } from 'lucide-react'; // <-- Ajout de l'icône Store
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import MouvementStockController from '@/actions/App/Http/Controllers/MouvementStockController';
@@ -16,6 +16,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Mouvements de stock', href: MouvementStockController.index.url() },
 ];
 
+interface Boutique { id: number; nom: string; }
 interface Produit { id: number; nom: string; }
 interface Taille { id: number; nom: string; }
 interface Variante { id: number; taille: Taille | null; prix_vente: number; quantite: number; }
@@ -25,6 +26,7 @@ interface MouvementStock {
     id: number;
     produit_id: number;
     variante_id: number;
+    boutique_id: number;
     user_id: number;
     quantite: number;
     type: 'entrée' | 'sortie' | 'perte' | 'ajustement';
@@ -33,20 +35,24 @@ interface MouvementStock {
     produit: Produit;
     variante: Variante;
     user: User;
+    boutique?: Boutique; // <-- Ajout de la boutique
 }
 
 export default function MouvementsIndex({
     mouvements,
+    boutiques, // <-- Nouvelle prop
     filters
 }: {
     mouvements: { data: MouvementStock[]; current_page: number; last_page: number; };
-    filters: { search?: string; type?: string; date_debut?: string; date_fin?: string; };
+    boutiques: Boutique[]; // <-- Définition du type
+    filters: { search?: string; type?: string; date_debut?: string; date_fin?: string; boutique_id?: string; };
 }) {
     const { auth } = usePage().props as unknown as { auth: { user: { permissions: string[] } } };
     const canManage = auth.user.permissions.includes('manage products');
 
     const [searchQuery, setSearchQuery] = useState(filters.search || '');
     const [typeFilter, setTypeFilter] = useState(filters.type || 'none');
+    const [boutiqueFilter, setBoutiqueFilter] = useState(filters.boutique_id || 'none'); // <-- Nouvel état
     const [dateDebut, setDateDebut] = useState(filters.date_debut || '');
     const [dateFin, setDateFin] = useState(filters.date_fin || '');
 
@@ -54,13 +60,18 @@ export default function MouvementsIndex({
         router.get(MouvementStockController.index.url(), {
             search: searchQuery,
             type: typeFilter !== 'none' ? typeFilter : '',
+            boutique_id: boutiqueFilter !== 'none' ? boutiqueFilter : '', // <-- Ajout dans la requête
             date_debut: dateDebut,
             date_fin: dateFin
         }, { preserveState: true, replace: true });
     };
 
     const clearFilters = () => {
-        setSearchQuery(''); setTypeFilter('none'); setDateDebut(''); setDateFin('');
+        setSearchQuery('');
+        setTypeFilter('none');
+        setBoutiqueFilter('none'); // <-- Réinitialisation
+        setDateDebut('');
+        setDateFin('');
         router.get(MouvementStockController.index.url(), {}, { preserveState: true, replace: true });
     };
 
@@ -131,7 +142,7 @@ export default function MouvementsIndex({
 
                 {/* SECTION 2: FILTRES */}
                 <Card className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 rounded-lg shadow-sm">
-                    <CardContent >
+                    <CardContent className="pt-6">
                         <div className="flex flex-col lg:flex-row items-center gap-4">
                             <div className="relative flex-1 w-full group">
                                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-indigo-500 transition-colors" />
@@ -142,8 +153,26 @@ export default function MouvementsIndex({
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
-                            <div className="grid grid-cols-2 md:flex items-center gap-3 w-full lg:w-auto">
-                                <Select value={typeFilter || 'none'} onValueChange={setTypeFilter}>
+                            <div className="grid grid-cols-2 md:flex flex-wrap items-center gap-3 w-full lg:w-auto">
+
+                                {/* Filtre Boutique : affiché seulement si l'utilisateur a accès à plusieurs boutiques */}
+                                {boutiques && boutiques.length > 0 && (
+                                    <Select value={boutiqueFilter} onValueChange={setBoutiqueFilter}>
+                                        <SelectTrigger className="w-full md:w-[160px] h-12 bg-white dark:bg-zinc-800/50 border-white/20 dark:border-zinc-700/50 rounded-2xl">
+                                            <SelectValue placeholder="Boutique" />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-lg border-zinc-200 dark:border-zinc-800">
+                                            <SelectItem value="none">Toutes les boutiques</SelectItem>
+                                            {boutiques.map((boutique) => (
+                                                <SelectItem key={boutique.id} value={boutique.id.toString()}>
+                                                    {boutique.nom}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                )}
+
+                                <Select value={typeFilter} onValueChange={setTypeFilter}>
                                     <SelectTrigger className="w-full md:w-[150px] h-12 bg-white dark:bg-zinc-800/50 border-white/20 dark:border-zinc-700/50 rounded-2xl">
                                         <SelectValue placeholder="Type" />
                                     </SelectTrigger>
@@ -155,11 +184,12 @@ export default function MouvementsIndex({
                                         <SelectItem value="ajustement">Ajustement</SelectItem>
                                     </SelectContent>
                                 </Select>
+
                                 <div className="flex items-center gap-2 h-12 px-3 bg-white dark:bg-zinc-800/50 border border-white/20 dark:border-zinc-700/50 rounded-2xl min-w-0">
                                     <Calendar className="size-4 text-muted-foreground shrink-0" />
                                     <input
                                         type="date"
-                                        className="bg-transparent border-0 text-xs focus:ring-0 p-0 w-full"
+                                        className="bg-transparent border-0 text-xs focus:ring-0 p-0 w-full outline-none dark:text-white"
                                         value={dateDebut}
                                         onChange={(e) => setDateDebut(e.target.value)}
                                     />
@@ -168,7 +198,7 @@ export default function MouvementsIndex({
                                     <Calendar className="size-4 text-muted-foreground shrink-0" />
                                     <input
                                         type="date"
-                                        className="bg-transparent border-0 text-xs focus:ring-0 p-0 w-full"
+                                        className="bg-transparent border-0 text-xs focus:ring-0 p-0 w-full outline-none dark:text-white"
                                         value={dateFin}
                                         onChange={(e) => setDateFin(e.target.value)}
                                     />
@@ -254,11 +284,21 @@ export default function MouvementsIndex({
                                             <p className="text-sm font-black uppercase tracking-tight line-clamp-1 text-zinc-900 dark:text-zinc-100">
                                                 {mvt.produit.nom}
                                             </p>
-                                            {mvt.variante.taille && (
-                                                <Badge variant="secondary" className="mt-2 text-[9px] py-0 px-2 h-4 rounded-lg bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700">
-                                                    Taille: {mvt.variante.taille.nom}
-                                                </Badge>
-                                            )}
+
+                                            <div className="flex flex-wrap gap-2 mt-2">
+                                                {mvt.variante.taille && (
+                                                    <Badge variant="secondary" className="text-[9px] py-0 px-2 h-4 rounded-lg bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700">
+                                                        Taille: {mvt.variante.taille.nom}
+                                                    </Badge>
+                                                )}
+                                                {/* Affichage de la boutique sur la carte */}
+                                                {mvt.boutique && (
+                                                    <Badge variant="outline" className="text-[9px] py-0 px-2 h-4 rounded-lg bg-indigo-50/50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800 flex items-center gap-1">
+                                                        <Store className="size-2.5" />
+                                                        {mvt.boutique.nom}
+                                                    </Badge>
+                                                )}
+                                            </div>
                                         </div>
 
                                         <div className="flex items-center gap-3">

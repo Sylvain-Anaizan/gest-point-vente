@@ -20,7 +20,6 @@ class PaiementController extends Controller
         $boutiqueId = $user->boutique_id;
 
         $paiements = Paiement::query()
-            ->when(! $user->isAdmin(), fn ($query) => $query->where('boutique_id', $boutiqueId))
             ->when(request('search'), function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('reference', 'like', "%{$search}%")
@@ -55,13 +54,11 @@ class PaiementController extends Controller
         $boutiqueId = $user->boutique_id;
 
         $ventes = Vente::query()
-            ->when(! $user->isAdmin(), fn ($q) => $q->where('boutique_id', $boutiqueId))
             ->latest()
             ->limit(50)
             ->get(['id', 'numero', 'montant_total', 'client_id']);
 
         $commandes = Commande::query()
-            ->when(! $user->isAdmin(), fn ($q) => $q->where('boutique_id', $boutiqueId))
             ->latest()
             ->limit(50)
             ->get(['id', 'numero', 'montant_total', 'client_id']);

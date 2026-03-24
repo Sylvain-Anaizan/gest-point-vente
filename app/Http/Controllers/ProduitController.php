@@ -10,8 +10,8 @@ use App\Models\Produit;
 use App\Models\Taille;
 use App\Models\Unite;
 use App\Models\Variante;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -25,20 +25,16 @@ class ProduitController extends Controller
      */
     public function index(Request $request): Response
     {
-        $user = auth()->user();
-        $query = Produit::visibles()
-            ->with(['category', 'boutique', 'variantes.taille'])
+        $user = $request->user();
+        $query = Produit::with(['category', 'boutique', 'variantes.taille'])
             ->when($request->search, function ($q) use ($request) {
                 $q->where('nom', 'like', '%'.$request->search.'%')
                     ->orWhereHas('category', function ($sq) use ($request) {
                         $sq->where('nom', 'like', '%'.$request->search.'%');
                     });
             })
-            ->when($request->boutique_id, function ($q) use ($request) {
+            ->when($request->boutique_id && $user->isAdmin(), function ($q) use ($request) {
                 $q->where('boutique_id', $request->boutique_id);
-            })
-            ->when($user->role === 'employé', function ($q) use ($user) {
-                $q->where('boutique_id', $user->boutique_id);
             });
 
         // Statistiques globales (AVANT pagination)
@@ -221,12 +217,12 @@ class ProduitController extends Controller
     /**
      * Update the specified resource in storage.
      */
-public function update(ProduitUpdateRequest $request, Produit $produit): RedirectResponse
+    public function update(ProduitUpdateRequest $request, Produit $produit): RedirectResponse
     {
         Gate::authorize('update', $produit);
         $user = auth()->user();
         $data = $request->validated();
-        
+
         // On récupère les variantes (avec un fallback au cas où c'est vide)
         $variantesData = $data['variantes'] ?? [];
         unset($data['variantes']);
@@ -239,12 +235,12 @@ public function update(ProduitUpdateRequest $request, Produit $produit): Redirec
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $filename = time().'_'.uniqid().'.'.$image->getClientOriginalExtension();
-            
+
             // On supprime l'ancienne image du serveur si elle existe
             if ($produit->image && Storage::disk('public')->exists('images/produits/'.$produit->image)) {
                 Storage::disk('public')->delete('images/produits/'.$produit->image);
             }
-            
+
             $image->storeAs('images/produits', $filename, 'public');
             $data['image'] = $filename;
         } else {
@@ -264,7 +260,7 @@ public function update(ProduitUpdateRequest $request, Produit $produit): Redirec
 
             // Variantes à supprimer
             $toDelete = array_diff($existingIds, $newIds);
-            if (!empty($toDelete)) {
+            if (! empty($toDelete)) {
                 Variante::whereIn('id', $toDelete)->delete();
             }
 
@@ -282,6 +278,7 @@ public function update(ProduitUpdateRequest $request, Produit $produit): Redirec
         return to_route('produits.index')
             ->with('success', 'Produit et variantes mis à jour avec succès.');
     }
+
     /**
      * Remove the specified resource from storage.
      */

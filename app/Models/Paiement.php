@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Traits\HasBoutique;
 use App\Observers\PaiementObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[ObservedBy(PaiementObserver::class)]
 class Paiement extends Model
 {
-    use HasFactory;
+    use HasBoutique, HasFactory;
 
     protected $fillable = [
         'vente_id',

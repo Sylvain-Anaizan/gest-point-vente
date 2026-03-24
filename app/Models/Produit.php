@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Traits\HasBoutique;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Produit extends Model
 {
     /** @use HasFactory<\Database\Factories\ProduitFactory> */
-    use HasFactory;
+    use HasBoutique, HasFactory;
 
     /**
      * The attributes that are mass assignable.

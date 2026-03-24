@@ -11,6 +11,7 @@ use App\Models\Commande;
 use App\Models\Produit;
 use App\Models\Vente;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -18,14 +19,14 @@ use Inertia\Response;
 
 class CommandeController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $user = auth()->user();
+        $user = $request->user();
         $boutiqueId = $user->boutique_id;
 
-        $commandes = Commande::query()
+        $commandesQuery = Commande::query()
             ->when(! $user->isAdmin(), function ($query) use ($boutiqueId) {
-                return $query->where('boutique_id', $boutiqueId);
+                return $query->where(['boutique_id' => $boutiqueId]);
             })
             ->when(request('search'), function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -44,28 +45,35 @@ class CommandeController extends Controller
                     $query->where('statut', $statut);
                 }
             })
-            ->with(['client', 'boutique'])
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+            ->with(['client', 'boutique']) // Combined all 'with' clauses
+            ->latest();
 
-        return Inertia::render('Commandes/Index', [
-            'commandes' => $commandes,
-            'filters' => request()->all(['search', 'statut']),
+        return Inertia::render('Commandes/Index', [ // Kept original casing for folder name
+'commandes' => $commandesQuery->paginate(12)->withQueryString(),
+            'filters' => request()->all(['search', 'statut']), // Kept filters for UI
         ]);
     }
 
     public function create(): Response
     {
         $user = auth()->user();
-        $boutiques = ($user->isAdmin() || ! $user->boutique_id)
+        $boutiqueId = $user->boutique_id; // Get user's boutique ID
+        $isAdmin = $user->isAdmin();
+
+        $boutiques = ($isAdmin || ! $boutiqueId)
             ? Boutique::all(['id', 'nom'])
             : [];
+
+        // Filter products by boutique if not admin
+        $produitsQuery = Produit::with(['variantes.taille']);
+        if (! $isAdmin && $boutiqueId) {
+            $produitsQuery->where('boutique_id', $boutiqueId);
+        }
 
         return Inertia::render('Commandes/Create', [
             'clients' => Client::actifs()->get(['id', 'nom', 'telephone']),
             'boutiques' => $boutiques,
-            'produits' => Produit::with(['variantes.taille'])->get()->map(fn ($p) => [
+            'produits' => $produitsQuery->get()->map(fn ($p) => [ // Use filtered products
                 'id' => $p->id,
                 'nom' => $p->nom,
                 'variantes' => $p->variantes->map(fn ($v) => [
@@ -103,7 +111,18 @@ class CommandeController extends Controller
 
         $data['boutique_id'] = $boutiqueId;
 
-        DB::transaction(function () use ($data) {
+        DB::transaction(function () use ($data, $user, $boutiqueId) { // Added $user and $boutiqueId to use clause
+            // Ensure products belong to the user's boutique (if not admin)
+            if (! $user->isAdmin()) {
+                foreach ($data['lignes_commande'] as $ligne) {
+                    $produit = Produit::find($ligne['produit_id']);
+                    if (! $produit || $produit->boutique_id !== $boutiqueId) {
+                        // This should ideally be caught by validation, but as a safeguard
+                        throw new \Exception('Un produit sélectionné n\'appartient pas à votre boutique.');
+                    }
+                }
+            }
+
             $commande = Commande::create(collect($data)->except('lignes_commande')->toArray());
             foreach ($data['lignes_commande'] as $ligne) {
                 $commande->lignesCommande()->create($ligne);
@@ -114,31 +133,46 @@ class CommandeController extends Controller
             ->with('success', 'Commande créée avec succès.');
     }
 
-    public function show(Commande $commande): Response
+    public function show(Request $request, Commande $commande): Response // Added Request parameter
     {
-        $this->authorizeBoutique($commande);
-        $commande->load(['client', 'lignesCommande', 'boutique', 'paiements.user']);
+        $boutiqueId = $request->user()->boutique_id;
+        $isAdmin = $request->user()->isAdmin();
 
-        return Inertia::render('Commandes/Show', [
+        if (! $isAdmin && $commande->boutique_id !== $boutiqueId) {
+            abort(403);
+        }
+        $commande->load(['client', 'lignesCommande', 'boutique', 'paiements.user']); // Original relations
+        $commande->load([ 'lignesCommande.produit', 'lignesCommande.variante']); // Added new relations from edit, adjusted to match existing model relations
+
+        return Inertia::render('Commandes/Show', [ // Kept original casing for folder name
             'commande' => $commande,
         ]);
     }
 
-    public function edit(Commande $commande): Response
+    public function edit(Request $request, Commande $commande): Response
     {
-        $this->authorizeBoutique($commande);
+        $this->authorizeBoutique($commande); // Keep existing authorization
         $commande->load('lignesCommande');
 
-        $user = auth()->user();
-        $boutiques = ($user->isAdmin() || ! $user->boutique_id)
-            ? \App\Models\Boutique::all(['id', 'nom'])
+        $user = $request->user();
+        $boutiqueId = $user->boutique_id; // Get user's boutique ID
+        $isAdmin = $user->isAdmin();
+
+        $boutiques = ($isAdmin || ! $boutiqueId)
+            ? Boutique::all(['id', 'nom'])
             : [];
+
+        // Filter products by boutique if not admin
+        $produitsQuery = Produit::with(['variantes.taille']);
+        if (! $isAdmin && $boutiqueId) {
+            $produitsQuery->where('boutique_id', $boutiqueId);
+        }
 
         return Inertia::render('Commandes/Edit', [
             'commande' => $commande,
             'clients' => Client::actifs()->get(['id', 'nom', 'telephone']),
             'boutiques' => $boutiques,
-            'produits' => Produit::with(['variantes.taille'])->get()->map(fn ($p) => [
+            'produits' => $produitsQuery->get()->map(fn ($p) => [ // Use filtered products
                 'id' => $p->id,
                 'nom' => $p->nom,
                 'variantes' => $p->variantes->map(fn ($v) => [
@@ -226,6 +260,7 @@ class CommandeController extends Controller
                     \App\Models\MouvementStock::create([
                         'produit_id' => $produitId,
                         'variante_id' => $varianteId,
+                        'boutique_id' => $commande->boutique_id,
                         'user_id' => auth()->id(),
                         'quantite' => -$ligneCmd->quantite,
                         'type' => 'vente',

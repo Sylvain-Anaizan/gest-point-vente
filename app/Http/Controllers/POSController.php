@@ -127,6 +127,7 @@ class POSController extends Controller
                     MouvementStock::create([
                         'produit_id' => $variante->produit_id,
                         'variante_id' => $variante->id,
+                        'boutique_id' => $vente->boutique_id,
                         'user_id' => Auth::id(),
                         'quantite' => -$item['quantite'],
                         'type' => 'vente',

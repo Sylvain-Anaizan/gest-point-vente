@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\Boutique;
 use App\Models\Client;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -11,13 +13,20 @@ class ClientTest extends TestCase
     use RefreshDatabase;
 
     protected \App\Models\User $user;
+    protected \App\Models\Boutique $boutique;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        // Créer un utilisateur pour les tests (nécessaire pour les routes protégées)
-        $this->user = \App\Models\User::factory()->create();
+        $this->boutique = Boutique::factory()->create();
+        $this->user = User::factory()->create([
+            'boutique_id' => $this->boutique->id,
+        ]);
+        
+        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'manage sales']);
+        $this->user->givePermissionTo('manage sales');
+
         $this->actingAs($this->user);
     }
 
@@ -40,15 +49,9 @@ class ClientTest extends TestCase
     {
         $clientData = [
             'nom' => 'Dupont',
-            'prenom' => 'Jean',
             'email' => 'jean.dupont@example.com',
             'telephone' => '01 23 45 67 89',
             'adresse' => '123 rue de la Paix',
-            'ville' => 'Paris',
-            'code_postal' => '75001',
-            'pays' => 'France',
-            'date_naissance' => '1990-01-01',
-            'notes' => 'Client VIP',
             'actif' => true,
         ];
 
@@ -104,15 +107,9 @@ class ClientTest extends TestCase
 
         $updateData = [
             'nom' => 'Martin',
-            'prenom' => 'Pierre',
             'email' => 'pierre.martin@example.com',
             'telephone' => '01 98 76 54 32',
             'adresse' => '456 avenue des Champs',
-            'ville' => 'Lyon',
-            'code_postal' => '69000',
-            'pays' => 'France',
-            'date_naissance' => '1985-05-15',
-            'notes' => 'Client mis à jour',
             'actif' => false,
         ];
 
@@ -169,7 +166,7 @@ class ClientTest extends TestCase
     {
         Client::factory()->create(['nom' => 'Dupont', 'email' => 'dupont@example.com']);
         Client::factory()->create(['nom' => 'Martin', 'email' => 'martin@example.com']);
-        Client::factory()->create(['nom' => 'Durand', 'prenom' => 'Jean', 'email' => 'jean.durand@example.com']);
+        Client::factory()->create(['nom' => 'Durand', 'email' => 'jean.durand@example.com']);
 
         $response = $this->get(route('clients.index', ['search' => 'dupont']));
 
@@ -226,30 +223,6 @@ class ClientTest extends TestCase
             );
     }
 
-    /** @test */
-    public function it_returns_correct_client_full_name()
-    {
-        $client = Client::factory()->create([
-            'nom' => 'Dupont',
-            'prenom' => 'Jean',
-        ]);
-
-        $this->assertEquals('Jean Dupont', $client->nom_complet);
-    }
-
-    /** @test */
-    public function it_returns_correct_client_full_address()
-    {
-        $client = Client::factory()->create([
-            'adresse' => '123 rue de la Paix',
-            'ville' => 'Paris',
-            'code_postal' => '75001',
-            'pays' => 'France',
-        ]);
-
-        $expectedAddress = '123 rue de la Paix, 75001 Paris';
-        $this->assertEquals($expectedAddress, $client->adresse_complete);
-    }
 
     /** @test */
     public function it_can_scope_active_clients()

@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Models\Boutique;
+use App\Models\Categorie;
 use App\Models\Produit;
 use App\Models\User;
 use App\Models\Variante;
-use App\Models\Boutique;
-use App\Models\Categorie;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class MouvementStockTest extends TestCase
@@ -16,23 +16,27 @@ class MouvementStockTest extends TestCase
     use RefreshDatabase;
 
     private User $admin;
+
     private Produit $produit;
+
     private Variante $variante;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->admin = User::factory()->create(['role' => 'admin']);
-        
+        Permission::create(['name' => 'manage products']);
+        $this->admin->givePermissionTo('manage products');
+
         $boutique = Boutique::factory()->create();
         $categorie = Categorie::factory()->create();
-        
+
         $this->produit = Produit::factory()->create([
             'boutique_id' => $boutique->id,
             'categorie_id' => $categorie->id,
         ]);
-        
+
         $this->variante = Variante::factory()->create([
             'produit_id' => $this->produit->id,
             'quantite' => 10,
@@ -58,7 +62,7 @@ class MouvementStockTest extends TestCase
     public function test_can_store_entree_mouvement_and_increase_stock()
     {
         $initialStock = $this->variante->quantite; // 10
-        
+
         $response = $this->actingAs($this->admin)
             ->post(route('mouvements-stock.store'), [
                 'produit_id' => $this->produit->id,
@@ -83,7 +87,7 @@ class MouvementStockTest extends TestCase
     public function test_can_store_sortie_mouvement_and_decrease_stock()
     {
         $initialStock = $this->variante->quantite; // 10
-        
+
         $response = $this->actingAs($this->admin)
             ->post(route('mouvements-stock.store'), [
                 'produit_id' => $this->produit->id,
@@ -93,14 +97,14 @@ class MouvementStockTest extends TestCase
             ]);
 
         $response->assertRedirect(route('mouvements-stock.index'));
-        
+
         $this->assertEquals($initialStock - 3, $this->variante->fresh()->quantite);
     }
 
     public function test_cannot_store_sortie_with_insufficient_stock()
     {
         $initialStock = $this->variante->quantite; // 10
-        
+
         $response = $this->actingAs($this->admin)
             ->post(route('mouvements-stock.store'), [
                 'produit_id' => $this->produit->id,
@@ -110,7 +114,7 @@ class MouvementStockTest extends TestCase
             ]);
 
         $response->assertSessionHas('error');
-        
+
         // Use fresh() to get the actual column value from db.
         $this->assertEquals($initialStock, $this->variante->fresh()->quantite);
     }

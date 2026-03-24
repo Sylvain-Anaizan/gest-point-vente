@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('mouvement_stocks', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('boutique_id')->constrained()->cascadeOnDelete();
             $table->foreignId('produit_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained(); // Qui a fait le mouvement
             $table->integer('quantite'); // Positif pour entrée, négatif pour sortie

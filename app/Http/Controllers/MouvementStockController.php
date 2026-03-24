@@ -3,14 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreMouvementStockRequest;
+use App\Models\Boutique;
 use App\Models\MouvementStock;
 use App\Models\Produit;
-use App\Models\Variante;
+use App\Models\Variante; // <-- Ajout de l'import
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\Request;
 
 class MouvementStockController extends Controller
 {
@@ -19,35 +20,41 @@ class MouvementStockController extends Controller
      */
     public function index(Request $request): Response
     {
-        $query = MouvementStock::with(['produit', 'variante.taille', 'user'])
-            ->latest();
+        $user = $request->user();
+        $isAdmin = $user->isAdmin();
 
-        // Filtre par recherche (produit)
+        // Admin can filter by boutique, others are scoped automatically by HasBoutique
+        $boutiques = $isAdmin
+            ? Boutique::orderBy('nom')->get(['id', 'nom'])
+            : Boutique::query()->where('id', $user->boutique_id)->get(['id', 'nom']);
+
+        $query = MouvementStock::with(['produit', 'variante', 'boutique', 'user']);
+
+        if ($isAdmin && $request->filled('boutique_id')) {
+            $query->where('boutique_id', $request->input('boutique_id'));
+        }
+
         if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->whereHas('produit', function ($q) use ($search) {
-                $q->where('nom', 'like', "%{$search}%");
-            });
+            $query->whereHas('produit', fn ($q) => $q->where('nom', 'like', "%{$request->search}%"));
         }
 
-        // Filtre par type
         if ($request->filled('type')) {
-            $query->where('type', $request->input('type'));
+            $query->where('type', $request->type);
         }
 
-        // Filtre par dates
         if ($request->filled('date_debut')) {
-            $query->whereDate('created_at', '>=', $request->input('date_debut'));
-        }
-        if ($request->filled('date_fin')) {
-            $query->whereDate('created_at', '<=', $request->input('date_fin'));
+            $query->whereDate('created_at', '>=', $request->date_debut);
         }
 
-        $mouvements = $query->paginate(15)->withQueryString();
+        if ($request->filled('date_fin')) {
+            $query->whereDate('created_at', '<=', $request->date_fin);
+        }
 
         return Inertia::render('mouvements/index', [
-            'mouvements' => $mouvements,
-            'filters' => $request->only(['search', 'type', 'date_debut', 'date_fin']),
+            'mouvements' => $query->latest()->paginate(20)->withQueryString(),
+            'boutiques' => $boutiques,
+            'filters' => $request->only(['search', 'type', 'date_debut', 'date_fin', 'boutique_id']),
+            'produits' => Produit::orderBy('nom')->get(['id', 'nom']),
         ]);
     }
 
@@ -56,10 +63,8 @@ class MouvementStockController extends Controller
      */
     public function create(): Response
     {
-        $produits = Produit::with(['variantes.taille'])->orderBy('nom')->get();
-
         return Inertia::render('mouvements/create', [
-            'produits' => $produits,
+            'produits' => Produit::orderBy('nom')->with('variantes.taille')->get(),
         ]);
     }
 
@@ -69,46 +74,53 @@ class MouvementStockController extends Controller
     public function store(StoreMouvementStockRequest $request): RedirectResponse
     {
         $validated = $request->validated();
-        
+        $user = $request->user();
+
         DB::beginTransaction();
-        
+
         try {
+            // FindOrFail will respect global scope, ensuring user can only find their own products
+            $produit = Produit::findOrFail($validated['produit_id']);
+
+            $variante = Variante::where('id', $validated['variante_id'])
+                ->where('produit_id', $produit->id)
+                ->firstOrFail();
+
             $mouvement = MouvementStock::create([
-                'produit_id' => $validated['produit_id'],
-                'variante_id' => $validated['variante_id'],
-                'user_id' => $request->user()->id,
+                'produit_id' => $produit->id,
+                'variante_id' => $variante->id,
+                'boutique_id' => $user->boutique_id ?? $produit->boutique_id,
+                'user_id' => $user->id,
                 'quantite' => $validated['quantite'],
                 'type' => $validated['type'],
                 'commentaire' => $validated['commentaire'] ?? null,
             ]);
 
             // Mettre à jour le stock de la variante
-            $variante = Variante::findOrFail($validated['variante_id']);
-            
-            if ($validated['type'] === 'entrée' || $validated['type'] === 'ajustement' && $validated['quantite'] > 0) {
-                // Pour l'entrée, on ajoute la quantité
+            if ($validated['type'] === 'entrée' || ($validated['type'] === 'ajustement' && $validated['quantite'] > 0)) {
                 $variante->quantite += $validated['quantite'];
             } else {
-                // Pour sortie, perte, on vérifie d'abord que le stock est suffisant
                 if ($variante->quantite < $validated['quantite']) {
                     DB::rollBack();
-                    return back()->with('error', 'Stock insuffisant pour cette opération. Le stock actuel est de ' . $variante->quantite);
+
+                    return back()->with('error', 'Stock insuffisant pour cette opération. Le stock actuel est de '.$variante->quantite);
                 }
                 $variante->quantite -= $validated['quantite'];
             }
-            
+
             $variante->save();
-            
+
             DB::commit();
-            
+
             return redirect()->route('mouvements-stock.index')
                 ->with('success', 'Mouvement de stock enregistré avec succès.');
-                
+
         } catch (\Exception $e) {
             DB::rollBack();
             if (app()->environment('testing')) {
                 throw $e;
             }
+
             return back()->with('error', 'Une erreur est survenue lors de l\'enregistrement du mouvement de stock.');
         }
     }

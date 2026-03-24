@@ -1,0 +1,90 @@
+<?php
+
+namespace App\Policies;
+
+use App\Models\User;
+use App\Models\Vente;
+use Illuminate\Auth\Access\Response;
+
+class VentePolicy
+{
+    /**
+     * Perform pre-authorization checks.
+     */
+    public function before(User $user, string $ability): ?bool
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return null;
+    }
+
+    /**
+     * Determine whether the user can view any models.
+     */
+    public function viewAny(User $user): bool
+    {
+        return $user->boutiques()->exists() || $user->boutique_id !== null;
+    }
+
+    /**
+     * Determine whether the user can view the model.
+     */
+    public function view(User $user, Vente $vente): bool
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return $user->boutiques->contains($vente->boutique_id) || $user->boutique_id === $vente->boutique_id;
+    }
+
+    /**
+     * Determine whether the user can create models.
+     */
+    public function create(User $user): bool
+    {
+        return $user->boutiques()->exists() || $user->boutique_id !== null;
+    }
+
+    /**
+     * Determine whether the user can update the model.
+     */
+    public function update(User $user, Vente $vente): bool
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return $user->boutiques->contains($vente->boutique_id) || $user->boutique_id === $vente->boutique_id;
+    }
+
+    /**
+     * Determine whether the user can delete the model.
+     */
+    public function delete(User $user, Vente $vente): bool
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return $user->boutiques->contains($vente->boutique_id) || $user->boutique_id === $vente->boutique_id;
+    }
+
+    /**
+     * Determine whether the user can restore the model.
+     */
+    public function restore(User $user, Vente $vente): bool
+    {
+        return $user->isAdmin();
+    }
+
+    /**
+     * Determine whether the user can permanently delete the model.
+     */
+    public function forceDelete(User $user, Vente $vente): bool
+    {
+        return $user->isAdmin();
+    }
+}

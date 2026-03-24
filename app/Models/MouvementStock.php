@@ -2,19 +2,29 @@
 
 namespace App\Models;
 
+use App\Models\Traits\HasBoutique;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MouvementStock extends Model
 {
+    use HasBoutique, HasFactory;
+
     protected $fillable = [
         'produit_id',
         'variante_id',
+        'boutique_id',
         'user_id',
-        'quantite',
         'type',
+        'quantite',
         'commentaire',
     ];
+
+    public function boutique(): BelongsTo
+    {
+        return $this->belongsTo(Boutique::class);
+    }
 
     /**
      * Get the produit (master) that owns the movement.

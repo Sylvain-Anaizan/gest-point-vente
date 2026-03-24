@@ -29,6 +29,7 @@ class InventaireController extends Controller
             ->whereHas('produit', fn ($q) => $q->where('est_virtuel', false))
             ->get()
             ->map(function ($variante) {
+                // MouvementStock is scoped, so this sum only includes current boutique's data if not admin
                 $tendance = MouvementStock::where('variante_id', $variante->id)
                     ->where('created_at', '>=', now()->subDays(7))
                     ->sum('quantite');
@@ -62,6 +63,10 @@ class InventaireController extends Controller
     {
         Gate::authorize('manage inventory');
 
+        if ($variante->produit->boutique_id !== auth()->user()->boutique_id) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'seuil_alerte' => 'required|integer|min:0',
         ]);
@@ -77,6 +82,10 @@ class InventaireController extends Controller
     public function adjustStock(AdjustStockRequest $request, Variante $variante): RedirectResponse
     {
         Gate::authorize('manage inventory');
+
+        if ($variante->produit->boutique_id !== $request->user()->boutique_id) {
+            abort(403);
+        }
 
         $validated = $request->validated();
 
@@ -96,6 +105,7 @@ class InventaireController extends Controller
             MouvementStock::create([
                 'produit_id' => $variante->produit_id,
                 'variante_id' => $variante->id,
+                'boutique_id' => $request->user()->boutique_id,
                 'user_id' => $request->user()->id,
                 'quantite' => $quantite,
                 'type' => $validated['type'] === 'entrée' ? 'entrée' : 'sortie',
@@ -112,6 +122,10 @@ class InventaireController extends Controller
     public function mouvements(Variante $variante): JsonResponse
     {
         Gate::authorize('manage inventory');
+
+        if ($variante->produit->boutique_id !== auth()->user()->boutique_id) {
+            return response()->json([], 403);
+        }
 
         $mouvements = MouvementStock::where('variante_id', $variante->id)
             ->with('user:id,name')
@@ -137,9 +151,14 @@ class InventaireController extends Controller
     {
         Gate::authorize('manage inventory');
 
+        $boutiqueId = auth()->user()->boutique_id;
+
         $variantes = Variante::query()
             ->with(['produit.category', 'taille'])
-            ->whereHas('produit', fn ($q) => $q->where('est_virtuel', false))
+            ->whereHas('produit', function ($query) use ($boutiqueId) {
+                $query->where('est_virtuel', false)
+                    ->where('boutique_id', $boutiqueId);
+            })
             ->get();
 
         $filename = 'inventaire_'.now()->format('Y-m-d_His').'.csv';

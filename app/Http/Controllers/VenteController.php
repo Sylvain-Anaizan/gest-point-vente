@@ -2,22 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Boutique;
 use App\Models\Client;
 use App\Models\LigneVente;
 use App\Models\Produit;
 use App\Models\Vente;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class VenteController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request): Response
     {
         /** @var \App\Models\User $user */
         $user = auth()->user();
@@ -37,10 +43,8 @@ class VenteController extends Controller
             })
             ->when($request->date_fin, function ($q) use ($request) {
                 $q->whereDate('created_at', '<=', $request->date_fin);
-            })
-            ->when($user->role === 'employé', function ($q) use ($user) {
-                $q->where('boutique_id', $user->boutique_id);
             });
+            // ->forBoutique($user->boutique_id); // Removed due to global scope
 
         // Calculer les statistiques sur la requête filtrée (AVANT pagination)
         $stats = [
@@ -76,83 +80,83 @@ class VenteController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(): Response
     {
         /** @var \App\Models\User $user */
         $user = auth()->user();
-        $clientsQuery = Client::select('id', 'nom', 'telephone')
-            ->where('actif', true)
-            ->orderBy('nom');
-
-        if ($user->role === 'employé') {
-            $clientsQuery->where('boutique_id', $user->boutique_id);
-        } else {
-            // Admin : liste vide au départ — remplie dynamiquement via /clients/par-boutique
-            $clientsQuery->whereRaw('0 = 1');
-        }
-
-        $clients = $clientsQuery->get();
-        $queryProduits = Produit::visibles()->with(['variantes.taille'])
+        $clients = Client::orderBy('nom')->get(['id', 'nom', 'telephone']); // forBoutique removed
+        $produits = Produit::visibles()
+            ->with(['variantes' => function ($query) {
+                $query->with('taille');
+            }, 'unite'])
             ->whereHas('variantes', function ($query) {
                 $query->where('quantite', '>', 0);
-            });
-
-        if ($user->role === 'employé') {
-            $queryProduits->where('boutique_id', $user->boutique_id);
-        }
-
-        $produits = $queryProduits->get()->map(fn ($p) => [
-            'id' => $p->id,
-            'nom' => $p->nom,
-            'boutique_id' => $p->boutique_id,
-            'variantes' => $p->variantes->map(fn ($v) => [
-                'id' => $v->id,
-                'taille' => $v->taille ? $v->taille->nom : 'N/A',
-                'prix_vente' => $v->prix_vente,
-                'quantite' => $v->quantite,
-            ]),
-        ]);
+            })
+            ->get();
+            // ->map(fn ($p) => [ // Removed mapping as it's handled by the `with` clause
+            //     'id' => $p->id,
+            //     'nom' => $p->nom,
+            //     'boutique_id' => $p->boutique_id,
+            //     'variantes' => $p->variantes->map(fn ($v) => [
+            //         'id' => $v->id,
+            //         'taille' => $v->taille ? $v->taille->nom : 'N/A',
+            //         'prix_vente' => $v->prix_vente,
+            //         'quantite' => $v->quantite,
+            //     ]),
+            // ]);
 
         return Inertia::render('ventes/create', [
             'clients' => $clients,
             'produits' => $produits,
-            'boutiques' => $user->role === 'admin'
-                ? \App\Models\Boutique::all(['id', 'nom'])
-                : \App\Models\Boutique::where('id', $user->boutique_id)->get(['id', 'nom']),
+            'boutiques' => Boutique::get(['id', 'nom']), // forBoutique removed
         ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
+        $boutiqueId = Auth::user()->boutique_id;
+
         $validated = $request->validate([
-            'client_id' => 'nullable|exists:clients,id',
+            'client_id' => [
+                'nullable',
+                Rule::exists('clients', 'id')->where('boutique_id', $boutiqueId),
+            ],
             'lignes' => 'required|array|min:1',
-            'lignes.*.produit_id' => 'required|exists:produits,id',
+            'lignes.*.produit_id' => [
+                'required',
+                Rule::exists('produits', 'id')->where('boutique_id', $boutiqueId),
+            ],
+            'lignes.*.variante_id' => 'required|exists:variantes,id',
             'lignes.*.quantite' => 'required|integer|min:1',
             'lignes.*.prix_unitaire' => 'required|numeric|min:0',
             'mode_paiement' => 'required|string|in:espèces,carte,virement,mobile_money',
-            'boutique_id' => 'nullable|exists:boutiques,id',
+            // 'boutique_id' => 'nullable|exists:boutiques,id', // Removed as it's handled by global scope or user's boutique_id
         ]);
 
         try {
             DB::beginTransaction();
 
-            // Vérifier le stock pour chaque variante (si fournie)
+            // $boutiqueId = $request->user()->boutique_id; // Already defined
+            $isAdmin = $request->user()->isAdmin();
+
+            // Vérifier le stock et l'appartenance à la boutique pour chaque variante
             foreach ($validated['lignes'] as $ligne) {
-                if (isset($ligne['variante_id'])) {
-                    $variante = \App\Models\Variante::find($ligne['variante_id']);
-                    if ($variante->quantite < $ligne['quantite']) {
-                        throw new \Exception("Stock insuffisant pour le produit: {$variante->produit->nom} (Taille: ".($variante->taille->nom ?? 'N/A').')');
-                    }
-                } else {
-                    // Fallback sur le produit si pas de variante (pour rétrocompatibilité si nécessaire mais peu probable ici)
-                    $produit = Produit::find($ligne['produit_id']);
-                    if ($produit->totalStock < $ligne['quantite']) {
-                        throw new \Exception("Stock insuffisant pour le produit: {$produit->nom}");
-                    }
+                $produit = Produit::find($ligne['produit_id']);
+                // The global scope should handle boutique_id check for $produit
+                if (! $isAdmin && $produit->boutique_id !== $boutiqueId) {
+                    throw new \Exception("Le produit '{$produit->nom}' n'appartient pas à votre boutique.");
+                }
+
+                // Variante check is now mandatory due to validation rule 'lignes.*.variante_id' => 'required|exists:variantes,id'
+                $variante = \App\Models\Variante::find($ligne['variante_id']);
+                if (! $variante || $variante->produit_id !== $produit->id) {
+                    throw new \Exception("Variante invalide pour le produit: {$produit->nom}");
+                }
+                if ($variante->quantite < $ligne['quantite']) {
+                    throw new \Exception("Stock insuffisant pour le produit: {$produit->nom} (Taille: ".($variante->taille->nom ?? 'N/A').')');
                 }
             }
 
@@ -171,7 +175,7 @@ class VenteController extends Controller
                 'user_id' => Auth::id(),
                 'boutique_id' => $user->role === 'employé'
                     ? $user->boutique_id
-                    : ($validated['boutique_id'] ?? null),
+                    : ($validated['boutique_id'] ?? $user->boutique_id), // Default to user's boutique if not provided and admin
                 'montant_total' => $montantTotal,
                 'mode_paiement' => $validated['mode_paiement'],
                 'statut' => 'complétée',
@@ -179,7 +183,7 @@ class VenteController extends Controller
 
             // Créer les lignes de vente et mettre à jour le stock
             foreach ($validated['lignes'] as $ligne) {
-                $variante_id = $ligne['variante_id'] ?? Produit::find($ligne['produit_id'])->variantes()->first()->id;
+                $variante_id = $ligne['variante_id']; // variante_id is now required
 
                 LigneVente::create([
                     'vente_id' => $vente->id,
@@ -200,21 +204,16 @@ class VenteController extends Controller
             return redirect()->route('ventes.show', $vente)->with('success', 'Vente créée avec succès');
         } catch (\Exception $e) {
             DB::rollback();
-
+            Log::error('Erreur lors de la création de la vente: '.$e->getMessage(), ['exception' => $e]);
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
-
     /**
      * Display the specified resource.
      */
-    public function show(Vente $vente)
+    public function show(Vente $vente): Response
     {
-        /** @var \App\Models\User $user */
-        $user = auth()->user();
-        if ($user->role === 'employé' && $vente->boutique_id !== $user->boutique_id) {
-            abort(403);
-        }
+        Gate::authorize('view', $vente);
         $vente->load(['client', 'user', 'lignes.produit', 'boutique', 'commande.lignesCommande', 'paiements.user']);
 
         return Inertia::render('ventes/show', [
@@ -225,16 +224,19 @@ class VenteController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Vente $vente)
+    public function edit(Vente $vente): Response
     {
+        Gate::authorize('update', $vente);
+
         /** @var \App\Models\User $user */
         $user = auth()->user();
-        if ($user->role === 'employé' && $vente->boutique_id !== $user->boutique_id) {
-            abort(403);
-        }
+
         $vente->load(['client', 'lignes.produit', 'lignes.variante.taille']);
-        $clients = Client::select('id', 'nom', 'telephone')->get();
-        $produits = Produit::with(['variantes.taille'])->get()->map(fn ($p) => [
+        $clients = Client::orderBy('nom')->get(['id', 'nom', 'telephone']); // forBoutique removed
+        $produits = Produit::with(['variantes.taille'])
+            ->get();
+
+        $produits = $produits->map(fn ($p) => [
             'id' => $p->id,
             'nom' => $p->nom,
             'boutique_id' => $p->boutique_id,
@@ -250,32 +252,34 @@ class VenteController extends Controller
             'vente' => $vente,
             'clients' => $clients,
             'produits' => $produits,
-            'boutiques' => $user->role === 'admin'
-                ? \App\Models\Boutique::all(['id', 'nom'])
-                : \App\Models\Boutique::where('id', $user->boutique_id)->get(['id', 'nom']),
+            'boutiques' => Boutique::get(['id', 'nom']), // forBoutique removed
         ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Vente $vente)
+    public function update(Request $request, Vente $vente): RedirectResponse
     {
-        /** @var \App\Models\User $user */
-        $user = auth()->user();
-        if ($user->role === 'employé' && $vente->boutique_id !== $user->boutique_id) {
-            abort(403);
-        }
+        Gate::authorize('update', $vente);
+        $boutiqueId = Auth::user()->boutique_id;
+
         $validated = $request->validate([
-            'client_id' => 'nullable|exists:clients,id',
+            'client_id' => [
+                'nullable',
+                Rule::exists('clients', 'id')->where('boutique_id', $boutiqueId),
+            ],
             'lignes' => 'required|array|min:1',
-            'lignes.*.produit_id' => 'required|exists:produits,id',
+            'lignes.*.produit_id' => [
+                'required',
+                Rule::exists('produits', 'id')->where('boutique_id', $boutiqueId),
+            ],
             'lignes.*.variante_id' => 'required|exists:variantes,id',
             'lignes.*.quantite' => 'required|integer|min:1',
             'lignes.*.prix_unitaire' => 'required|numeric|min:0',
             'mode_paiement' => 'required|string|in:espèces,carte,virement,mobile_money',
             'statut' => 'required|string|in:complétée,annulée',
-            'boutique_id' => 'nullable|exists:boutiques,id',
+            // 'boutique_id' => 'nullable|exists:boutiques,id', // Removed as it's handled by global scope or user's boutique_id
         ]);
 
         try {
@@ -355,11 +359,7 @@ class VenteController extends Controller
      */
     public function destroy(Vente $vente)
     {
-        /** @var \App\Models\User $user */
-        $user = auth()->user();
-        if ($user->role === 'employé' && $vente->boutique_id !== $user->boutique_id) {
-            abort(403);
-        }
+        Gate::authorize('delete', $vente);
         try {
             DB::beginTransaction();
 
@@ -391,11 +391,7 @@ class VenteController extends Controller
      */
     public function receipt(Vente $vente)
     {
-        /** @var \App\Models\User $user */
-        $user = auth()->user();
-        if ($user->role === 'employé' && $vente->boutique_id !== $user->boutique_id) {
-            abort(403);
-        }
+        Gate::authorize('view', $vente);
         $vente->load(['client', 'user', 'lignes.produit', 'boutique']);
 
         return Inertia::render('ventes/receipt', [

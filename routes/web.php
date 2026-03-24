@@ -53,7 +53,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('clients.toggle-status')
         ->middleware('permission:manage sales');
     Route::resource('clients', ClientController::class)->middleware('permission:manage sales');
-    Route::resource('ventes', VenteController::class)->middleware('permission:manage sales');
+    Route::resource('ventes', VenteController::class)->middleware('permission:manage sales'); 
     Route::resource('commandes', CommandeController::class)->middleware('permission:manage sales');
     Route::resource('paiements', PaiementController::class)->except(['edit', 'update'])->middleware('permission:manage payments');
     Route::get('commandes/{commande}/receipt', [\App\Http\Controllers\CommandeReceiptController::class, 'download'])
