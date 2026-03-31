@@ -24,7 +24,7 @@ class VentePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->boutiques()->exists() || $user->boutique_id !== null;
+        return $user->boutique_id !== null;
     }
 
     /**
@@ -36,7 +36,7 @@ class VentePolicy
             return true;
         }
 
-        return $user->boutiques->contains($vente->boutique_id) || $user->boutique_id === $vente->boutique_id;
+        return $user->boutique_id === $vente->boutique_id;
     }
 
     /**
@@ -44,7 +44,7 @@ class VentePolicy
      */
     public function create(User $user): bool
     {
-        return $user->boutiques()->exists() || $user->boutique_id !== null;
+        return $user->boutique_id !== null;
     }
 
     /**
@@ -56,7 +56,7 @@ class VentePolicy
             return true;
         }
 
-        return $user->boutiques->contains($vente->boutique_id) || $user->boutique_id === $vente->boutique_id;
+        return $user->boutique_id === $vente->boutique_id;
     }
 
     /**
@@ -68,7 +68,7 @@ class VentePolicy
             return false;
         }
 
-        return $user->boutiques->contains($vente->boutique_id) || $user->boutique_id === $vente->boutique_id;
+        return $user->boutique_id === $vente->boutique_id;
     }
 
     /**
