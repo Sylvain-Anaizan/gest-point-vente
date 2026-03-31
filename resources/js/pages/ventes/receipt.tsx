@@ -121,7 +121,7 @@ export default function VentesReceipt({ vente }: { vente: Vente }) {
                         {/* Header with Logo */}
                         <div className="text-center mb-8 border-b-2 border-gray-800 pb-6">
                             <img
-                                src="/storage/anaizan.png"
+                                src="/anaizan.png"
                                 alt="Anaizan"
                                 className="h-20 mx-auto mb-4"
                             />
