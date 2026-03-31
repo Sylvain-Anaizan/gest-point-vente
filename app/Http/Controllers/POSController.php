@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Client;
 use App\Models\MouvementStock;
 use App\Models\Produit;
+use App\Models\SousCategorie;
 use App\Models\Variante;
 use App\Models\Vente;
 use Illuminate\Http\Request;
@@ -22,7 +23,7 @@ class POSController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        $queryProduits = Produit::visibles()->with(['category', 'variantes.taille'])
+        $queryProduits = Produit::visibles()->with(['category', 'sousCategorie', 'variantes.taille'])
             ->whereHas('variantes', function ($q) {
                 $q->where('quantite', '>', 0);
             });
@@ -37,6 +38,8 @@ class POSController extends Controller
                 'nom' => $p->nom,
                 'imageUrl' => $p->imageUrl,
                 'category' => $p->category->nom,
+                'sous_categorie' => $p->sousCategorie?->nom,
+                'sous_categorie_id' => $p->sous_categorie_id,
                 'boutique_id' => $p->boutique_id,
                 'variantes' => $p->variantes->map(fn ($v) => [
                     'id' => $v->id,
@@ -47,6 +50,7 @@ class POSController extends Controller
             ]),
             'clients' => Client::actifs()->get(),
             'tailles' => \App\Models\Taille::all(['id', 'nom']),
+            'sousCategories' => SousCategorie::with('categorie:id,nom')->get(['id', 'nom', 'categorie_id']),
             'boutiques' => $user->role === 'admin'
                 ? \App\Models\Boutique::all(['id', 'nom'])
                 : \App\Models\Boutique::where('id', $user->boutique_id)->get(['id', 'nom']),

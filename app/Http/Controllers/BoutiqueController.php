@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\BoutiqueStoreRequest;
 use App\Http\Requests\BoutiqueUpdateRequest;
 use App\Models\Boutique;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -113,6 +113,8 @@ class BoutiqueController extends Controller
      */
     public function destroy(Boutique $boutique): RedirectResponse
     {
+        Gate::authorize('delete boutiques');
+
         // On pourrait vouloir empêcher la suppression si des produits sont liés
         $boutique->delete();
 

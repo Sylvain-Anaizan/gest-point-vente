@@ -32,6 +32,16 @@ class RoleAndPermissionSeeder extends Seeder
             'manage payments',
             'manage settings',
             'manage inventory',
+            // Permissions de suppression (doivent être attribuées explicitement)
+            'delete products',
+            'delete sales',
+            'delete categories',
+            'delete units',
+            'delete boutiques',
+            'delete users',
+            'delete roles',
+            'delete payments',
+            'delete inventory',
         ];
 
         foreach ($permissions as $permission) {
@@ -42,6 +52,7 @@ class RoleAndPermissionSeeder extends Seeder
         $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
         $adminRole->syncPermissions(Permission::all());
 
+        // L'employé n'a PAS de permissions de suppression par défaut
         $employeRole = Role::firstOrCreate(['name' => 'employé', 'guard_name' => 'web']);
         $employeRole->syncPermissions([
             'view dashboard',

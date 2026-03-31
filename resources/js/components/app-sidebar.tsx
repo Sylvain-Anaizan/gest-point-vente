@@ -16,12 +16,14 @@ import TailleController from '@/actions/App/Http/Controllers/TailleController';
 import ProduitController from '@/actions/App/Http/Controllers/ProduitController';
 import BoutiqueController from '@/actions/App/Http/Controllers/BoutiqueController';
 import UniteController from '@/actions/App/Http/Controllers/UniteController';
+import SousCategorieController from '@/actions/App/Http/Controllers/SousCategorieController';
 import { Link, usePage } from '@inertiajs/react';
 import {
 
     LayoutGrid,
     Store,
     Tag,
+    Layers,
     Ruler,
     Users,
     ShoppingBag,
@@ -76,6 +78,7 @@ const navigationGroups: NavGroup[] = [
         items: [
             { title: 'Boutiques', href: BoutiqueController.index.url(), icon: Store, permission: 'manage boutiques' },
             { title: 'Catégories', href: CategoryController.index.url(), icon: Tag, permission: 'manage categories' },
+            { title: 'Sous-catégories', href: SousCategorieController.index.url(), icon: Layers, permission: 'manage categories' },
             { title: 'Tailles', href: TailleController.index.url(), icon: Ruler, permission: 'manage categories' },
             { title: 'Unités de mesure', href: UniteController.index.url(), icon: Ruler, permission: 'manage units' },
             { title: 'Équipe & Staff', href: EmployeController.index.url(), icon: UserCheck, permission: 'manage users' },

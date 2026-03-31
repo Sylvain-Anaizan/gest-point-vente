@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\Vente;
-use Illuminate\Auth\Access\Response;
 
 class VentePolicy
 {
@@ -65,8 +64,8 @@ class VentePolicy
      */
     public function delete(User $user, Vente $vente): bool
     {
-        if ($user->isAdmin()) {
-            return true;
+        if (! $user->hasPermissionTo('delete sales')) {
+            return false;
         }
 
         return $user->boutiques->contains($vente->boutique_id) || $user->boutique_id === $vente->boutique_id;

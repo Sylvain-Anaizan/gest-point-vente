@@ -7,6 +7,7 @@ use App\Http\Requests\ProduitUpdateRequest;
 use App\Models\Boutique;
 use App\Models\Categorie;
 use App\Models\Produit;
+use App\Models\SousCategorie;
 use App\Models\Taille;
 use App\Models\Unite;
 use App\Models\Variante;
@@ -26,7 +27,8 @@ class ProduitController extends Controller
     public function index(Request $request): Response
     {
         $user = $request->user();
-        $query = Produit::with(['category', 'boutique', 'variantes.taille'])
+        $query = Produit::with(['category', 'sousCategorie', 'boutique', 'variantes.taille'])
+            ->where('est_virtuel', false)
             ->when($request->search, function ($q) use ($request) {
                 $q->where('nom', 'like', '%'.$request->search.'%')
                     ->orWhereHas('category', function ($sq) use ($request) {
@@ -35,6 +37,12 @@ class ProduitController extends Controller
             })
             ->when($request->boutique_id && $user->isAdmin(), function ($q) use ($request) {
                 $q->where('boutique_id', $request->boutique_id);
+            })
+            ->when($request->categorie_id, function ($q) use ($request) {
+                $q->where('categorie_id', $request->categorie_id);
+            })
+            ->when($request->sous_categorie_id, function ($q) use ($request) {
+                $q->where('sous_categorie_id', $request->sous_categorie_id);
             });
 
         // Statistiques globales (AVANT pagination)
@@ -62,6 +70,10 @@ class ProduitController extends Controller
                         'id' => $produit->category->id,
                         'nom' => $produit->category->nom,
                     ],
+                    'sousCategorie' => $produit->sousCategorie ? [
+                        'id' => $produit->sousCategorie->id,
+                        'nom' => $produit->sousCategorie->nom,
+                    ] : null,
                     'variantes' => $produit->variantes->map(fn ($v) => [
                         'id' => $v->id,
                         'taille' => $v->taille ? $v->taille->nom : 'N/A',
@@ -74,7 +86,9 @@ class ProduitController extends Controller
                     ] : null,
                 ]),
             'stats' => $stats,
-            'filters' => $request->only(['search', 'boutique_id']),
+            'filters' => $request->only(['search', 'boutique_id', 'categorie_id', 'sous_categorie_id']),
+            'categories' => Categorie::orderBy('nom')->get(['id', 'nom']),
+            'sousCategories' => SousCategorie::with('categorie:id,nom')->get(['id', 'nom', 'categorie_id']),
             'boutiques' => $user->isAdmin()
                 ? Boutique::all(['id', 'nom'])
                 : Boutique::where('id', $user->boutique_id)->get(['id', 'nom']),
@@ -92,6 +106,9 @@ class ProduitController extends Controller
             'categories' => Categorie::query()
                 ->orderBy('nom')
                 ->get(['id', 'nom']),
+            'sousCategories' => SousCategorie::query()
+                ->orderBy('nom')
+                ->get(['id', 'nom', 'categorie_id']),
             'tailles' => Taille::query()
                 ->orderBy('nom')
                 ->get(['id', 'nom']),
@@ -141,7 +158,7 @@ class ProduitController extends Controller
     public function show(Produit $produit): Response
     {
         Gate::authorize('view', $produit);
-        $produit->load(['category', 'variantes.taille', 'boutique', 'unite']);
+        $produit->load(['category', 'sousCategorie', 'variantes.taille', 'boutique', 'unite']);
 
         return Inertia::render('produits/show', [
             'produit' => [
@@ -156,6 +173,10 @@ class ProduitController extends Controller
                     'id' => $produit->category->id,
                     'nom' => $produit->category->nom,
                 ],
+                'sousCategorie' => $produit->sousCategorie ? [
+                    'id' => $produit->sousCategorie->id,
+                    'nom' => $produit->sousCategorie->nom,
+                ] : null,
                 'variantes' => $produit->variantes->map(fn ($v) => [
                     'id' => $v->id,
                     'taille' => $v->taille ? $v->taille->nom : 'N/A',
@@ -190,6 +211,7 @@ class ProduitController extends Controller
                 'description' => $produit->description,
                 'imageUrl' => $produit->imageUrl,
                 'categorie_id' => $produit->categorie_id,
+                'sous_categorie_id' => $produit->sous_categorie_id,
                 'boutique_id' => $produit->boutique_id,
                 'unite_id' => $produit->unite_id,
                 'variantes' => $produit->variantes->map(fn ($v) => [
@@ -202,6 +224,9 @@ class ProduitController extends Controller
             'categories' => Categorie::query()
                 ->orderBy('nom')
                 ->get(['id', 'nom']),
+            'sousCategories' => SousCategorie::query()
+                ->orderBy('nom')
+                ->get(['id', 'nom', 'categorie_id']),
             'tailles' => Taille::query()
                 ->orderBy('nom')
                 ->get(['id', 'nom']),

@@ -126,6 +126,8 @@ class PaiementController extends Controller
 
     public function destroy(Paiement $paiement): RedirectResponse
     {
+        \Illuminate\Support\Facades\Gate::authorize('delete payments');
+
         $this->authorizeBoutique($paiement);
 
         $vente = $paiement->vente;

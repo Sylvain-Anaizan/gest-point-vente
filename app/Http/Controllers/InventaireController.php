@@ -37,6 +37,7 @@ class InventaireController extends Controller
                 return [
                     'id' => $variante->id,
                     'produit' => $variante->produit->nom,
+                    'image_url' => $variante->produit->imageUrl,
                     'categorie' => $variante->produit->category?->nom ?? 'Non classé',
                     'taille' => $variante->taille?->nom ?? 'Unique',
                     'couleur' => $variante->couleur ?? 'N/A',

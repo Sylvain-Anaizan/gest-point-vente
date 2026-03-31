@@ -188,6 +188,8 @@ class ClientController extends Controller
      */
     public function destroy(Client $client)
     {
+        \Illuminate\Support\Facades\Gate::authorize('delete sales');
+
         $this->authorizeClientAccess($client);
 
         $client->delete();

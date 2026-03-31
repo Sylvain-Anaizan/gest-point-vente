@@ -28,6 +28,7 @@ class Produit extends Model
         'image',
         'boutique_id',
         'unite_id',
+        'sous_categorie_id',
         'est_virtuel',
     ];
 
@@ -82,6 +83,14 @@ class Produit extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Categorie::class, 'categorie_id');
+    }
+
+    /**
+     * Get the sub-category that owns the produit.
+     */
+    public function sousCategorie(): BelongsTo
+    {
+        return $this->belongsTo(SousCategorie::class, 'sous_categorie_id');
     }
 
     /**

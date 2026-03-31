@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CategoryStoreRequest;
 use App\Http\Requests\CategoryUpdateRequest;
 use App\Models\Categorie;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -108,6 +108,8 @@ class CategoryController extends Controller
      */
     public function destroy(Categorie $category): RedirectResponse
     {
+        Gate::authorize('delete categories');
+
         $category->delete();
 
         return to_route('categories.index')->with('success', 'Catégorie supprimée avec succès.');

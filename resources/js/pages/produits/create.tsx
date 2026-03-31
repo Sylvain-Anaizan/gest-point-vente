@@ -49,6 +49,12 @@ interface Category {
     nom: string;
 }
 
+interface SousCategorie {
+    id: number;
+    nom: string;
+    categorie_id: number;
+}
+
 interface Taille {
     id: number;
     nom: string;
@@ -66,11 +72,13 @@ interface Unite {
 
 export default function ProduitsCreate({
     categories,
+    sousCategories,
     tailles,
     boutiques,
     unites,
 }: {
     categories: Category[];
+    sousCategories: SousCategorie[];
     tailles: Taille[];
     boutiques: Boutique[];
     unites: Unite[];
@@ -78,6 +86,7 @@ export default function ProduitsCreate({
     const { data, setData, post, processing, errors } = useForm({
         nom: '',
         categorie_id: 0,
+        sous_categorie_id: null as number | null,
         boutique_id: null as number | null,
         unite_id: null as number | null,
         description: '',
@@ -86,6 +95,11 @@ export default function ProduitsCreate({
             { taille_id: null as number | null, prix_vente: 0, quantite: 0 }
         ] as { taille_id: number | null; prix_vente: number; quantite: number }[],
     });
+
+    // Sous-catégories filtrées par catégorie sélectionnée
+    const filteredSousCategories = sousCategories.filter(
+        (sc) => sc.categorie_id === data.categorie_id
+    );
 
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -249,12 +263,13 @@ export default function ProduitsCreate({
                                             <Select
                                                 name="categorie_id"
                                                 value={data.categorie_id ? data.categorie_id.toString() : undefined}
-                                                onValueChange={(value) =>
-                                                    setData(
-                                                        'categorie_id',
-                                                        parseInt(value) || 0,
-                                                    )
-                                                }
+                                                onValueChange={(value) => {
+                                                    setData((prev) => ({
+                                                        ...prev,
+                                                        categorie_id: parseInt(value) || 0,
+                                                        sous_categorie_id: null,
+                                                    }));
+                                                }}
                                             >
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Sélectionner une catégorie" />
@@ -271,6 +286,36 @@ export default function ProduitsCreate({
                                                 </SelectContent>
                                             </Select>
                                             <InputError message={errors.categorie_id} />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label htmlFor="sous_categorie_id">
+                                                Sous-catégorie
+                                            </Label>
+                                            <Select
+                                                name="sous_categorie_id"
+                                                value={data.sous_categorie_id?.toString() ?? "none"}
+                                                onValueChange={(value) => {
+                                                    setData('sous_categorie_id', value === "none" ? null : parseInt(value));
+                                                }}
+                                                disabled={!data.categorie_id || filteredSousCategories.length === 0}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Sélectionner une sous-catégorie" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="none">Aucune</SelectItem>
+                                                    {filteredSousCategories.map((sc) => (
+                                                        <SelectItem
+                                                            key={sc.id}
+                                                            value={sc.id.toString()}
+                                                        >
+                                                            {sc.nom}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <InputError message={errors.sous_categorie_id} />
                                         </div>
 
                                         <div className="space-y-2">

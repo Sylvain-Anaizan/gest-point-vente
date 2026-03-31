@@ -60,14 +60,14 @@ class TailleController extends Controller
                 'id' => $taille->id,
                 'nom' => $taille->nom,
                 'description' => $taille->description,
-                    'produits' => $taille->produits()->with('category')->get()->map(fn ($produit) => [
-                        'id' => $produit->id,
-                        'nom' => $produit->nom,
-                        'prix_vente' => $produit->prixMin,
-                        'quantite' => $produit->totalStock,
-                        'imageUrl' => $produit->imageUrl,
-                        'category' => $produit->category->nom ?? 'N/A',
-                    ]),
+                'produits' => $taille->produits()->with('category')->get()->map(fn ($produit) => [
+                    'id' => $produit->id,
+                    'nom' => $produit->nom,
+                    'prix_vente' => $produit->prixMin,
+                    'quantite' => $produit->totalStock,
+                    'imageUrl' => $produit->imageUrl,
+                    'category' => $produit->category->nom ?? 'N/A',
+                ]),
             ],
         ]);
     }
@@ -101,6 +101,8 @@ class TailleController extends Controller
      */
     public function destroy(Taille $taille): RedirectResponse
     {
+        Gate::authorize('delete categories');
+
         $taille->delete();
 
         return to_route('tailles.index')->with('success', 'Taille supprim?e avec succ?s.');

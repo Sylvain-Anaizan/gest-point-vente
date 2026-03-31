@@ -49,9 +49,9 @@ class EmployeController extends Controller
         $validated = $request->validated();
         $roles = $validated['roles'] ?? [];
         unset($validated['roles']);
-        
+
         $validated['password'] = Hash::make($validated['password']);
-        
+
         // Legacy column sync
         $validated['role'] = in_array('admin', $roles) ? 'admin' : 'employé';
 
@@ -90,12 +90,12 @@ class EmployeController extends Controller
         }
 
         // Legacy column sync
-        if (!empty($roles)) {
+        if (! empty($roles)) {
             $validated['role'] = in_array('admin', $roles) ? 'admin' : 'employé';
         }
 
         $employe->update($validated);
-        
+
         $employe->syncRoles($roles);
 
         return redirect()->route('employes.index')
@@ -107,6 +107,8 @@ class EmployeController extends Controller
      */
     public function destroy(User $employe): RedirectResponse
     {
+        Gate::authorize('delete users');
+
         $employe->delete();
 
         return redirect()->route('employes.index')

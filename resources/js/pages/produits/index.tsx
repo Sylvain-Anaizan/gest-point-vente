@@ -45,7 +45,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import AppLayout from '@/layouts/app-layout';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Pagination from '@/components/ui/pagination-custom';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -64,6 +64,13 @@ interface Boutique {
     nom: string;
 }
 
+interface SousCategorie {
+    id: number;
+    nom: string;
+    categorie_id: number;
+    categorie?: { id: number; nom: string };
+}
+
 interface Produit {
     id: number;
     nom: string;
@@ -73,12 +80,15 @@ interface Produit {
     description: string | null;
     imageUrl: string | null;
     category: Category;
+    sousCategorie: { id: number; nom: string } | null;
     boutique: Boutique | null;
 }
 
 export default function ProduitsIndex({
     produits,
     boutiques = [],
+    categories = [],
+    sousCategories = [],
     stats,
     filters
 }: {
@@ -93,27 +103,47 @@ export default function ProduitsIndex({
         to: number | null;
     };
     boutiques: Boutique[];
+    categories: Category[];
+    sousCategories: SousCategorie[];
     stats: { total_produits: number; low_stock: number; total_value: number; };
-    filters: { search?: string; boutique_id?: string; };
+    filters: { search?: string; boutique_id?: string; categorie_id?: string; sous_categorie_id?: string; };
 }) {
     const { auth } = usePage().props as unknown as { auth: { user: { permissions: string[] } } };
     const canManage = auth.user.permissions.includes('manage products');
 
     const [searchQuery, setSearchQuery] = useState(filters.search || '');
     const [selectedBoutique, setSelectedBoutique] = useState<string>(filters.boutique_id || 'all');
+    const [selectedCategory, setSelectedCategory] = useState<string>(filters.categorie_id || 'all');
+    const [selectedSousCategorie, setSelectedSousCategorie] = useState<string>(filters.sous_categorie_id || 'all');
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [produitToDelete, setProduitToDelete] = useState<Produit | null>(null);
 
+    const filteredSousCategories = useMemo(() => {
+        if (selectedCategory === 'all') return sousCategories;
+        return sousCategories.filter(sc => sc.categorie_id.toString() === selectedCategory);
+    }, [sousCategories, selectedCategory]);
+
+    const buildFilterParams = (overrides: Record<string, string | undefined> = {}) => {
+        const params: Record<string, string | undefined> = {
+            search: searchQuery || undefined,
+            boutique_id: selectedBoutique === 'all' ? undefined : selectedBoutique,
+            categorie_id: selectedCategory === 'all' ? undefined : selectedCategory,
+            sous_categorie_id: selectedSousCategorie === 'all' ? undefined : selectedSousCategorie,
+            ...overrides,
+        };
+        // Remove undefined keys
+        return Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined));
+    };
+
     const handleSearch = () => {
-        router.get(ProduitController.index.url(), {
-            search: searchQuery,
-            boutique_id: selectedBoutique === 'all' ? undefined : selectedBoutique
-        }, { preserveState: true, replace: true });
+        router.get(ProduitController.index.url(), buildFilterParams(), { preserveState: true, replace: true });
     };
 
     const clearFilters = () => {
         setSearchQuery('');
         setSelectedBoutique('all');
+        setSelectedCategory('all');
+        setSelectedSousCategorie('all');
         router.get(ProduitController.index.url(), {}, { preserveState: true, replace: true });
     };
 
@@ -240,6 +270,42 @@ export default function ProduitsIndex({
                                         ))}
                                     </SelectContent>
                                 </Select>
+                                <Select value={selectedCategory} onValueChange={(val) => {
+                                    setSelectedCategory(val);
+                                    setSelectedSousCategorie('all');
+                                    router.get(ProduitController.index.url(), buildFilterParams({
+                                        categorie_id: val === 'all' ? undefined : val,
+                                        sous_categorie_id: undefined,
+                                    }), { preserveState: true, replace: true });
+                                }}>
+                                    <SelectTrigger className="w-full lg:w-[200px] h-12 bg-gray-200 dark:bg-zinc-800/50 border-white/20 dark:border-zinc-700/50 rounded-2xl">
+                                        <SelectValue placeholder="Catégories" />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-lg bg-gray-200 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800">
+                                        <SelectItem value="all">Catégories</SelectItem>
+                                        {categories.map((cat) => (
+                                            <SelectItem key={cat.id} value={cat.id.toString()}>{cat.nom}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {filteredSousCategories.length > 0 && (
+                                    <Select value={selectedSousCategorie} onValueChange={(val) => {
+                                        setSelectedSousCategorie(val);
+                                        router.get(ProduitController.index.url(), buildFilterParams({
+                                            sous_categorie_id: val === 'all' ? undefined : val,
+                                        }), { preserveState: true, replace: true });
+                                    }}>
+                                        <SelectTrigger className="w-full lg:w-[200px] h-12 bg-gray-200 dark:bg-zinc-800/50 border-white/20 dark:border-zinc-700/50 rounded-2xl">
+                                            <SelectValue placeholder="Sous-catégories" />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-lg bg-gray-200 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800">
+                                            <SelectItem value="all">Sous-catégories</SelectItem>
+                                            {filteredSousCategories.map((sc) => (
+                                                <SelectItem key={sc.id} value={sc.id.toString()}>{sc.nom}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                )}
                                 <div className="hidden sm:flex h-12 px-4 items-center bg-zinc-100 dark:bg-zinc-800/50 rounded-2xl border border-white/10 text-[10px] font-black uppercase tracking-widest text-muted-foreground whitespace-nowrap">
                                     {produits.total} RÉFÉRENCES
                                 </div>
@@ -313,10 +379,15 @@ export default function ProduitsIndex({
                                                 </DropdownMenu>
                                             </div>
 
-                                            <div className="absolute top-3 left-3">
+                                            <div className="absolute top-3 left-3 flex flex-col gap-1">
                                                 <Badge className="bg-white/90 dark:bg-zinc-800/90 text-zinc-900 dark:text-zinc-50 border-0 shadow-sm backdrop-blur-md px-3 py-1 rounded-xl font-black uppercase text-[9px] tracking-widest">
                                                     {produit.category.nom}
                                                 </Badge>
+                                                {produit.sousCategorie && (
+                                                    <Badge className="bg-indigo-500/80 text-white border-0 shadow-sm backdrop-blur-md px-3 py-1 rounded-xl font-bold text-[8px] tracking-wider">
+                                                        {produit.sousCategorie.nom}
+                                                    </Badge>
+                                                )}
                                             </div>
                                         </div>
 

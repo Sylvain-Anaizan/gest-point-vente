@@ -14,6 +14,7 @@ use App\Http\Controllers\POSController;
 use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\RapportController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SousCategorieController;
 use App\Http\Controllers\TailleController;
 use App\Http\Controllers\VenteController;
 use App\Http\Controllers\WhatsAppController;
@@ -37,6 +38,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('categories', CategoryController::class)->middleware('permission:manage categories');
+    Route::resource('sous-categories', SousCategorieController::class)->except(['show'])->middleware('permission:manage categories');
     Route::resource('tailles', TailleController::class)->middleware('permission:manage units');
     Route::resource('unites', \App\Http\Controllers\UniteController::class)->middleware('permission:manage units');
     Route::resource('boutiques', BoutiqueController::class)->middleware('permission:manage boutiques');
@@ -53,7 +55,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('clients.toggle-status')
         ->middleware('permission:manage sales');
     Route::resource('clients', ClientController::class)->middleware('permission:manage sales');
-    Route::resource('ventes', VenteController::class)->middleware('permission:manage sales'); 
+    Route::resource('ventes', VenteController::class)->middleware('permission:manage sales');
     Route::resource('commandes', CommandeController::class)->middleware('permission:manage sales');
     Route::resource('paiements', PaiementController::class)->except(['edit', 'update'])->middleware('permission:manage payments');
     Route::get('commandes/{commande}/receipt', [\App\Http\Controllers\CommandeReceiptController::class, 'download'])

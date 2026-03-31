@@ -60,6 +60,7 @@ interface Produit {
     description: string | null;
     imageUrl: string | null;
     category: Category;
+    sousCategorie: { id: number; nom: string } | null;
     unite: Unite | null;
     variantes: Variante[];
 }
@@ -115,6 +116,9 @@ export default function ProduitsShow({ produit }: { produit: Produit }) {
                             </h1>
                             <div className="flex items-center space-x-2 mt-1">
                                 <Badge variant="secondary">{produit.category.nom}</Badge>
+                                {produit.sousCategorie && (
+                                    <Badge variant="outline">{produit.sousCategorie.nom}</Badge>
+                                )}
                                 <Badge variant="outline" className="flex items-center gap-1">
                                     <RulerIcon className="size-3" />
                                     {produit.variantes.length} Variantes
@@ -280,6 +284,14 @@ export default function ProduitsShow({ produit }: { produit: Produit }) {
                                 <div className="space-y-1 p-2 rounded-md bg-muted/50">
                                     <span className="text-xs font-semibold text-muted-foreground block">Catégorie</span>
                                     <Badge variant="default">{produit.category.nom}</Badge>
+                                </div>
+                                <div className="space-y-1 p-2 rounded-md bg-muted/50">
+                                    <span className="text-xs font-semibold text-muted-foreground block">Sous-catégorie</span>
+                                    {produit.sousCategorie ? (
+                                        <Badge variant="secondary">{produit.sousCategorie.nom}</Badge>
+                                    ) : (
+                                        <span className="text-sm italic text-muted-foreground">Aucune</span>
+                                    )}
                                 </div>
                                 <div className="space-y-1 p-2 rounded-md bg-muted/50">
                                     <span className="text-xs font-semibold text-muted-foreground block">ID Produit</span>

@@ -72,8 +72,8 @@ class ProduitPolicy
      */
     public function delete(User $user, Produit $produit): bool
     {
-        if ($user->isAdmin()) {
-            return true;
+        if (! $user->hasPermissionTo('delete products')) {
+            return false;
         }
 
         if ($user->isEmploye()) {

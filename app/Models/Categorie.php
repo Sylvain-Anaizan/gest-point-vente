@@ -28,4 +28,12 @@ class Categorie extends Model
     {
         return $this->hasMany(Produit::class);
     }
+
+    /**
+     * Get the sub-categories for the category.
+     */
+    public function sousCategories(): HasMany
+    {
+        return $this->hasMany(SousCategorie::class);
+    }
 }

@@ -75,8 +75,17 @@ interface Produit {
     nom: string;
     imageUrl: string;
     category?: string;
+    sous_categorie?: string | null;
+    sous_categorie_id?: number | null;
     boutique_id: number | null;
     variantes: Variante[];
+}
+
+interface SousCategorie {
+    id: number;
+    nom: string;
+    categorie_id: number;
+    categorie?: { id: number; nom: string };
 }
 
 interface Client {
@@ -103,15 +112,18 @@ interface Boutique { id: number; nom: string; }
 // ─────────────────────────────────────────────
 interface QuickClientModalProps {
     boutiqueId: string;
+    boutiques: Boutique[];
+    userRole: string;
     onClose: () => void;
     onCreated: (client: Client) => void;
 }
 
-function QuickClientModal({ boutiqueId, onClose, onCreated }: QuickClientModalProps) {
+function QuickClientModal({ boutiqueId, boutiques, userRole, onClose, onCreated }: QuickClientModalProps) {
     const [nom, setNom] = useState('');
     const [telephone, setTelephone] = useState('');
     const [email, setEmail] = useState('');
     const [adresse, setAdresse] = useState('');
+    const [selectedBoutique, setSelectedBoutique] = useState(boutiqueId && boutiqueId !== 'all' ? boutiqueId : (boutiques.length === 1 ? boutiques[0].id.toString() : ''));
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -129,7 +141,7 @@ function QuickClientModal({ boutiqueId, onClose, onCreated }: QuickClientModalPr
             if (telephone) body.telephone = telephone.trim();
             if (email) body.email = email.trim();
             if (adresse) body.adresse = adresse.trim();
-            if (boutiqueId && boutiqueId !== 'all') body.boutique_id = boutiqueId;
+            if (selectedBoutique) body.boutique_id = selectedBoutique;
 
             const response = await fetch('/clients/creation-rapide', {
                 method: 'POST',
@@ -209,6 +221,29 @@ function QuickClientModal({ boutiqueId, onClose, onCreated }: QuickClientModalPr
                         />
                         {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                     </div>
+                    {userRole === 'admin' ? (
+                        <div className="space-y-1.5">
+                            <Label htmlFor="qc-boutique">Boutique <span className="text-destructive">*</span></Label>
+                            <Select value={selectedBoutique} onValueChange={setSelectedBoutique}>
+                                <SelectTrigger id="qc-boutique" className={!selectedBoutique ? 'border-destructive' : ''}>
+                                    <SelectValue placeholder="Sélectionner une boutique" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {boutiques.map(b => (
+                                        <SelectItem key={b.id} value={b.id.toString()}>{b.nom}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    ) : boutiques.length === 1 ? (
+                        <div className="space-y-1.5">
+                            <Label>Boutique</Label>
+                            <div className="flex items-center gap-2 h-10 px-3 rounded-md border bg-muted/40 text-sm">
+                                <StoreIcon className="h-4 w-4 text-muted-foreground" />
+                                <span>{boutiques[0].nom}</span>
+                            </div>
+                        </div>
+                    ) : null}
                     <div className="space-y-1.5">
                         <Label htmlFor="qc-adresse">Adresse</Label>
                         <Input
@@ -233,13 +268,14 @@ function QuickClientModal({ boutiqueId, onClose, onCreated }: QuickClientModalPr
     );
 }
 
-export default function POSIndex({ produits, clients, boutiques }: { produits: Produit[]; clients: Client[]; boutiques: Boutique[] }) {
+export default function POSIndex({ produits, clients, boutiques, sousCategories }: { produits: Produit[]; clients: Client[]; boutiques: Boutique[]; sousCategories: SousCategorie[] }) {
     const { auth } = usePage().props as unknown as { auth: { user: { role: string; permissions: string[] } } };
     const userRole = auth.user.role;
     const canManage = auth.user.permissions.includes('manage sales');
 
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [selectedSousCategorie, setSelectedSousCategorie] = useState<string>('all');
     const [selectedBoutiqueId, setSelectedBoutiqueId] = useState<string>(
         userRole !== 'admin' && boutiques.length === 1 ? boutiques[0].id.toString() : 'all'
     );
@@ -261,21 +297,41 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
         boutique_id: (userRole !== 'admin' && boutiques.length === 1) ? boutiques[0].id : null as number | null,
     });
 
-    const handleBoutiqueChange = (value: string) => {
+    const handleBoutiqueChange = async (value: string) => {
         setSelectedBoutiqueId(value);
         setPanier([]);
         setSelectedClient('anonymous');
         setData('client_id', null);
         const boutiqueId = value === 'all' ? null : parseInt(value);
         setData('boutique_id', boutiqueId);
+
+        // Charger les clients de la boutique sélectionnée
+        try {
+            const url = boutiqueId
+                ? `/clients/par-boutique?boutique_id=${boutiqueId}`
+                : `/clients/par-boutique`;
+            const response = await fetch(url, {
+                headers: { 'Accept': 'application/json' },
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setClientsList(data);
+            }
+        } catch {
+            // Fallback : keep current list
+        }
     };
 
     // --- Clients filtrés par boutique ---
     const filteredClients = useMemo(() => {
-        if (selectedBoutiqueId === 'all') return clientsList;
-        const boutiqueId = parseInt(selectedBoutiqueId);
-        return clientsList.filter(c => c.boutique_id === boutiqueId || c.boutique_id === null);
-    }, [clientsList, selectedBoutiqueId]);
+        return clientsList;
+    }, [clientsList]);
+
+    // --- Sous-catégories filtrées par catégorie sélectionnée ---
+    const filteredSousCategories = useMemo(() => {
+        if (selectedCategory === 'all') return sousCategories;
+        return sousCategories.filter(sc => sc.categorie?.nom === selectedCategory);
+    }, [sousCategories, selectedCategory]);
 
     // --- Calculs ---
     const categories = useMemo(() => {
@@ -287,12 +343,13 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
         return produits.filter(p => {
             const matchesSearch = p.nom.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesCategory = selectedCategory === 'all' || (p.category || 'Autre') === selectedCategory;
+            const matchesSousCategorie = selectedSousCategorie === 'all' || p.sous_categorie_id?.toString() === selectedSousCategorie;
             const matchesBoutique = selectedBoutiqueId === 'all'
                 ? p.boutique_id === null
                 : p.boutique_id?.toString() === selectedBoutiqueId;
-            return matchesSearch && matchesCategory && matchesBoutique;
+            return matchesSearch && matchesCategory && matchesSousCategorie && matchesBoutique;
         });
-    }, [produits, searchTerm, selectedCategory, selectedBoutiqueId]);
+    }, [produits, searchTerm, selectedCategory, selectedSousCategorie, selectedBoutiqueId]);
 
     const panierTotal = useMemo(() => {
         return panier.reduce((total, item) => total + (item.prix_vente * item.panierQuantite), 0);
@@ -360,6 +417,15 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
         });
     };
 
+    const updatePrice = (varianteId: number, newPrice: number) => {
+        if (isNaN(newPrice) || newPrice < 0) return;
+        setPanier(prev => prev.map(item =>
+            item.variante_id === varianteId
+                ? { ...item, prix_vente: newPrice }
+                : item
+        ));
+    };
+
     const handleCheckout = () => {
         setPaymentModalOpen(true);
         setIsCartOpen(false);
@@ -416,17 +482,6 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
                             </div>
-                            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                                <SelectTrigger className="w-full sm:w-[180px] h-11 lg:h-10 bg-background shadow-sm lg:shadow-none">
-                                    <SelectValue placeholder="Catégorie" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Tout</SelectItem>
-                                    {categories.filter(c => c !== 'all').map(cat => (
-                                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
                             {userRole === 'admin' && (
                                 <Select value={selectedBoutiqueId} onValueChange={handleBoutiqueChange}>
                                     <SelectTrigger className="w-full sm:w-[200px] h-11 lg:h-10 bg-background shadow-sm lg:shadow-none">
@@ -441,6 +496,31 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                                     </SelectContent>
                                 </Select>
                             )}
+                            <Select value={selectedCategory} onValueChange={(val) => { setSelectedCategory(val); setSelectedSousCategorie('all'); }}>
+                                <SelectTrigger className="w-full sm:w-[180px] h-11 lg:h-10 bg-background shadow-sm lg:shadow-none">
+                                    <SelectValue placeholder="Catégorie" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Catégories</SelectItem>
+                                    {categories.filter(c => c !== 'all').map(cat => (
+                                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {filteredSousCategories.length > 0 && (
+                                <Select value={selectedSousCategorie} onValueChange={setSelectedSousCategorie}>
+                                    <SelectTrigger className="w-full sm:w-[180px] h-11 lg:h-10 bg-background shadow-sm lg:shadow-none">
+                                        <SelectValue placeholder="Sous-catégorie" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Sous-catégories </SelectItem>
+                                        {filteredSousCategories.map(sc => (
+                                            <SelectItem key={sc.id} value={sc.id.toString()}>{sc.nom}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            )}
+
                         </CardContent>
                     </Card>
 
@@ -635,10 +715,19 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                                                 <div className="flex-1 min-w-0">
                                                     <h4 className="text-sm font-medium truncate">{item.nom}</h4>
                                                     <p className="text-[10px] text-muted-foreground font-semibold uppercase">Taille: {item.taille}</p>
-                                                    <div className="flex items-center justify-between mt-1">
-                                                        <p className="text-xs text-muted-foreground">
-                                                            {item.panierQuantite} x {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(item.prix_vente)}
-                                                        </p>
+                                                    <div className="flex items-center justify-between mt-1 gap-2">
+                                                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                            <span>{item.panierQuantite} x</span>
+                                                            <input
+                                                                type="number"
+                                                                value={item.prix_vente}
+                                                                onChange={(e) => updatePrice(item.variante_id, parseFloat(e.target.value) || 0)}
+                                                                className="w-16 h-6 text-xs text-center font-medium bg-muted/50 border border-border/50 rounded px-1 focus:outline-none focus:ring-1 focus:ring-primary/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                                min={0}
+                                                                step={100}
+                                                            />
+                                                            <span className="text-[9px]">F</span>
+                                                        </div>
                                                         <p className="text-sm font-semibold">
                                                             {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(item.prix_vente * item.panierQuantite)}
                                                         </p>
@@ -823,10 +912,19 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
                                                         <div className="flex-1 min-w-0">
                                                             <h4 className="text-sm font-medium truncate">{item.nom}</h4>
                                                             <p className="text-[10px] text-muted-foreground font-semibold uppercase">Taille: {item.taille}</p>
-                                                            <div className="flex items-center justify-between mt-1">
-                                                                <p className="text-xs text-muted-foreground">
-                                                                    {item.panierQuantite} x {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(item.prix_vente)}
-                                                                </p>
+                                                            <div className="flex items-center justify-between mt-1 gap-2">
+                                                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                                    <span>{item.panierQuantite} x</span>
+                                                                    <input
+                                                                        type="number"
+                                                                        value={item.prix_vente}
+                                                                        onChange={(e) => updatePrice(item.variante_id, parseFloat(e.target.value) || 0)}
+                                                                        className="w-16 h-6 text-xs text-center font-medium bg-muted/50 border border-border/50 rounded px-1 focus:outline-none focus:ring-1 focus:ring-primary/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                                        min={0}
+                                                                        step={100}
+                                                                    />
+                                                                    <span className="text-[9px]">F</span>
+                                                                </div>
                                                                 <p className="text-sm font-semibold">
                                                                     {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(item.prix_vente * item.panierQuantite)}
                                                                 </p>
@@ -1015,6 +1113,8 @@ export default function POSIndex({ produits, clients, boutiques }: { produits: P
             {showQuickClientModal && (
                 <QuickClientModal
                     boutiqueId={selectedBoutiqueId}
+                    boutiques={boutiques}
+                    userRole={userRole}
                     onClose={() => setShowQuickClientModal(false)}
                     onCreated={(newClient) => {
                         setClientsList(prev => [newClient, ...prev]);

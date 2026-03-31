@@ -39,7 +39,6 @@ import { useState, useMemo, useCallback } from 'react';
 import {
     AlertCircle,
     ArrowDown,
-    ArrowRight,
     ArrowUp,
     ArrowUpDown,
     ChevronLeft,
@@ -56,8 +55,6 @@ import {
     Settings2,
     ShoppingBag,
     Tag,
-    TrendingDown,
-    TrendingUp,
 } from 'lucide-react';
 import { BreadcrumbItem } from '@/types';
 import {
@@ -71,6 +68,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface VarianteData {
     id: number;
     produit: string;
+    image_url: string;
     categorie: string;
     taille: string;
     couleur: string;
@@ -247,25 +245,7 @@ export default function Index({ variantes, categories }: Props) {
         }).format(Number(price));
     };
 
-    const TendanceIcon = ({ tendance }: { tendance: number }) => {
-        if (tendance > 0)
-            return (
-                <span className="inline-flex items-center gap-0.5 text-emerald-500" title={`+${tendance} sur 7 jours`}>
-                    <TrendingUp className="h-4 w-4" />
-                </span>
-            );
-        if (tendance < 0)
-            return (
-                <span className="inline-flex items-center gap-0.5 text-red-500" title={`${tendance} sur 7 jours`}>
-                    <TrendingDown className="h-4 w-4" />
-                </span>
-            );
-        return (
-            <span className="inline-flex items-center text-muted-foreground/40" title="Aucun mouvement sur 7 jours">
-                <ArrowRight className="h-4 w-4" />
-            </span>
-        );
-    };
+
 
     const SortableHeader = ({
         field,
@@ -277,7 +257,7 @@ export default function Index({ variantes, categories }: Props) {
         className?: string;
     }) => (
         <TableHead
-            className={`cursor-pointer select-none hover:text-foreground transition-colors ${className}`}
+            className={`cursor-pointer select-none hover:text-slate-900 transition-colors text-slate-600 font-semibold ${className}`}
             onClick={() => handleSort(field)}
         >
             <span className="inline-flex items-center gap-1.5">
@@ -289,7 +269,7 @@ export default function Index({ variantes, categories }: Props) {
                         <ArrowDown className="h-3.5 w-3.5" />
                     )
                 ) : (
-                    <ArrowUpDown className="h-3.5 w-3.5 opacity-30" />
+                    <ArrowUpDown className="h-3.5 w-3.5 text-slate-300" />
                 )}
             </span>
         </TableHead>
@@ -299,18 +279,18 @@ export default function Index({ variantes, categories }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Inventaire | Sylvain Anaizan" />
 
-            <div className="flex h-full flex-col gap-6 p-4 md:p-8">
+            <div className="flex h-full flex-col gap-6 p-4 font-sans min-h-screen">
                 {/* Header Section */}
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5 }}
+                        transition={{ duration: 0.4 }}
                     >
-                        <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
                             Inventaire de Stock
                         </h1>
-                        <p className="text-muted-foreground mt-1 text-lg">
+                        <p className="text-slate-500 mt-1 text-base">
                             Visualisation et gestion complète de vos stocks.
                         </p>
                     </motion.div>
@@ -318,15 +298,15 @@ export default function Index({ variantes, categories }: Props) {
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 0.1 }}
+                        transition={{ duration: 0.4, delay: 0.1 }}
                         className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
                     >
                         <div className="relative w-full sm:w-[300px]">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                             <Input
                                 type="search"
-                                placeholder="Rechercher..."
-                                className="pl-9 h-10 rounded-xl border-white/5 bg-background/50 backdrop-blur-md"
+                                placeholder="Rechercher un produit..."
+                                className="pl-9 h-10 rounded-lg border-slate-200 bg-white shadow-sm focus-visible:ring-slate-400"
                                 value={search}
                                 onChange={(e) => {
                                     setSearch(e.target.value);
@@ -341,10 +321,10 @@ export default function Index({ variantes, categories }: Props) {
                                 setCurrentPage(1);
                             }}
                         >
-                            <SelectTrigger className="w-full sm:w-[180px] h-10 rounded-xl border-white/5 bg-background/50 backdrop-blur-md">
+                            <SelectTrigger className="w-full sm:w-[180px] h-10 rounded-lg border-slate-200 bg-white shadow-sm">
                                 <SelectValue placeholder="Catégorie" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="bg-white border-slate-200 shadow-md">
                                 <SelectItem value="all">Toutes les catégories</SelectItem>
                                 {categories.map((cat) => (
                                     <SelectItem key={cat} value={cat}>
@@ -356,12 +336,12 @@ export default function Index({ variantes, categories }: Props) {
                         <Button
                             variant="outline"
                             size="sm"
-                            className="h-10 rounded-xl border-white/5 bg-background/50 gap-2"
+                            className="h-10 rounded-lg border-slate-200 bg-white shadow-sm text-slate-700 hover:bg-slate-50 gap-2"
                             asChild
                         >
                             <a href={exportMethod.url()} download>
                                 <Download className="h-4 w-4" />
-                                <span className="hidden sm:inline">Export CSV</span>
+                                <span className="hidden sm:inline font-medium">Exporter</span>
                             </a>
                         </Button>
                     </motion.div>
@@ -374,48 +354,45 @@ export default function Index({ variantes, categories }: Props) {
                             title: 'Articles Uniques',
                             value: stats.total,
                             icon: Package,
-                            gradient: 'from-blue-500/10 to-indigo-500/10',
-                            border: 'border-blue-500/20',
+                            iconBg: 'bg-blue-50',
+                            iconColor: 'text-blue-600',
                         },
                         {
                             title: 'Points de Vigilance',
                             value: stats.alerte,
                             icon: AlertCircle,
-                            color: 'text-red-500',
-                            gradient: 'from-red-500/10 to-orange-500/10',
-                            border: 'border-red-500/20',
+                            iconBg: 'bg-red-50',
+                            iconColor: 'text-red-600',
+                            valueColor: 'text-red-600',
                             animate: stats.alerte > 0,
                         },
                         {
                             title: 'Valeur Estimée',
                             value: formatPrice(stats.valeur),
                             icon: ShoppingBag,
-                            gradient: 'from-emerald-500/10 to-teal-500/10',
-                            border: 'border-emerald-500/20',
+                            iconBg: 'bg-emerald-50',
+                            iconColor: 'text-emerald-600',
                         },
                     ].map((stat, i) => (
                         <motion.div
                             key={stat.title}
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: i * 0.1 }}
+                            transition={{ duration: 0.4, delay: i * 0.1 }}
                         >
-                            <Card
-                                className={`overflow-hidden border-none bg-gradient-to-br ${stat.gradient} backdrop-blur-sm relative group`}
-                            >
-                                <div
-                                    className={`absolute inset-0 border-2 rounded-xl transition-opacity opacity-0 group-hover:opacity-100 ${stat.border}`}
-                                />
-                                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                    <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground/80">
+                            <Card className="bg-white border-slate-200 shadow-sm rounded-xl overflow-hidden">
+                                <CardHeader className="flex flex-row items-center justify-between pb-2 pt-5">
+                                    <p className="text-sm font-medium text-slate-500">
                                         {stat.title}
                                     </p>
-                                    <stat.icon
-                                        className={`h-5 w-5 ${stat.color || 'text-muted-foreground'} ${stat.animate ? 'animate-pulse' : ''}`}
-                                    />
+                                    <div className={`p-2 rounded-lg ${stat.iconBg}`}>
+                                        <stat.icon
+                                            className={`h-5 w-5 ${stat.iconColor} ${stat.animate ? 'animate-pulse' : ''}`}
+                                        />
+                                    </div>
                                 </CardHeader>
-                                <CardContent>
-                                    <p className={`text-3xl font-bold tracking-tight ${stat.color || ''}`}>
+                                <CardContent className="pb-5">
+                                    <p className={`text-2xl font-bold ${stat.valueColor || 'text-slate-900'}`}>
                                         {stat.value}
                                     </p>
                                 </CardContent>
@@ -425,19 +402,20 @@ export default function Index({ variantes, categories }: Props) {
 
                     {/* Alertes Only Toggle Card */}
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.3 }}
+                        transition={{ duration: 0.4, delay: 0.3 }}
                     >
-                        <Card className="overflow-hidden border-none bg-gradient-to-br from-amber-500/10 to-yellow-500/10 backdrop-blur-sm relative group h-full flex flex-col justify-center">
-                            <div className="absolute inset-0 border-2 rounded-xl transition-opacity opacity-0 group-hover:opacity-100 border-amber-500/20" />
-                            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground/80">
+                        <Card className="bg-white border-slate-200 shadow-sm rounded-xl h-full flex flex-col justify-center">
+                            <CardHeader className="flex flex-row items-center justify-between pb-2 pt-5">
+                                <p className="text-sm font-medium text-slate-500">
                                     Filtre rapide
                                 </p>
-                                <AlertCircle className="h-5 w-5 text-amber-500" />
+                                <div className="p-2 rounded-lg bg-amber-50">
+                                    <AlertCircle className="h-5 w-5 text-amber-600" />
+                                </div>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="pb-5">
                                 <div className="flex items-center gap-3">
                                     <Switch
                                         id="alertes-only"
@@ -446,8 +424,9 @@ export default function Index({ variantes, categories }: Props) {
                                             setAlertesOnly(v);
                                             setCurrentPage(1);
                                         }}
+                                        className="data-[state=checked]:bg-amber-500"
                                     />
-                                    <Label htmlFor="alertes-only" className="text-sm font-semibold cursor-pointer">
+                                    <Label htmlFor="alertes-only" className="text-sm font-semibold text-slate-700 cursor-pointer">
                                         Alertes uniquement
                                     </Label>
                                 </div>
@@ -457,52 +436,47 @@ export default function Index({ variantes, categories }: Props) {
                 </div>
 
                 {/* Results count */}
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <div className="flex items-center justify-between text-sm text-slate-500 font-medium">
                     <span>
                         {processedVariantes.length} résultat{processedVariantes.length !== 1 ? 's' : ''}
                         {processedVariantes.length !== variantes.length && ` sur ${variantes.length}`}
                     </span>
                     {totalPages > 1 && (
                         <span>
-                            Page {safeCurrentPage} / {totalPages}
+                            Page {safeCurrentPage} sur {totalPages}
                         </span>
                     )}
                 </div>
 
                 {/* Desktop Table View */}
-                <Card className="hidden lg:block overflow-hidden border-white/5 bg-background/40 backdrop-blur-xl rounded-3xl">
+                <Card className="hidden lg:block bg-white border-slate-200 shadow-sm rounded-xl overflow-hidden">
                     <Table>
-                        <TableHeader>
-                            <TableRow className="hover:bg-transparent border-white/5 bg-muted/30">
-                                <SortableHeader field="produit" className="w-[260px] py-5 pl-8">
+                        <TableHeader className="bg-slate-50 border-b border-slate-200">
+                            <TableRow className="hover:bg-slate-50 border-none">
+                                <SortableHeader field="produit" className="w-[280px] py-4 pl-6">
                                     Produit
                                 </SortableHeader>
                                 <SortableHeader field="categorie">Catégorie</SortableHeader>
-                                <TableHead>Détails</TableHead>
+                                <TableHead className="text-slate-600 font-semibold">Détails</TableHead>
                                 <SortableHeader field="prix_vente" className="text-left">
                                     Prix
                                 </SortableHeader>
                                 <SortableHeader field="quantite">
                                     Stock
                                 </SortableHeader>
-                                <SortableHeader field="tendance">
-                                    Tendance
-                                </SortableHeader>
-                                <TableHead>Statut</TableHead>
-                                <TableHead className="text-right pr-8">Actions</TableHead>
+                                <TableHead className="text-slate-600 font-semibold">Statut</TableHead>
+                                <TableHead className="text-right pr-6 text-slate-600 font-semibold">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             <AnimatePresence mode="popLayout">
                                 {paginatedVariantes.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={8} className="h-64 text-center">
-                                            <div className="flex flex-col items-center gap-2 opacity-50">
-                                                <Search className="h-10 w-10 mb-2" />
-                                                <p className="text-xl font-medium">Aucun résultat</p>
-                                                <p className="text-sm">
-                                                    Essayez un autre filtre ou mot-clé.
-                                                </p>
+                                        <TableCell colSpan={8} className="h-48 text-center text-slate-500">
+                                            <div className="flex flex-col items-center justify-center gap-2">
+                                                <Search className="h-8 w-8 text-slate-300 mb-1" />
+                                                <p className="text-lg font-medium text-slate-600">Aucun produit trouvé</p>
+                                                <p className="text-sm">Modifiez vos filtres ou votre recherche.</p>
                                             </div>
                                         </TableCell>
                                     </TableRow>
@@ -514,64 +488,65 @@ export default function Index({ variantes, categories }: Props) {
                                             animate={{ opacity: 1 }}
                                             exit={{ opacity: 0 }}
                                             key={v.id}
-                                            className="group border-white/5 hover:bg-accent/30 transition-all duration-300"
+                                            className="group border-b border-slate-100 hover:bg-slate-50/80 transition-colors"
                                         >
-                                            <TableCell className="py-4 pl-8">
-                                                <span className="font-bold text-base group-hover:text-primary transition-colors">
-                                                    {v.produit}
-                                                </span>
-                                            </TableCell>
-                                            <TableCell>
-                                                <span className="text-xs text-muted-foreground uppercase tracking-widest flex items-center gap-1">
-                                                    <Tag className="h-3 w-3" /> {v.categorie}
-                                                </span>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex gap-2">
-                                                    <Badge
-                                                        variant="outline"
-                                                        className="rounded-full bg-background/50 border-white/5 font-medium px-3"
-                                                    >
-                                                        <Layers className="h-3 w-3 mr-1.5" /> {v.taille}
-                                                    </Badge>
+                                            <TableCell className="py-3 pl-6">
+                                                <div className="flex items-center gap-3">
+                                                    <img
+                                                        src={v.image_url}
+                                                        alt={v.produit}
+                                                        className="h-10 w-10 rounded-md object-cover border border-slate-200 bg-slate-50 shrink-0"
+                                                    />
+                                                    <span className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+                                                        {v.produit}
+                                                    </span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className=" font-mono text-base font-semibold tabular-nums">
+                                            <TableCell>
+                                                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md">
+                                                    <Tag className="h-3 w-3 text-slate-400" /> {v.categorie}
+                                                </span>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex gap-2 text-sm text-slate-600">
+                                                    <span className="inline-flex items-center">
+                                                        <Layers className="h-3.5 w-3.5 mr-1.5 text-slate-400" /> {v.taille}
+                                                    </span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="font-medium text-slate-700 tabular-nums">
                                                 {formatPrice(v.prix_vente)}
                                             </TableCell>
-                                            <TableCell >
+                                            <TableCell>
                                                 <span
-                                                    className={`text-xl font-mono font-bold ${v.en_alerte ? 'text-red-500' : 'text-emerald-500'}`}
+                                                    className={`text-lg font-bold tabular-nums ${v.en_alerte ? 'text-red-600' : 'text-emerald-600'}`}
                                                 >
                                                     {v.quantite}
                                                 </span>
                                             </TableCell>
                                             <TableCell>
-                                                <TendanceIcon tendance={v.tendance} />
-                                            </TableCell>
-                                            <TableCell>
                                                 {v.en_alerte ? (
                                                     <Badge
                                                         variant="destructive"
-                                                        className="rounded-full px-3 py-0.5 animate-pulse shadow-lg shadow-red-500/20"
+                                                        className="bg-red-50 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-600 font-semibold shadow-none"
                                                     >
                                                         Alerte
                                                     </Badge>
                                                 ) : (
                                                     <Badge
                                                         variant="secondary"
-                                                        className="rounded-full px-3 py-0.5 bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                                                        className="bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-600 font-semibold shadow-none"
                                                     >
-                                                        OK
+                                                        En stock
                                                     </Badge>
                                                 )}
                                             </TableCell>
-                                            <TableCell className="text-right pr-8">
+                                            <TableCell className="text-right pr-6">
                                                 <div className="flex items-center justify-end gap-1">
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary"
+                                                        className="h-8 w-8 rounded-md text-slate-500 hover:bg-slate-200 hover:text-slate-900"
                                                         title="Ajuster le stock"
                                                         onClick={() => {
                                                             setSelectedVariante(v);
@@ -586,7 +561,7 @@ export default function Index({ variantes, categories }: Props) {
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="h-8 w-8 rounded-full hover:bg-blue-500/10 hover:text-blue-500"
+                                                        className="h-8 w-8 rounded-md text-slate-500 hover:bg-blue-50 hover:text-blue-600"
                                                         title="Historique"
                                                         onClick={() => openMouvements(v)}
                                                     >
@@ -595,7 +570,7 @@ export default function Index({ variantes, categories }: Props) {
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="h-8 w-8 rounded-full hover:bg-amber-500/10 hover:text-amber-500"
+                                                        className="h-8 w-8 rounded-md text-slate-500 hover:bg-slate-200 hover:text-slate-900"
                                                         title="Configurer le seuil"
                                                         onClick={() => {
                                                             setSelectedVariante(v);
@@ -616,11 +591,11 @@ export default function Index({ variantes, categories }: Props) {
 
                     {/* Pagination */}
                     {totalPages > 1 && (
-                        <div className="flex items-center justify-center gap-2 py-4 border-t border-white/5">
+                        <div className="flex items-center justify-center gap-1.5 py-3 bg-slate-50 border-t border-slate-200">
                             <Button
-                                variant="ghost"
+                                variant="outline"
                                 size="icon"
-                                className="h-9 w-9 rounded-full"
+                                className="h-8 w-8 rounded-md bg-white border-slate-200 text-slate-600"
                                 disabled={safeCurrentPage <= 1}
                                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                             >
@@ -636,12 +611,12 @@ export default function Index({ variantes, categories }: Props) {
                                 .map((p, idx, arr) => (
                                     <span key={p} className="flex items-center">
                                         {idx > 0 && arr[idx - 1] !== p - 1 && (
-                                            <span className="px-1 text-muted-foreground">…</span>
+                                            <span className="px-2 text-slate-400">…</span>
                                         )}
                                         <Button
-                                            variant={p === safeCurrentPage ? 'default' : 'ghost'}
+                                            variant={p === safeCurrentPage ? 'default' : 'outline'}
                                             size="icon"
-                                            className={`h-9 w-9 rounded-full font-mono text-sm ${p === safeCurrentPage ? 'shadow-lg shadow-primary/20' : ''}`}
+                                            className={`h-8 w-8 rounded-md text-sm font-medium ${p === safeCurrentPage ? 'bg-slate-900 text-white' : 'bg-white border-slate-200 text-slate-700'}`}
                                             onClick={() => setCurrentPage(p)}
                                         >
                                             {p}
@@ -649,9 +624,9 @@ export default function Index({ variantes, categories }: Props) {
                                     </span>
                                 ))}
                             <Button
-                                variant="ghost"
+                                variant="outline"
                                 size="icon"
-                                className="h-9 w-9 rounded-full"
+                                className="h-8 w-8 rounded-md bg-white border-slate-200 text-slate-600"
                                 disabled={safeCurrentPage >= totalPages}
                                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                             >
@@ -670,61 +645,62 @@ export default function Index({ variantes, categories }: Props) {
                             transition={{ delay: i * 0.05 }}
                             key={v.id}
                         >
-                            <Card
-                                className={`overflow-hidden border-white/10 bg-background/50 backdrop-blur-md relative ${v.en_alerte ? 'border-l-4 border-l-red-500' : ''}`}
-                            >
-                                <CardHeader className="p-4 pb-2">
+                            <Card className={`bg-white border-slate-200 shadow-sm overflow-hidden ${v.en_alerte ? 'border-l-4 border-l-red-500' : ''}`}>
+                                <CardHeader className="p-4 pb-2 border-b border-slate-50">
                                     <div className="flex justify-between items-start">
-                                        <div>
-                                            <CardTitle className="text-lg font-bold">{v.produit}</CardTitle>
-                                            <CardDescription className="flex items-center gap-1.5 mt-0.5 uppercase text-[10px] tracking-widest font-semibold">
-                                                <Tag className="h-3 w-3" /> {v.categorie}
-                                            </CardDescription>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <TendanceIcon tendance={v.tendance} />
-                                            <Badge
-                                                variant={v.en_alerte ? 'destructive' : 'secondary'}
-                                                className="rounded-full text-[10px]"
-                                            >
-                                                {v.en_alerte ? 'Alerte' : 'OK'}
-                                            </Badge>
+                                        <div className="flex items-center gap-3">
+                                            <img
+                                                src={v.image_url}
+                                                alt={v.produit}
+                                                className="h-12 w-12 rounded-md object-cover border border-slate-200 bg-slate-50 shrink-0"
+                                            />
+                                            <div>
+                                                <CardTitle className="text-base font-bold text-slate-900">{v.produit}</CardTitle>
+                                                <CardDescription className="flex items-center gap-1.5 mt-0.5 text-xs font-medium text-slate-500">
+                                                    <Tag className="h-3 w-3" /> {v.categorie}
+                                                </CardDescription>
+                                            </div>
                                         </div>
                                     </div>
                                 </CardHeader>
-                                <CardContent className="p-4 pt-0">
-                                    <div className="grid grid-cols-2 gap-4 mt-2">
+                                <CardContent className="p-4">
+                                    <div className="grid grid-cols-2 gap-y-4 gap-x-2">
                                         <div className="space-y-1">
-                                            <span className="text-[10px] uppercase text-muted-foreground tracking-wider">
+                                            <span className="text-xs font-medium text-slate-500">
                                                 Variante
                                             </span>
-                                            <p className="text-sm font-medium">
+                                            <p className="text-sm font-semibold text-slate-800">
                                                 {v.taille} / {v.couleur}
                                             </p>
                                         </div>
                                         <div className="space-y-1 text-right">
-                                            <span className="text-[10px] uppercase text-muted-foreground tracking-wider">
+                                            <span className="text-xs font-medium text-slate-500">
                                                 Prix
                                             </span>
-                                            <p className="text-sm font-bold font-mono">
+                                            <p className="text-sm font-semibold text-slate-800 tabular-nums">
                                                 {formatPrice(v.prix_vente)}
                                             </p>
                                         </div>
                                         <div className="space-y-1">
-                                            <span className="text-[10px] uppercase text-muted-foreground tracking-wider">
-                                                Stock Actuel
+                                            <span className="text-xs font-medium text-slate-500">
+                                                Stock
                                             </span>
-                                            <p
-                                                className={`text-xl font-bold font-mono ${v.en_alerte ? 'text-red-500' : 'text-emerald-500'}`}
-                                            >
-                                                {v.quantite}
-                                            </p>
+                                            <div className="flex items-center gap-2">
+                                                <p className={`text-lg font-bold tabular-nums ${v.en_alerte ? 'text-red-600' : 'text-emerald-600'}`}>
+                                                    {v.quantite}
+                                                </p>
+                                                {v.en_alerte && (
+                                                    <Badge variant="destructive" className="h-5 px-1.5 text-[10px] bg-red-50 text-red-600 border-red-200 shadow-none">
+                                                        Alerte
+                                                    </Badge>
+                                                )}
+                                            </div>
                                         </div>
                                         <div className="flex items-end justify-end gap-1.5">
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="h-8 rounded-full border-white/10 bg-background/50"
+                                                className="h-8 rounded-md border-slate-200 bg-white text-slate-700"
                                                 onClick={() => {
                                                     setSelectedVariante(v);
                                                     setAdjustQuantite(1);
@@ -733,13 +709,13 @@ export default function Index({ variantes, categories }: Props) {
                                                     setIsAdjustDialogOpen(true);
                                                 }}
                                             >
-                                                <Plus className="h-3. w-3.5 mr-1" />
+                                                <Plus className="h-3.5 w-3.5 mr-1" />
                                                 Stock
                                             </Button>
                                             <Button
                                                 variant="outline"
                                                 size="icon"
-                                                className="h-8 w-8 rounded-full border-white/10 bg-background/50"
+                                                className="h-8 w-8 rounded-md border-slate-200 bg-white text-slate-700"
                                                 onClick={() => openMouvements(v)}
                                             >
                                                 <History className="h-3.5 w-3.5" />
@@ -747,7 +723,7 @@ export default function Index({ variantes, categories }: Props) {
                                             <Button
                                                 variant="outline"
                                                 size="icon"
-                                                className="h-8 w-8 rounded-full border-white/10 bg-background/50"
+                                                className="h-8 w-8 rounded-md border-slate-200 bg-white text-slate-700"
                                                 onClick={() => {
                                                     setSelectedVariante(v);
                                                     setNewSeuil(v.seuil_alerte);
@@ -763,31 +739,31 @@ export default function Index({ variantes, categories }: Props) {
                         </motion.div>
                     ))}
                     {paginatedVariantes.length === 0 && (
-                        <div className="py-20 text-center opacity-40">
-                            <Package className="h-12 w-12 mx-auto mb-3" />
-                            <p className="font-medium">Aucun résultat trouvé</p>
+                        <div className="py-12 text-center text-slate-400 bg-white border border-slate-200 rounded-xl">
+                            <Package className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                            <p className="font-medium text-slate-600">Aucun résultat trouvé</p>
                         </div>
                     )}
 
                     {/* Mobile pagination */}
                     {totalPages > 1 && (
-                        <div className="flex items-center justify-center gap-3 py-4">
+                        <div className="flex items-center justify-center gap-3 py-2">
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className="rounded-full"
+                                className="rounded-md border-slate-200 bg-white text-slate-700"
                                 disabled={safeCurrentPage <= 1}
                                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                             >
                                 <ChevronLeft className="h-4 w-4 mr-1" /> Préc.
                             </Button>
-                            <span className="text-sm font-mono text-muted-foreground">
+                            <span className="text-sm font-medium text-slate-600">
                                 {safeCurrentPage} / {totalPages}
                             </span>
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className="rounded-full"
+                                className="rounded-md border-slate-200 bg-white text-slate-700"
                                 disabled={safeCurrentPage >= totalPages}
                                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                             >
@@ -799,57 +775,55 @@ export default function Index({ variantes, categories }: Props) {
 
                 {/* ── Dialog : Seuil d'alerte ── */}
                 <Dialog open={isSeuilDialogOpen} onOpenChange={setIsSeuilDialogOpen}>
-                    <DialogContent className="border-white/10 bg-background/80 backdrop-blur-3xl rounded-[2rem] sm:max-w-[425px]">
+                    <DialogContent className="bg-white border border-slate-200 shadow-xl sm:rounded-2xl sm:max-w-[425px]">
                         <DialogHeader>
-                            <DialogTitle className="text-2xl font-bold tracking-tight">
+                            <DialogTitle className="text-xl font-bold text-slate-900">
                                 Configuration de Vigilance
                             </DialogTitle>
-                            <DialogDescription className="text-md mt-2">
-                                Ajustez le seuil de bascule pour{' '}
-                                <span className="font-bold text-foreground">{selectedVariante?.produit}</span>
+                            <DialogDescription className="text-slate-500 mt-1">
+                                Ajustez le seuil d'alerte pour le produit{' '}
+                                <span className="font-semibold text-slate-900">{selectedVariante?.produit}</span>
                             </DialogDescription>
                         </DialogHeader>
-                        <div className="grid gap-6 py-6">
-                            <div className="flex items-center gap-4 p-4 rounded-2xl bg-muted/30 border border-white/5">
-                                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                                    <AlertCircle className="h-6 w-6" />
-                                </div>
+                        <div className="grid gap-5 py-4">
+                            <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                <AlertCircle className="h-5 w-5 text-slate-500 mt-0.5 shrink-0" />
                                 <div>
-                                    <p className="text-sm text-muted-foreground uppercase tracking-wider text-[10px] font-bold">
-                                        Quantité minimale souhaitée
+                                    <p className="text-sm font-semibold text-slate-700">
+                                        Quantité minimale
                                     </p>
-                                    <p className="text-xs text-muted-foreground max-w-[200px]">
+                                    <p className="text-xs text-slate-500 mt-0.5">
                                         Une alerte s'activera dès que le stock sera inférieur ou égal à ce chiffre.
                                     </p>
                                 </div>
                             </div>
-                            <div className="grid gap-3 px-1">
-                                <Label htmlFor="seuil" className="text-sm font-semibold pl-1">
+                            <div className="grid gap-2">
+                                <Label htmlFor="seuil" className="text-sm font-semibold text-slate-700">
                                     Valeur du seuil
                                 </Label>
                                 <Input
                                     id="seuil"
                                     type="number"
                                     autoFocus
-                                    className="h-14 rounded-2xl border-white/10 bg-background/50 text-2xl font-mono text-center focus-visible:ring-primary/20"
+                                    className="h-12 rounded-lg border-slate-300 bg-white text-xl text-center focus-visible:ring-slate-400"
                                     value={newSeuil}
                                     onChange={(e) => setNewSeuil(parseInt(e.target.value) || 0)}
                                 />
                             </div>
                         </div>
-                        <DialogFooter className="gap-3 sm:gap-0">
+                        <DialogFooter className="gap-2 sm:gap-0">
                             <Button
-                                variant="ghost"
-                                className="rounded-2xl h-12 flex-1 font-semibold"
+                                variant="outline"
+                                className="rounded-lg h-10 border-slate-200 text-slate-700 w-full sm:w-auto"
                                 onClick={() => setIsSeuilDialogOpen(false)}
                             >
-                                Ignorer
+                                Annuler
                             </Button>
                             <Button
-                                className="rounded-2xl h-12 flex-1 font-bold shadow-lg shadow-primary/20 transition-transform active:scale-95"
+                                className="rounded-lg h-10 bg-slate-900 text-white hover:bg-slate-800 w-full sm:w-auto"
                                 onClick={handleUpdateSeuil}
                             >
-                                Confirmer
+                                Enregistrer
                             </Button>
                         </DialogFooter>
                     </DialogContent>
@@ -857,27 +831,27 @@ export default function Index({ variantes, categories }: Props) {
 
                 {/* ── Dialog : Ajustement rapide de stock ── */}
                 <Dialog open={isAdjustDialogOpen} onOpenChange={setIsAdjustDialogOpen}>
-                    <DialogContent className="border-white/10 bg-background/80 backdrop-blur-3xl rounded-[2rem] sm:max-w-[425px]">
+                    <DialogContent className="bg-white border border-slate-200 shadow-xl sm:rounded-2xl sm:max-w-[425px]">
                         <DialogHeader>
-                            <DialogTitle className="text-2xl font-bold tracking-tight">
+                            <DialogTitle className="text-xl font-bold text-slate-900">
                                 Ajustement de Stock
                             </DialogTitle>
-                            <DialogDescription className="text-md mt-2">
+                            <DialogDescription className="text-slate-500 mt-1">
                                 Modifier le stock de{' '}
-                                <span className="font-bold text-foreground">{selectedVariante?.produit}</span>
-                                <span className="text-xs ml-2 text-muted-foreground">
-                                    (actuel : {selectedVariante?.quantite})
+                                <span className="font-semibold text-slate-900">{selectedVariante?.produit}</span>
+                                <span className="text-xs ml-1 font-medium bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">
+                                    Actuel : {selectedVariante?.quantite}
                                 </span>
                             </DialogDescription>
                         </DialogHeader>
-                        <div className="grid gap-5 py-4">
-                            <div className="grid gap-3">
-                                <Label className="text-sm font-semibold pl-1">Type de mouvement</Label>
+                        <div className="grid gap-5 py-2">
+                            <div className="grid gap-2">
+                                <Label className="text-sm font-semibold text-slate-700">Type de mouvement</Label>
                                 <div className="grid grid-cols-2 gap-3">
                                     <Button
                                         type="button"
                                         variant={adjustType === 'entrée' ? 'default' : 'outline'}
-                                        className="h-12 rounded-2xl gap-2 font-semibold"
+                                        className={`h-11 rounded-lg gap-2 font-medium ${adjustType === 'entrée' ? 'bg-slate-900 text-white' : 'border-slate-200 text-slate-600'}`}
                                         onClick={() => setAdjustType('entrée')}
                                     >
                                         <Plus className="h-4 w-4" /> Entrée
@@ -885,33 +859,33 @@ export default function Index({ variantes, categories }: Props) {
                                     <Button
                                         type="button"
                                         variant={adjustType === 'sortie' ? 'destructive' : 'outline'}
-                                        className="h-12 rounded-2xl gap-2 font-semibold"
+                                        className={`h-11 rounded-lg gap-2 font-medium ${adjustType === 'sortie' ? '' : 'border-slate-200 text-slate-600 hover:text-red-600 hover:border-red-200'}`}
                                         onClick={() => setAdjustType('sortie')}
                                     >
                                         <Minus className="h-4 w-4" /> Sortie
                                     </Button>
                                 </div>
                             </div>
-                            <div className="grid gap-3">
-                                <Label htmlFor="adjust-qty" className="text-sm font-semibold pl-1">
+                            <div className="grid gap-2">
+                                <Label htmlFor="adjust-qty" className="text-sm font-semibold text-slate-700">
                                     Quantité
                                 </Label>
                                 <Input
                                     id="adjust-qty"
                                     type="number"
                                     min={1}
-                                    className="h-14 rounded-2xl border-white/10 bg-background/50 text-2xl font-mono text-center"
+                                    className="h-12 rounded-lg border-slate-300 bg-white text-xl text-center focus-visible:ring-slate-400"
                                     value={adjustQuantite}
                                     onChange={(e) => setAdjustQuantite(Math.max(1, parseInt(e.target.value) || 1))}
                                 />
                             </div>
-                            <div className="grid gap-3">
-                                <Label htmlFor="adjust-comment" className="text-sm font-semibold pl-1">
-                                    Commentaire <span className="text-muted-foreground font-normal">(optionnel)</span>
+                            <div className="grid gap-2">
+                                <Label htmlFor="adjust-comment" className="text-sm font-semibold text-slate-700">
+                                    Commentaire <span className="text-slate-400 font-normal">(optionnel)</span>
                                 </Label>
                                 <Input
                                     id="adjust-comment"
-                                    className="h-11 rounded-xl border-white/10 bg-background/50"
+                                    className="h-10 rounded-lg border-slate-300 bg-white"
                                     placeholder="Raison de l'ajustement..."
                                     value={adjustCommentaire}
                                     onChange={(e) => setAdjustCommentaire(e.target.value)}
@@ -920,22 +894,22 @@ export default function Index({ variantes, categories }: Props) {
                             {adjustType === 'sortie' &&
                                 selectedVariante &&
                                 adjustQuantite > selectedVariante.quantite && (
-                                    <p className="text-sm text-red-500 flex items-center gap-2 px-1">
-                                        <AlertCircle className="h-4 w-4" />
+                                    <p className="text-sm text-red-600 flex items-center gap-1.5 bg-red-50 p-2 rounded-md border border-red-100">
+                                        <AlertCircle className="h-4 w-4 shrink-0" />
                                         Quantité supérieure au stock disponible ({selectedVariante.quantite})
                                     </p>
                                 )}
                         </div>
-                        <DialogFooter className="gap-3 sm:gap-0">
+                        <DialogFooter className="gap-2 sm:gap-0 mt-2">
                             <Button
-                                variant="ghost"
-                                className="rounded-2xl h-12 flex-1 font-semibold"
+                                variant="outline"
+                                className="rounded-lg h-10 border-slate-200 text-slate-700 w-full sm:w-auto"
                                 onClick={() => setIsAdjustDialogOpen(false)}
                             >
                                 Annuler
                             </Button>
                             <Button
-                                className="rounded-2xl h-12 flex-1 font-bold shadow-lg shadow-primary/20 transition-transform active:scale-95"
+                                className="rounded-lg h-10 bg-slate-900 text-white hover:bg-slate-800 w-full sm:w-auto"
                                 onClick={handleAdjustStock}
                                 disabled={
                                     adjustProcessing ||
@@ -958,38 +932,39 @@ export default function Index({ variantes, categories }: Props) {
 
                 {/* ── Dialog : Historique des mouvements ── */}
                 <Dialog open={isMouvementsDialogOpen} onOpenChange={setIsMouvementsDialogOpen}>
-                    <DialogContent className="border-white/10 bg-background/80 backdrop-blur-3xl rounded-[2rem] sm:max-w-[550px] max-h-[80vh] overflow-y-auto">
-                        <DialogHeader>
-                            <DialogTitle className="text-2xl font-bold tracking-tight flex items-center gap-3">
-                                <Clock className="h-6 w-6 text-blue-500" />
+                    <DialogContent className="bg-white border border-slate-200 shadow-xl sm:rounded-2xl sm:max-w-[500px] max-h-[85vh] flex flex-col">
+                        <DialogHeader className="shrink-0">
+                            <DialogTitle className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                                <Clock className="h-5 w-5 text-slate-400" />
                                 Historique des mouvements
                             </DialogTitle>
-                            <DialogDescription className="text-md mt-2">
-                                Derniers mouvements pour{' '}
-                                <span className="font-bold text-foreground">{selectedVariante?.produit}</span>
+                            <DialogDescription className="text-slate-500 mt-1">
+                                Dernières opérations pour{' '}
+                                <span className="font-semibold text-slate-900">{selectedVariante?.produit}</span>
                             </DialogDescription>
                         </DialogHeader>
-                        <div className="py-4">
+                        <div className="py-2 overflow-y-auto min-h-[150px]">
                             {mouvementsLoading ? (
-                                <div className="flex items-center justify-center py-12">
-                                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-2">
+                                    <Loader2 className="h-6 w-6 animate-spin" />
+                                    <span className="text-sm">Chargement...</span>
                                 </div>
                             ) : mouvementsList.length === 0 ? (
-                                <div className="text-center py-12 opacity-50">
-                                    <History className="h-10 w-10 mx-auto mb-3" />
-                                    <p className="font-medium">Aucun mouvement enregistré</p>
+                                <div className="text-center py-10 text-slate-400">
+                                    <History className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                    <p className="font-medium text-slate-600">Aucun mouvement enregistré</p>
                                 </div>
                             ) : (
-                                <div className="space-y-3">
+                                <div className="space-y-2">
                                     {mouvementsList.map((m) => (
                                         <div
                                             key={m.id}
-                                            className="flex items-start gap-4 p-3 rounded-xl bg-muted/20 border border-white/5"
+                                            className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100"
                                         >
                                             <div
-                                                className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${m.quantite > 0
-                                                    ? 'bg-emerald-500/10 text-emerald-500'
-                                                    : 'bg-red-500/10 text-red-500'
+                                                className={`h-8 w-8 rounded-md flex items-center justify-center shrink-0 ${m.quantite > 0
+                                                    ? 'bg-emerald-100 text-emerald-700'
+                                                    : 'bg-red-100 text-red-700'
                                                     }`}
                                             >
                                                 {m.quantite > 0 ? (
@@ -1000,20 +975,20 @@ export default function Index({ variantes, categories }: Props) {
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center justify-between">
-                                                    <span className="font-bold font-mono text-lg">
+                                                    <span className="font-bold text-slate-900">
                                                         {m.quantite > 0 ? '+' : ''}
                                                         {m.quantite}
                                                     </span>
-                                                    <Badge variant="outline" className="rounded-full text-[10px] capitalize">
+                                                    <Badge variant="outline" className="h-5 px-1.5 text-[10px] uppercase tracking-wider text-slate-500 bg-white border-slate-200">
                                                         {m.type}
                                                     </Badge>
                                                 </div>
                                                 {m.commentaire && (
-                                                    <p className="text-sm text-muted-foreground mt-0.5 truncate">
+                                                    <p className="text-sm text-slate-600 mt-0.5 truncate">
                                                         {m.commentaire}
                                                     </p>
                                                 )}
-                                                <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                                                <div className="flex items-center gap-1.5 mt-1.5 text-xs text-slate-400 font-medium">
                                                     <span>{m.user}</span>
                                                     <span>•</span>
                                                     <span>{m.date}</span>

@@ -49,7 +49,7 @@ class CommandeController extends Controller
             ->latest();
 
         return Inertia::render('Commandes/Index', [ // Kept original casing for folder name
-'commandes' => $commandesQuery->paginate(12)->withQueryString(),
+            'commandes' => $commandesQuery->paginate(12)->withQueryString(),
             'filters' => request()->all(['search', 'statut']), // Kept filters for UI
         ]);
     }
@@ -142,7 +142,7 @@ class CommandeController extends Controller
             abort(403);
         }
         $commande->load(['client', 'lignesCommande', 'boutique', 'paiements.user']); // Original relations
-        $commande->load([ 'lignesCommande.produit', 'lignesCommande.variante']); // Added new relations from edit, adjusted to match existing model relations
+        $commande->load(['lignesCommande.produit', 'lignesCommande.variante']); // Added new relations from edit, adjusted to match existing model relations
 
         return Inertia::render('Commandes/Show', [ // Kept original casing for folder name
             'commande' => $commande,
@@ -286,6 +286,8 @@ class CommandeController extends Controller
 
     public function destroy(Commande $commande): RedirectResponse
     {
+        \Illuminate\Support\Facades\Gate::authorize('delete sales');
+
         $this->authorizeBoutique($commande);
         $commande->delete();
 

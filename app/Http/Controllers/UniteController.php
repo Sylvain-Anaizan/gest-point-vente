@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Unite;
-use Illuminate\Http\Request;
 
 class UniteController extends Controller
 {
@@ -92,7 +91,7 @@ class UniteController extends Controller
     public function update(\Illuminate\Http\Request $request, Unite $unite): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validate([
-            'nom' => 'required|string|max:255|unique:unites,nom,' . $unite->id,
+            'nom' => 'required|string|max:255|unique:unites,nom,'.$unite->id,
             'description' => 'nullable|string|max:500',
         ]);
 
@@ -106,6 +105,8 @@ class UniteController extends Controller
      */
     public function destroy(Unite $unite): \Illuminate\Http\RedirectResponse
     {
+        \Illuminate\Support\Facades\Gate::authorize('delete units');
+
         $unite->delete();
 
         return to_route('unites.index')->with('success', 'Unité de mesure supprimée avec succès.');
